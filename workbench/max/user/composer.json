@@ -1,0 +1,20 @@
+{
+    "name": "max/user",
+    "description": "",
+    "authors": [
+        {
+            "name": "",
+            "email": ""
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.x"
+    },
+    "autoload": {
+        "psr-0": {
+            "Max\\User": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
