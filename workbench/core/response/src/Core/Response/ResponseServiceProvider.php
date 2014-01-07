@@ -28,7 +28,10 @@ class ResponseServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+            $this->app['response'] = $this->app->share(function($app)
+            {
+                    return new Response($app['config']);
+            });
 	}
 
 	/**
@@ -38,7 +41,8 @@ class ResponseServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		//return array();
+            return array('response');
 	}
 
 }
