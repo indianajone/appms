@@ -40,6 +40,4 @@ Route::get('/core', function() {
     $status['message'] = 'success';
     //ERROR
     return Response::error($status);
-    
-    
 });

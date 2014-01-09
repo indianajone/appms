@@ -1,6 +1,6 @@
 {
-    "name": "core/response",
-    "description": "core api of project",
+    "name": "kitti/subproject",
+    "description": "",
     "authors": [
         {
             "name": "kitti klinbua",
@@ -12,8 +12,13 @@
         "illuminate/support": "4.1.x"
     },
     "autoload": {
+        "classmap": [
+          "src/controllers",
+          "src/models",
+          "src/migrations"
+        ],
         "psr-0": {
-            "Core\\Response": "src/"
+            "Kitti\\Subproject": "src/"
         }
     },
     "minimum-stability": "dev"

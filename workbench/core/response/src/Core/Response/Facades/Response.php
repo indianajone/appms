@@ -3,9 +3,10 @@
 namespace Core\Response\Facades;
 
 use Illuminate\Support\Facades\Response as BaseResponse;
+use Illuminate\Support\Facades\DB;
 
 class Response extends BaseResponse {
-    
+
     public $response;
 
     /**
@@ -30,16 +31,16 @@ class Response extends BaseResponse {
 //                    'entries' => is_object($data) ? $data->toArray() : $data
 //                        ], 200)->header('Content-Type', 'application/json');
         $response = array(
-                'header' => array(
-                    'code' => $status['code'],
-                    'message' => $status['message']
-                ),
-                'offset' => $offset,
-                'limit' => $limit,
-                'total' => is_object($data) ? $data->count() : 0,
-                'entries' => is_object($data) ? $data->toArray() : $data
+            'header' => array(
+                'code' => $status['code'],
+                'message' => $status['message']
+            ),
+            'offset' => $offset,
+            'limit' => $limit,
+            'total' => is_object($data) ? $data->count() : 0,
+            'entries' => is_object($data) ? $data->toArray() : $data
         );
-        
+
         return $response;
     }
 
@@ -109,7 +110,7 @@ class Response extends BaseResponse {
         return $result;
     }
 
-    public static function error($status, $format = 'json') {
+    public static function message($status, $format = 'json') {
         if (is_array($status)) {
             $response = array(
                 'header' => array(
@@ -117,35 +118,51 @@ class Response extends BaseResponse {
                     'message' => $status['message']
                 )
             );
-        }
 
-        if ($format == 'json') {
-            return Response::json($response, $status['code']);
+            if ($format == 'json') {
+                return Response::json($response, $status['code']);
+            } else {
+                return Response::xml($response);
+            }
         } else {
-            return Response::xml($response);
+            return "Please set status code ans message.";
         }
     }
-
+    
     /**
      * Display a listing of the resource.
      *
      * @return Response
      */
-    public function fields($model , $format = 'json') {
-        //$model = User::find(1);
+    public static function getAllColumnsNames($table) {
+        $query = 'SHOW COLUMNS FROM ' . $table;
+        $column_name = 'Field';
+        $column_type = 'Type';
+        $columns = array();
+
+        foreach (DB::select($query) as $column) {
+            array_push($columns, array($column->$column_name => $column->$column_type));
+        }
+
+        return $columns;
+    }
+    
+    public static function fields($table, $format = 'json') {
         $response = array(
             'header' => array(
                 'code' => 200,
                 'message' => 'success'
             ),
-            'fields' => $model->getAllColumnsNames()
+            'fields' => Response::getAllColumnsNames($table)
         );
-        
+
         if ($format == 'json') {
             return Response::json($response, 200);
         } else {
             return Response::xml($response);
         }
     }
+
+
 
 }

@@ -107,6 +107,7 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
                 'Core\Response\ResponseServiceProvider',
+                'Kitti\Subproject\SubprojectServiceProvider'
 	),
 
 	/*
@@ -163,7 +164,7 @@ return array(
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
 		'Request'         => 'Illuminate\Support\Facades\Request',
 		//'Response'        => 'Illuminate\Support\Facades\Response',
-                'Response'        => 'Core\Response\Facades\Response',
+		'Response'        => 'Core\Response\Facades\Response',
 		'Route'           => 'Illuminate\Support\Facades\Route',
 		'Schema'          => 'Illuminate\Support\Facades\Schema',
 		'Seeder'          => 'Illuminate\Database\Seeder',
