@@ -5,29 +5,48 @@ use Kitti\Subproject\Models\PluginInventory;
 class PluginInventoryController extends BaseController {
 
     public function getLists() {
-        $status['code'] = 200;
-        $status['message'] = 'success';
-
-        if (Input::has('appkey')) {
-            $plugin = PluginInventory::where('plugin_id', '=', Input::get('appkey'))->first()->toArray();
-        } else {
-            $offset= Input::get('offset',0);
-            $limit = Input::get('limit',10);
-            $plugin = PluginInventory::all()->skip($offset)->take($limit)->toArray();
-        }
-
-        $response = Response::listing($status, $plugin);
-        if (Input::has('format')) 
-            {
-            $format = Input::get('format');
-            if ($format == 'xml') {
-                return Response::xml($response, 'root');
-            } else {
-                return $response;
-            }
-        } else {
-            return $response;
-        }
+        $plugin = new Plugin();
+        $data = array(
+            'plugin_id' => 1,
+            'name' => '1111',
+            'description' => '44444'
+        );
+        return $plugin->createPluginMethod($data);
+        //return $plugin->readPluginInventory(0,3);
+//        return $plugin->readPluginInventoryById(6);
+//        $data = array(
+//            'name'  => 'name',
+//            'description' => 'desc',
+//            'version' => 12,
+//            'author' => 'name',
+//            'author_email' => 'name@example.com'
+//        );
+        //$result = $plugin->createPluginInventory($data);
+//        $result = $plugin->updatePluginInventory(5,$data);
+//        return $result;
+//        $status['code'] = 200;
+//        $status['message'] = 'success';
+//
+//        if (Input::has('appkey')) {
+//            $plugin = PluginInventory::where('plugin_id', '=', Input::get('appkey'))->first()->toArray();
+//        } else {
+//            $offset= Input::get('offset',0);
+//            $limit = Input::get('limit',10);
+//            $plugin = PluginInventory::all()->skip($offset)->take($limit)->toArray();
+//        }
+//
+//        $response = Response::listing($status, $plugin);
+//        if (Input::has('format')) 
+//            {
+//            $format = Input::get('format');
+//            if ($format == 'xml') {
+//                return Response::xml($response, 'root');
+//            } else {
+//                return $response;
+//            }
+//        } else {
+//            return $response;
+//        }
     }
 
     public function postCreate() {

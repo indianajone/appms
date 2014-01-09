@@ -107,7 +107,9 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
                 'Core\Response\ResponseServiceProvider',
-                'Kitti\Subproject\SubprojectServiceProvider'
+                'Core\Plugin\PluginServiceProvider',
+                'Kitti\Subproject\SubprojectServiceProvider',
+                
 	),
 
 	/*
@@ -159,6 +161,7 @@ return array(
 		'Mail'            => 'Illuminate\Support\Facades\Mail',
 		'Paginator'       => 'Illuminate\Support\Facades\Paginator',
 		'Password'        => 'Illuminate\Support\Facades\Password',
+                'Plugin'          => 'Core\Plugin\Facades\Plugin',
 		'Queue'           => 'Illuminate\Support\Facades\Queue',
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
