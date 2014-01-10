@@ -13,7 +13,7 @@ return array(
 	|
 	*/
 
-	'debug' => true,
+	'debug' => TRUE,
 
 	/*
 	|--------------------------------------------------------------------------
@@ -107,6 +107,8 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
+		'Way\Generators\GeneratorsServiceProvider',
+		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider'
 	),
 
 	/*
@@ -173,6 +175,7 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
+		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 	),
 
 );
