@@ -3,6 +3,7 @@
 use \BaseController;
 use \Input;
 use \Response;
+use \Validator;
 use \Indianajone\RolesAndPermissions\Role;
 
 class RoleController extends BaseController {
@@ -18,23 +19,36 @@ class RoleController extends BaseController {
 		$offset = Input::get('offset', 0);
 		$limit= Input::get('limit', 10);
 		$field = Input::get('fields', null);
-		$fields = $field ? explode(',', $field) : array('*');
+		$fields = explode(',', $field);
+ 	
+ 		$roles =  Role::with('permits')->offset($offset)->limit($limit)->get();
 
-		var_dump($fields);
-		return;
-		// $array = array_except($fields, array('keys'));
- 		$roles =  Role::skip($offset)->take($limit)->get($fields);
-		
-		$roles->each(function($role) {
-			$role->permits;
-		});
+ 		// if(in_array(array('permit', 'permits', '*'), $fields)) $roles->with('permits');
+ 	// 	->each(function($role) {
+		// 	$f = explode(',', Input::get('fields', '*'));
+		// 	// $role->permits;
+		// 	// $role->setHidden($f);
+			// if(!$fields || !in_array('*', $fields))
+			// {
+				var_dump($fields);
+		// 		list($keys, $values) = array_divide($f);
+		// 		$hide = array_except($role->attributesToArray(), $values);
+		// 		list($keys, $values) = array_divide($hide);
+		// 		$role->setHidden($keys);
+			// }
+		// });
+
+
+
         
-        return  Response::json(
+        return Response::json(
         	array(
         		'header' => array(
         			'code' => 200,
         			'message' => 'success'
         		),
+        		'offset' => (int) $offset,
+        		'limit' => (int) $limit,
         		'total' => $roles->count(),
         		'entries' => $roles->toArray()
         	)
@@ -58,7 +72,34 @@ class RoleController extends BaseController {
 	 */
 	public function store()
 	{
-		//
+		$rules = array(
+			'name' => 'required|unique:roles'
+		);
+
+		$validator = Validator::make(Input::all(), $rules);
+
+		if ($validator->fails()) {
+			return Response::json(array(
+				'header'=> [
+	        		'code'=> 400,
+	        		'message'=> $validator->messages()->first()
+	        	]
+			), 200); 
+			//return Response::missing($validator->messages()->first());
+		} else {
+			$role = new Role();
+			$role->name = Input::get('name', null);
+
+			$result = $role->save();
+
+			return Response::json(array(
+				'header'=> [
+	        		'code'=> 200,
+	        		'message'=> 'success'
+	        	],
+				'id'=> $role->id
+			), 200); 
+		} 
 	}
 
 	/**
