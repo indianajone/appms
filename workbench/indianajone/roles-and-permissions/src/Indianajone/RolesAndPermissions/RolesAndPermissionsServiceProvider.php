@@ -1,8 +1,9 @@
-<?php namespace Indianajone\RolesAndPermission;
+<?php namespace Indianajone\RolesAndPermissions;
 
 use Illuminate\Support\ServiceProvider;
+use Zizaco\Entrust\Entrust;
 
-class RolesAndPermissionServiceProvider extends ServiceProvider {
+class RolesAndPermissionsServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -18,7 +19,8 @@ class RolesAndPermissionServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('indianajone/roles-and-permission');
+		$this->package('indianajone/roles-and-permissions');
+		include __DIR__.'/../../routes.php';
 	}
 
 	/**
@@ -28,8 +30,10 @@ class RolesAndPermissionServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
-	}
+		$this->app->bind('RolesAndPermissions', function($app)
+        {
+            return new Entrust($app);
+        });	}
 
 	/**
 	 * Get the services provided by the provider.
@@ -38,7 +42,7 @@ class RolesAndPermissionServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array('RolesAndPermissions');
 	}
 
 }
