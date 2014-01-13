@@ -81,7 +81,7 @@ Route::get('/auth/logout', function(){
 
 Route::get('/users/{id?}', function($id=1){
 	$user = User::find(1);
-	$user->roles->first()->permits;	
+	$user->roles->with('permits');	
 	
 	return $user;
 });

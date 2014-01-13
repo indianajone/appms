@@ -2,6 +2,7 @@
 
 use \BaseController;
 use \Input;
+use \Redirect;
 use \Response;
 use \Validator;
 use \Indianajone\RolesAndPermissions\Role;
@@ -20,26 +21,12 @@ class RoleController extends BaseController {
 		$limit= Input::get('limit', 10);
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
- 	
  		$roles =  Role::with('permits')->offset($offset)->limit($limit)->get();
-
- 		// if(in_array(array('permit', 'permits', '*'), $fields)) $roles->with('permits');
- 	// 	->each(function($role) {
-		// 	$f = explode(',', Input::get('fields', '*'));
-		// 	// $role->permits;
-		// 	// $role->setHidden($f);
-			// if(!$fields || !in_array('*', $fields))
-			// {
-				var_dump($fields);
-		// 		list($keys, $values) = array_divide($f);
-		// 		$hide = array_except($role->attributesToArray(), $values);
-		// 		list($keys, $values) = array_divide($hide);
-		// 		$role->setHidden($keys);
-			// }
-		// });
-
-
-
+ 		
+ 		if($field)
+	 		$roles->each(function($role) use ($fields){
+	 			$role->setVisible($fields);
+	 		});
         
         return Response::json(
         	array(
@@ -56,13 +43,13 @@ class RoleController extends BaseController {
 	}
 
 	/**
-	 * Show the form for creating a new resource.
+	 * Store a newly created resource in storage with GET.
 	 *
 	 * @return Response
 	 */
 	public function create()
 	{
-        
+        return $this->store();
 	}
 
 	/**
@@ -85,7 +72,6 @@ class RoleController extends BaseController {
 	        		'message'=> $validator->messages()->first()
 	        	]
 			), 200); 
-			//return Response::missing($validator->messages()->first());
 		} else {
 			$role = new Role();
 			$role->name = Input::get('name', null);
@@ -110,18 +96,48 @@ class RoleController extends BaseController {
 	 */
 	public function show($id)
 	{
-       
+      	$field = Input::get('fields', null);
+		$fields = explode(',', $field);
+ 		$role =  Role::find($id);
+
+ 		if($role)
+		{
+			if($fields[0] == '' || in_array('permits', $fields)) $role->permits;
+	 		if($field) $role->setVisible($fields);
+
+		 	return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 200,
+	        			'message' => 'success'
+	        		),
+	        		'entry' => $role->toArray()
+	        	), 200
+	        );
+		}
+		else
+		{
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 204,
+	        			'message' => 'No user were found.'
+	        		)
+	        	), 200
+	        );
+		}
+ 		
 	}
 
 	/**
-	 * Show the form for editing the specified resource.
+	 * Update the specified resource in storage with GET.
 	 *
 	 * @param  int  $id
 	 * @return Response
 	 */
 	public function edit($id)
 	{
-        
+		return $this->update($id);
 	}
 
 	/**
@@ -132,7 +148,59 @@ class RoleController extends BaseController {
 	 */
 	public function update($id)
 	{
-		//
+		$role =  Role::find($id);
+
+		if($role)
+		{
+			$result = $role->update(array(
+				'name'=> Input::get('name', $role->name)
+			));
+
+			if($result)
+			{
+				return Response::json(
+		        	array(
+		        		'header' => array(
+		        			'code' => 200,
+		        			'message' => 'Updated role_id: '.$id.' success!'
+		        		)
+		        	), 200
+		        );
+			}
+			else
+			{
+				return Response::json(
+		        	array(
+		        		'header' => array(
+		        			'code' => 500,
+		        			'message' => 'Internal Server Error.'
+		        		)
+		        	), 200
+		        );
+			}
+		}
+		else
+		{
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 204,
+	        			'message' => 'No user were found.'
+	        		)
+	        	), 200
+	        );
+		}
+	}
+
+	/**
+	 * Remove the specified resource from storage with POST.
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function delete($id)
+	{
+		return $this->destroy($id);
 	}
 
 	/**
@@ -143,7 +211,30 @@ class RoleController extends BaseController {
 	 */
 	public function destroy($id)
 	{
-		//
+		$role = User::find($id);
+		if($role) 
+		{
+			$role->delete();
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 200,
+	        			'message' => 'Deleted role_id: '.$id.' success!'
+	        		)
+	        	), 200
+	        );
+		}
+		else
+		{
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 204,
+	        			'message' => 'No user were found.'
+	        		)
+	        	), 200
+	        );
+		}
 	}
 
 }
