@@ -119,6 +119,22 @@ class Plugin {
             return $result;
         }
     }
+    
+    public static function attachMethod($plugin_id) {
+        $data = array_add($data, 'update_date', date('Y-m-d H:i:s'));
+            $result = DB::table('plugin_inventory')
+                    ->where('plugin_id', $id)
+                    ->update(array('status' => 1));
+            return $result;
+    }
+    
+    public static function detachMethod($plugin_id) {
+        $data = array_add($data, 'update_date', date('Y-m-d H:i:s'));
+            $result = DB::table('plugin_inventory')
+                    ->where('plugin_id', $id)
+                    ->update(array('status' => 0));
+            return $result;
+    }
 
     public static function check_key($data_require, $data) {
         foreach ($data_require as $key) {

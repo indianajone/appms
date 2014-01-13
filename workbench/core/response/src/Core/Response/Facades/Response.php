@@ -96,7 +96,7 @@ class Response extends BaseResponse {
                     }
                 }
             }
-
+            //header("Content-type: text/xml");
             return $xml->asXML();
         } else {
             return "Is not array";
@@ -162,7 +162,4 @@ class Response extends BaseResponse {
             return Response::xml($response);
         }
     }
-
-
-
 }
