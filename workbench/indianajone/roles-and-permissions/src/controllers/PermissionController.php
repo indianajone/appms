@@ -2,10 +2,9 @@
 
 use \BaseController;
 use \Input;
-use \Redirect;
 use \Response;
 use \Validator;
-use \Indianajone\RolesAndPermissions\Role;
+use \Indianajone\RolesAndPermissions\Permission;
 
 class PermissionController extends BaseController {
 

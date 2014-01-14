@@ -1,4 +1,12 @@
 <?php
+	
+	Route::get('api/v1/roles', function(){
+		return 'Roles';
+	});
+
+	Route::get('api/v1/permissions', function(){
+		return 'Permissions';
+	});
 
 	Route::group(array('prefix' => 'api/v1'), function() {
 		/**
@@ -13,6 +21,6 @@
 		Route::resource('roles', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController');
 
 		// Permissions
-		Route::post('permisions/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController@delete');
-		Route::resource('permisions', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController');
+		Route::post('permissions/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController@delete');
+		Route::resource('permissions', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController');
 	});
