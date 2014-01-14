@@ -1,0 +1,25 @@
+{
+    "name": "Role and Permission",
+    "description": "Manage Role and Permission",
+    "authors": [
+        {
+            "name": "Ravi Vaisayawan",
+            "email": "mmer555@hotmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*",
+        "zizaco/entrust": "dev-master"
+    },
+    "autoload": {
+        "classmap": [
+            "src/controllers",
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Indianajone\\RolesAndPermissions\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
