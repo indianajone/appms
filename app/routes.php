@@ -13,75 +13,102 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+	return 'hello'; // View::make('hello');
 });
 
 // Route::get('/users', function(){
 // 	return User::find(1);
 // });
 
-Route::get('/roles', function(){
-	return Indianajone\RolesAndPermissions\Role::all();
-});
-
-Route::get('/permissions', function(){
-	return Indianajone\RolesAndPermissions\Permission::all();
-});
-
-// / Route::get('/roles/create', function(){
-// 	$r = new \Indianajone\RolesAndPermissions\Role;
-// 	$r->name = 'user_all';
-// 	$r->display_name = 'Full access User Plugin';
-// 	$r->save();
+// Route::get('/roles', function(){
+// 	return Indianajone\RolesAndPermissions\Role::all();
 // });
 
-// Route::get('/permissions/attach/{role_id}', function($id){
-// 	$role = Indianajone\RolesAndPermissions\Role::find($id);
-// 	$role->perms()->sync(
-// 		array(1)
-// 	);
+// Route::get('/permissions', function(){
+// 	return Indianajone\RolesAndPermissions\Permission::all();
 // });
 
-// Route::get('/permissions/create', function(){
-// 	$p = new \Indianajone\RolesAndPermissions\Permission;
-// 	$p->name = 'user_all';
-// 	$p->display_name = 'Full access User Plugin';
-// 	$p->method_id = 1;
-// 	$p->save();
+// // / Route::get('/roles/create', function(){
+// // 	$r = new \Indianajone\RolesAndPermissions\Role;
+// // 	$r->name = 'user_all';
+// // 	$r->display_name = 'Full access User Plugin';
+// // 	$r->save();
+// // });
+
+// // Route::get('/permissions/attach/{role_id}', function($id){
+// // 	$role = Indianajone\RolesAndPermissions\Role::find($id);
+// // 	$role->perms()->sync(
+// // 		array(1)
+// // 	);
+// // });
+
+// // Route::get('/permissions/create', function(){
+// // 	$p = new \Indianajone\RolesAndPermissions\Permission;
+// // 	$p->name = 'user_all';
+// // 	$p->display_name = 'Full access User Plugin';
+// // 	$p->method_id = 1;
+// // 	$p->save();
+// // });
+
+Route::get('migrate/install', function(){
+	echo '<br>init migrate:install...';
+	Artisan::call('migrate:install');
+	echo 'done migrate:install';
+});
+
+Route::get('migrate/drop/{table}', function($table){
+	Schema::drop($table);
+	return 'Table '. $table .' has dropped.';
+});
+
+// Use |(pine) instead of / 
+Route::get('migrate/{bench?}', function($bench){
+	if(isset($bench))
+	{
+		$b = str_replace('|', '/', $bench);
+		echo '<br>migrating bench '. $b .'...';
+		Artisan::call('migrate', ['--bench'=> $b]);
+		echo 'done migrate bench '. $b;
+	}
+	else
+	{
+		Artisan::call('migrate');
+		echo 'done migrate';
+	}
+});
+
+// Route::get('/auth/login', function(){
+// 	$user = array(
+//         'email' => Input::get('email'),
+//         'password' => Input::get('password')
+//     );
+
+// 	if(!Auth::check()) {
+// 		Auth::attempt($user);
+// 	}
+// 	else {
+// 		return 'you are already logedin.';
+// 	}
+
+// 	$user = User::find(Auth::user()->id)->with('roles')->get();
+
+// 	return $user;
 // });
 
-Route::get('/auth/login', function(){
-	$user = array(
-        'email' => Input::get('email'),
-        'password' => Input::get('password')
-    );
-
-	if(!Auth::check()) {
-		Auth::attempt($user);
-	}
-	else {
-		return 'you are already logedin.';
-	}
-
-	$user = User::find(Auth::user()->id)->with('roles')->get();
-
-	return $user;
-});
-
-Route::get('/auth/logout', function(){
-	if(Auth::check()) {
-		Auth::logout();
-		return 'logout success.';
-	}
-	else {
-		return 'you are not logedin.';
-	}
-});
+// Route::get('/auth/logout', function(){
+// 	if(Auth::check()) {
+// 		Auth::logout();
+// 		return 'logout success.';
+// 	}
+// 	else {
+// 		return 'you are not logedin.';
+// 	}
+// });
 
 
-Route::get('/users/{id?}', function($id=1){
-	$user = User::find(1);
-	$user->roles->with('permits');	
+// Route::get('/users/{id?}', function($id=1){
+// 	$user = User::find(1);
+// 	$user->roles->with('permits');	
 	
-	return $user;
-});
+// 	return $user;
+// });

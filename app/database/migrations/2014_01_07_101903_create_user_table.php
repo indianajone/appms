@@ -24,15 +24,16 @@ class CreateUserTable extends Migration {
 			$table->integer('birthday')->nullable();
 			$table->integer('created_at');
 			$table->integer('updated_at');
+			$table->integer('last_seen');
 		});
 
-		// Creates password reminders table
-        Schema::create('password_reminders', function($table)
-        {
-            $table->string('email');
-            $table->string('token');
-            $table->integer('created_at');
-        });
+		// // Creates password reminders table
+  //       Schema::create('password_reminders', function($table)
+  //       {
+  //           $table->string('email');
+  //           $table->string('token');
+  //           $table->integer('created_at');
+  //       });
 	}
 
 
