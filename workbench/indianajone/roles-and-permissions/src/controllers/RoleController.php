@@ -72,12 +72,11 @@ class RoleController extends BaseController {
 	        		'message'=> $validator->messages()->first()
 	        	]
 			), 200); 
-		} else {
-			$role = new Role();
-			$role->name = Input::get('name', null);
-
-			$result = $role->save();
-
+		} 
+		
+		$role = new Role();
+		$role->name = Input::get('name', null);
+		if($role->save())
 			return Response::json(array(
 				'header'=> [
 	        		'code'=> 200,
@@ -85,7 +84,6 @@ class RoleController extends BaseController {
 	        	],
 				'id'=> $role->id
 			), 200); 
-		} 
 	}
 
 	/**
@@ -211,7 +209,7 @@ class RoleController extends BaseController {
 	 */
 	public function destroy($id)
 	{
-		$role = User::find($id);
+		$role = Role::find($id);
 		if($role) 
 		{
 			$role->delete();
@@ -237,4 +235,57 @@ class RoleController extends BaseController {
 		}
 	}
 
+	/**
+	 * Attach the permissions to specified roles.
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function attachPermissions($id)
+	{
+		$rules = array(
+			'permission_id' => 'required'
+		);
+		$perms_id = Input::get('permission_id');
+		if($perms_id) unset($rules['permission_id']);
+		$perms = explode(',',$perms_id);
+
+		for ($i = 0, $c = count($perms); $i < $c; $i++)
+		{
+			$rules[$i] = 'required|exists:permissions,id';
+			$messages['exists'] = 'permission_id: '.$perms[$i].' is not exist';
+		}
+
+		$validator = Validator::make($perms, $rules, $messages);
+
+		if($validator->passes())
+		{
+			$role = Role::find($id);
+			if(!$role) 
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 400,
+		        		'message'=> 'Role id: '. $id .' can not be found'
+		        	]
+				), 200);
+			else 
+			{
+				$role->permits()->sync($perms);
+
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'permission_id: '. $perms_id .' is attached to ' . $role->name
+		        	]
+				), 200);
+			}
+		}
+
+		return Response::json(array(
+			'header'=> [
+        		'code'=> 400,
+        		'message'=> $validator->messages()->first()
+        	]
+		), 200); 
+	}
 }
