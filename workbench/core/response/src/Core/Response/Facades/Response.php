@@ -148,12 +148,21 @@ class Response extends BaseResponse {
     }
     
     public static function fields($table, $format = 'json') {
+        $display = array();
+        $column = Response::getAllColumnsNames($table);
+
+        foreach($column as $data) {
+            foreach($data as $subkey => $subdata) {
+                $display[$subkey] = $subdata;
+            }
+        }
+
         $response = array(
             'header' => array(
                 'code' => 200,
                 'message' => 'success'
             ),
-            'fields' => Response::getAllColumnsNames($table)
+            'fields' => $display
         );
 
         if ($format == 'json') {

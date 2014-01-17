@@ -108,6 +108,7 @@ return array(
 		'Illuminate\Workbench\WorkbenchServiceProvider',
                 'Core\Response\ResponseServiceProvider',
                 'Core\Plugin\PluginServiceProvider',
+                'Articles\Article\ArticleServiceProvider',
                 'Kitti\Subproject\SubprojectServiceProvider',
                 
 	),
