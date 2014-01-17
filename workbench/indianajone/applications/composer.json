@@ -12,11 +12,11 @@
         "illuminate/support": "4.1.x"
     },
     "autoload": {
+        "classmap": [
+            "src/controllers",
+            "src/migrations"
+        ],
         "psr-0": {
-            "classmap": [
-                "src/controllers",
-                "src/migrations"
-            ],
             "Indianajone\\Applications": "src/"
         }
     },

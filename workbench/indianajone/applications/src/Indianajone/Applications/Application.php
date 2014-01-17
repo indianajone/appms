@@ -1,4 +1,4 @@
-<?php namespace Indianajone\Applications;
+<?php namespace Indianajone\Applications\Models;
 
 use BaseModel;
 

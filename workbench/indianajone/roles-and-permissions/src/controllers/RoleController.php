@@ -2,7 +2,6 @@
 
 use \BaseController;
 use \Input;
-use \Redirect;
 use \Response;
 use \Validator;
 use \Indianajone\RolesAndPermissions\Role;
@@ -65,25 +64,25 @@ class RoleController extends BaseController {
 
 		$validator = Validator::make(Input::all(), $rules);
 
-		if ($validator->fails()) {
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 400,
-	        		'message'=> $validator->messages()->first()
-	        	]
-			), 200); 
+		if ($validator->passes()) {
+			$role = new Role();
+			$role->name = Input::get('name', null);
+			if($role->save())
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	],
+					'id'=> $role->id
+				), 200); 
 		} 
-		
-		$role = new Role();
-		$role->name = Input::get('name', null);
-		if($role->save())
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 200,
-	        		'message'=> 'success'
-	        	],
-				'id'=> $role->id
-			), 200); 
+
+		return Response::json(array(
+			'header'=> [
+        		'code'=> 400,
+        		'message'=> $validator->messages()->first()
+        	]
+		), 200); 
 	}
 
 	/**
@@ -243,20 +242,22 @@ class RoleController extends BaseController {
 	 */
 	public function attachPermissions($id)
 	{
+		/**
+			#TODO: Move Validation to service and Rules to Model.
+		**/
 		$rules = array(
-			'permission_id' => 'required'
+			'permission_id' => 'required|existloop:permissions,id'
 		);
-		$perms_id = Input::get('permission_id');
-		if($perms_id) unset($rules['permission_id']);
-		$perms = explode(',',$perms_id);
 
-		for ($i = 0, $c = count($perms); $i < $c; $i++)
+		/**
+			#TODO: Find a better place for resolver.
+		**/
+		Validator::resolver(function($translator, $data, $rules, $messages)
 		{
-			$rules[$i] = 'required|exists:permissions,id';
-			$messages['exists'] = 'permission_id: '.$perms[$i].' is not exist';
-		}
+		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
+		});
 
-		$validator = Validator::make($perms, $rules, $messages);
+		$validator = Validator::make(Input::all(), $rules);
 
 		if($validator->passes())
 		{
@@ -270,12 +271,12 @@ class RoleController extends BaseController {
 				), 200);
 			else 
 			{
-				$role->permits()->sync($perms);
-
+				$ids = Input::get('permission_id');
+				$role->permits()->sync(array_map('intval', explode(',', $ids)));
 				return Response::json(array(
 					'header'=> [
 		        		'code'=> 200,
-		        		'message'=> 'permission_id: '. $perms_id .' is attached to ' . $role->name
+		        		'message'=> 'permission_id: '. $ids .' is attached to ' . $role->name
 		        	]
 				), 200);
 			}
@@ -283,7 +284,7 @@ class RoleController extends BaseController {
 
 		return Response::json(array(
 			'header'=> [
-        		'code'=> 400,
+        		'code'=> 204,
         		'message'=> $validator->messages()->first()
         	]
 		), 200); 

@@ -12,7 +12,7 @@
 		*	- Need Get fields function.
 		*
 		**/
-		// Roles
+		// Apps
 		Route::post('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApplicationController@delete');
-		Route::resource('apps', 'Indianajone\\Applications\\Controllers\\ApplicationController');
+		Route::resource('apps', 'Indianajone\\Applications\Controllers\\ApplicationController');
 	});

@@ -13,9 +13,10 @@ class User extends BaseModel implements UserInterface, RemindableInterface {
 	 * @var string
 	 */
 	protected $table = 'users';
+	protected $guarded = [];
 
-	 protected $appends = array(
-        'fullname' );
+	// protected $appends = array(
+        // 'fullname' );
 
 	/**
 	 * The attributes excluded from the model's JSON form.
@@ -32,10 +33,16 @@ class User extends BaseModel implements UserInterface, RemindableInterface {
         return $this->belongsToMany('Indianajone\RolesAndPermissions\Role', 'user_roles');
     }
 
-    public function getFullnameAttribute()
+    public function children()
     {
-    	return $this->first_name .' '. $this->last_name;
+    	return $this->hasMany('User', 'parent_id', 'id')->with('children')->where('parent_id', '>', 0);
+    	// return $this->hasMany('User', 'parent_id')->with('children');
     }
+
+    // public function getFullnameAttribute()
+    // {
+    // 	return $this->first_name .' '. $this->last_name;
+    // }
 
 	/**
 	 * Get the unique identifier for the user.
