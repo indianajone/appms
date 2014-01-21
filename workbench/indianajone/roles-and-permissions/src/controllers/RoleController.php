@@ -112,18 +112,15 @@ class RoleController extends BaseController {
 	        	), 200
 	        );
 		}
-		else
-		{
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 204,
-	        			'message' => 'No user were found.'
-	        		)
-	        	), 200
-	        );
-		}
- 		
+		
+		return Response::json(
+        	array(
+        		'header' => array(
+        			'code' => 204,
+        			'message' => 'No user were found.'
+        		)
+        	), 200
+        );	
 	}
 
 	/**
@@ -164,17 +161,15 @@ class RoleController extends BaseController {
 		        	), 200
 		        );
 			}
-			else
-			{
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 500,
-		        			'message' => 'Internal Server Error.'
-		        		)
-		        	), 200
-		        );
-			}
+			
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 500,
+	        			'message' => 'Internal Server Error.'
+	        		)
+	        	), 200
+	        );
 		}
 		else
 		{
