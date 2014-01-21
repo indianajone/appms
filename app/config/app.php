@@ -65,11 +65,8 @@ return array(
 	|
 	*/
 
-<<<<<<< HEAD
 	'key' => 'ObhZ0ddptMXcaiJVvVWqKr1hLvWL3kUj',
-=======
-	'key' => 'Els7N6FrLOTufl0MGQGugVo5FM8gxHFD',
->>>>>>> Max
+
 
 	/*
 	|--------------------------------------------------------------------------
@@ -111,18 +108,24 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
             
-                'Core\Response\ResponseServiceProvider',
-                
-                'Max\Application\ApplicationServiceProvider',
-                'Max\Device\DeviceServiceProvider',
-                'Max\Member\MemberServiceProvider',
-                'Max\User\UserServiceProvider',
-                'Max\Missingchild\MissingchildServiceProvider',
+        'Max\User\UserServiceProvider',
 
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Applications\ApplicationsServiceProvider',
 		'Indianajone\Categories\CategoriesServiceProvider'
 	),
+
+	/**
+	*
+	* Core\Response\ResponseServiceProvider',
+        		'Max\Application\ApplicationServiceProvider',
+                'Max\Device\DeviceServiceProvider',
+                'Max\Member\MemberServiceProvider',
+                'Max\User\UserServiceProvider',
+                'Max\Missingchild\MissingchildServiceProvider',
+	*
+	**/
+	
 
 	/*
 	|--------------------------------------------------------------------------
@@ -188,11 +191,8 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
-<<<<<<< HEAD
 		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
-=======
-                'Response'        => 'Core\Response\Facades\Response',
->>>>>>> Max
+
 	),
 
 );
