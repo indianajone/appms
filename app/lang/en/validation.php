@@ -35,7 +35,10 @@ return array(
 	"digits_between"   => "The :attribute must be between :min and :max digits.",
 	"email"            => "The :attribute format is invalid.",
 	"exists"           => "The selected :attribute is invalid.",
-	// "existloop"        => "The selected :attribute is invalid.",
+	// Customs
+	"existloop"        => "The selected :attribute is invalid.",
+	"existsornull"     => "The selected :attribute is invalid.",
+	
 	"image"            => "The :attribute must be an image.",
 	"in"               => "The selected :attribute is invalid.",
 	"integer"          => "The :attribute must be an integer.",
