@@ -2,7 +2,6 @@
 
 use \BaseController;
 use \Input;
-use \Redirect;
 use \Response;
 use \Validator;
 use \Indianajone\RolesAndPermissions\Role;
@@ -65,27 +64,25 @@ class RoleController extends BaseController {
 
 		$validator = Validator::make(Input::all(), $rules);
 
-		if ($validator->fails()) {
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 400,
-	        		'message'=> $validator->messages()->first()
-	        	]
-			), 200); 
-		} else {
+		if ($validator->passes()) {
 			$role = new Role();
 			$role->name = Input::get('name', null);
-
-			$result = $role->save();
-
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 200,
-	        		'message'=> 'success'
-	        	],
-				'id'=> $role->id
-			), 200); 
+			if($role->save())
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	],
+					'id'=> $role->id
+				), 200); 
 		} 
+
+		return Response::json(array(
+			'header'=> [
+        		'code'=> 400,
+        		'message'=> $validator->messages()->first()
+        	]
+		), 200); 
 	}
 
 	/**
@@ -115,18 +112,15 @@ class RoleController extends BaseController {
 	        	), 200
 	        );
 		}
-		else
-		{
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 204,
-	        			'message' => 'No user were found.'
-	        		)
-	        	), 200
-	        );
-		}
- 		
+		
+		return Response::json(
+        	array(
+        		'header' => array(
+        			'code' => 204,
+        			'message' => 'No user were found.'
+        		)
+        	), 200
+        );	
 	}
 
 	/**
@@ -167,17 +161,15 @@ class RoleController extends BaseController {
 		        	), 200
 		        );
 			}
-			else
-			{
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 500,
-		        			'message' => 'Internal Server Error.'
-		        		)
-		        	), 200
-		        );
-			}
+			
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 500,
+	        			'message' => 'Internal Server Error.'
+	        		)
+	        	), 200
+	        );
 		}
 		else
 		{
@@ -211,7 +203,7 @@ class RoleController extends BaseController {
 	 */
 	public function destroy($id)
 	{
-		$role = User::find($id);
+		$role = Role::find($id);
 		if($role) 
 		{
 			$role->delete();
@@ -237,4 +229,59 @@ class RoleController extends BaseController {
 		}
 	}
 
+	/**
+	 * Attach the permissions to specified roles.
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function attachPermissions($id)
+	{
+		/**
+			#TODO: Move Validation to service and Rules to Model.
+		**/
+		$rules = array(
+			'permission_id' => 'required|existloop:permissions,id'
+		);
+
+		/**
+			#TODO: Find a better place for resolver.
+		**/
+		Validator::resolver(function($translator, $data, $rules, $messages)
+		{
+		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
+		});
+
+		$validator = Validator::make(Input::all(), $rules);
+
+		if($validator->passes())
+		{
+			$role = Role::find($id);
+			if(!$role) 
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 400,
+		        		'message'=> 'Role id: '. $id .' can not be found'
+		        	]
+				), 200);
+			else 
+			{
+				$ids = Input::get('permission_id');
+				$role->permits()->sync(array_map('intval', explode(',', $ids)));
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'permission_id: '. $ids .' is attached to ' . $role->name
+		        	]
+				), 200);
+			}
+		}
+
+		return Response::json(array(
+			'header'=> [
+        		'code'=> 204,
+        		'message'=> $validator->messages()->first()
+        	]
+		), 200); 
+	}
 }

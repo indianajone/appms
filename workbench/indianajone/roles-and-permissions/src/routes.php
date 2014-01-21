@@ -17,9 +17,9 @@
 		*
 		**/
 		// Roles
+		Route::get('roles/{id}/attach', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController@attachPermissions');
 		Route::post('roles/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController@delete');
 		Route::resource('roles', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController');
-
 		// Permissions
 		Route::post('permissions/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController@delete');
 		Route::resource('permissions', 'Indianajone\\RolesAndsPermissions\\Controllers\\PermissionController');

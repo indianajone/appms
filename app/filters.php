@@ -13,7 +13,18 @@
 
 App::before(function($request)
 {
-	// dd(App::environment());
+	// $app = Indianajone\Applications\Models\Application::where(
+	// 	'appkey', '=', Input::get('appkey', null)
+	// )->get();
+	
+	// if(!$app->count()) return Response::json(
+	// 	array(
+ //    		'header' => array(
+ //    			'code' => 401,
+ //    			'message' => 'App Key is invalid.'
+ //    		)
+ //    	), 200
+	// );
 });
 
 

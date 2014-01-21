@@ -59,7 +59,8 @@ class PermissionController extends BaseController {
 	public function store()
 	{
 		$rules = array(
-			'name' => 'required'
+			'name' => 'required',
+			'display_name' => 'required'
 		);
 
 		$validator = Validator::make(Input::all(), $rules);
@@ -72,18 +73,15 @@ class PermissionController extends BaseController {
 	        	]
 			), 200); 
 		} else {
-			$perm = new Permission();
-			$perm->name = Input::get('name', null);
-
-			$result = $perm->save();
-
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 200,
-	        		'message'=> 'success'
-	        	],
-				'id'=> $perm->id
-			), 200); 
+			$p = Permission::create(Input::all());
+			if($p)
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	],
+					'id'=> $p->id
+				), 200); 
 		} 
 	}
 
@@ -235,5 +233,4 @@ class PermissionController extends BaseController {
 	        );
 		}
 	}
-
 }
