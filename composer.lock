@@ -3,7 +3,11 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
+<<<<<<< HEAD
     "hash": "8e4d626d379e69464dc1f44c48d22889",
+=======
+    "hash": "818ba2a3ee5256729bce9c404171c5bd",
+>>>>>>> Max
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -226,6 +230,7 @@
         },
         {
             "name": "laravel/framework",
+<<<<<<< HEAD
             "version": "v4.1.16",
             "source": {
                 "type": "git",
@@ -236,6 +241,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/99a342124cb1003ef4eee36aad8f50fb7ef36e7e",
                 "reference": "99a342124cb1003ef4eee36aad8f50fb7ef36e7e",
+=======
+            "version": "v4.1.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "956511d9ebbddabb6ab79b1ec074616308a93a50"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/956511d9ebbddabb6ab79b1ec074616308a93a50",
+                "reference": "956511d9ebbddabb6ab79b1ec074616308a93a50",
+>>>>>>> Max
                 "shasum": ""
             },
             "require": {
@@ -339,7 +356,11 @@
                 "framework",
                 "laravel"
             ],
+<<<<<<< HEAD
             "time": "2014-01-13 19:40:50"
+=======
+            "time": "2014-01-05 16:10:41"
+>>>>>>> Max
         },
         {
             "name": "monolog/monolog",

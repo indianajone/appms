@@ -17,7 +17,7 @@ class UserController extends \BaseController {
             $field = Input::get('fields', null);
             $fields = $field ? explode(',', $field) : $field;
             $users = User::take($limit)->skip($offset)->get($fields);
-            
+            return $users;
             foreach ($users as $user) {
                 $user->apps;
             }
