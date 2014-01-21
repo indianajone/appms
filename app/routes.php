@@ -17,7 +17,7 @@ Route::get('/', function()
 });
 
 Route::get('/users', function(){
-	return User::find(1);
+	return User::find(1)->with('apps')->get();
 });
 
 // Route::get('/roles', function(){
