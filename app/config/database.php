@@ -54,17 +54,10 @@ return array(
 
 		'mysql' => array(
 			'driver'    => 'mysql',
-<<<<<<< HEAD
 			'host'      => '192.168.134.11',
 			'database'  => 'thaimissing_db',
 			'username'  => 'thaimissing_rw',
 			'password'  => 's5sZFmbr8cNc',
-=======
-			'host'      => 'localhost',
-			'database'  => 'appms',
-			'username'  => 'root',
-			'password'  => '',
->>>>>>> Max
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
