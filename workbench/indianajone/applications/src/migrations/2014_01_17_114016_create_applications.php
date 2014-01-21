@@ -19,7 +19,7 @@ class CreateApplications extends Migration {
 			$table->string('name', 100);
 			$table->string('description', 255)->nullable();
 			$table->string('picture')->nullable();
-			$table->string('appkey', 100);
+			$table->string('appkey', 32)->unique();
 			$table->integer('created_at');
 			$table->integer('updated_at');
 		});
