@@ -39,6 +39,11 @@ class User extends BaseModel implements UserInterface, RemindableInterface {
     	// return $this->hasMany('User', 'parent_id')->with('children');
     }
 
+    public function apps()
+    {
+        return $this->hasMany('Indianajone\Applications\Models\Application', 'user_id');
+    }
+
     // public function getFullnameAttribute()
     // {
     // 	return $this->first_name .' '. $this->last_name;
