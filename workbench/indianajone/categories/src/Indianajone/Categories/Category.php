@@ -29,7 +29,7 @@ class Category extends Node {
       'parent_id' => 'exists:categories,id'
     ),
     'update' => array(
-      'parent_id' => 'exists:categories,id'
+      'parent_id' => 'integer|existsornull:categories,id'
     ),
     'delete' => array(
       'id' => 'required|exists:categories'
@@ -138,6 +138,12 @@ class Category extends Node {
   //   });
   // }
 
-
+  public function updateParent($id)
+  {
+    if($id >= 1)
+      $this->makeChildOf($id);
+    else
+      $this->makeRoot();
+  }
 
 }

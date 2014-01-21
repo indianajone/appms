@@ -20,7 +20,7 @@ class CategoryController extends BaseController
 		$limit= Input::get('limit', 10);
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
-		$cats = Category::offset($offset)->limit($limit)->get();
+		$cats = Category::with('children')->offset($offset)->limit($limit)->get();
 
 		if($field)
 	 		$cats->each(function($cat) use ($fields){
@@ -115,9 +115,6 @@ class CategoryController extends BaseController
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
 		$cat = Category::with('children')->find($id);
-		// $cat->children();
-
-		// dd($cat);
 
 		if($cat)
 			return Response::json(
@@ -160,22 +157,36 @@ class CategoryController extends BaseController
 	 */
 	public function update($id)
 	{
+		/**
+			#TODO: Find a better place for resolver.
+		**/
+		Validator::resolver(function($translator, $data, $rules, $messages)
+		{
+		    return new \Indianajone\Validators\Rules\ExistsOrNull($translator, $data, $rules, $messages);
+		});
+
 		$validator = Validator::make(Input::all(), Category::$rules['update']);
 
 		if ($validator->passes()) {
 			$cat = Category::find($id);
 			$cat->name = Input::get('name', $cat->name);
-			$parent_id = Input::get('parent_id', $cat->parent_id);
+			$cat->description = Input::get('description', $cat->description);
+			$parent_id = Input::get('parent_id', $cat->parent_id, null);
 
-			if($parent_id)
+			if(!is_null($parent_id))
 			{
-				$parent = Category::find($parent_id);
-				$cat->makeChildOf($parent);
+				$cat->updateParent($parent_id);
 			}
 
-			$cat->save();
-			// $cat->description = Input::get('description', $cat->description);
-			// $cat->picture = Input::get('picture', null);
+			if($cat->save())
+				return Response::json(
+		        	array(
+		        		'header' => array(
+		        			'code' => 200,
+		        			'message' => 'Updated category_id: '.$id.' success!'
+		        		)
+		        	), 200
+		        ); 
 		}
 
 		return Response::json(array(
@@ -205,25 +216,25 @@ class CategoryController extends BaseController
 	 */
 	public function destroy($id)
 	{
-		// $validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
+		$validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
 
-		// if ($validator->passes()) {
-		// 	$app->find($id)->delete();
-		// 	return Response::json(
-	 //        	array(
-	 //        		'header' => array(
-	 //        			'code' => 200,
-	 //        			'message' => 'Deleted Application: '.$id.' success!'
-	 //        		)
-	 //        	), 200
-	 //        );
-		// }
+		if ($validator->passes()) {
+			$app->find($id)->delete();
+			return Response::json(
+	        	array(
+	        		'header' => array(
+	        			'code' => 200,
+	        			'message' => 'Deleted category_'.$id.' success!'
+	        		)
+	        	), 200
+	        );
+		}
 
-		// return Response::json(array(
-		// 	'header'=> [
-  //       		'code'=> 400,
-  //       		'message'=> $validator->messages()->first()
-  //       	]
-		// ), 200); 
+		return Response::json(array(
+			'header'=> [
+        		'code'=> 400,
+        		'message'=> $validator->messages()->first()
+        	]
+		), 200); 
 	}
 }
