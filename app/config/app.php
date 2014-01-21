@@ -65,7 +65,7 @@ return array(
 	|
 	*/
 
-	'key' => 'YourSecretKey!!!',
+	'key' => 'Els7N6FrLOTufl0MGQGugVo5FM8gxHFD',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -106,6 +106,14 @@ return array(
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
+            
+                'Core\Response\ResponseServiceProvider',
+                
+                'Max\Application\ApplicationServiceProvider',
+                'Max\Device\DeviceServiceProvider',
+                'Max\Member\MemberServiceProvider',
+                'Max\User\UserServiceProvider',
+                'Max\Missingchild\MissingchildServiceProvider',
 
 	),
 
@@ -162,7 +170,7 @@ return array(
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
 		'Request'         => 'Illuminate\Support\Facades\Request',
-		'Response'        => 'Illuminate\Support\Facades\Response',
+//		'Response'        => 'Illuminate\Support\Facades\Response',
 		'Route'           => 'Illuminate\Support\Facades\Route',
 		'Schema'          => 'Illuminate\Support\Facades\Schema',
 		'Seeder'          => 'Illuminate\Database\Seeder',
@@ -173,6 +181,7 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
+                'Response'        => 'Core\Response\Facades\Response',
 	),
 
 );

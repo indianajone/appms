@@ -12,6 +12,17 @@ class UserServiceProvider extends ServiceProvider {
 	protected $defer = false;
 
 	/**
+	 * Bootstrap the application events.
+	 *
+	 * @return void
+	 */
+	public function boot()
+	{
+            $this->package('max/user');
+            include __DIR__.'/../../routes.php';
+	}
+
+	/**
 	 * Register the service provider.
 	 *
 	 * @return void
