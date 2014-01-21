@@ -13,7 +13,11 @@ return array(
 	|
 	*/
 
+<<<<<<< HEAD
 	'name' => 'Ravi Vaisayawan',
+=======
+	'name' => 'Phasupong Yingampol',
+>>>>>>> Max
 
 	/*
 	|--------------------------------------------------------------------------
@@ -26,6 +30,10 @@ return array(
 	|
 	*/
 
+<<<<<<< HEAD
 	'email' => 'mmer555@hotmail.com',
+=======
+	'email' => 'phasupong@gmail.com',
+>>>>>>> Max
 
 );
