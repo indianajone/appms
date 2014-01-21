@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-/workbench
-=======
 */vendor/
->>>>>>> best
 .DS_Store
 /public/uploads
 .gitignore
-=======
 /nbproject/private/
->>>>>>> origin/Max
+
