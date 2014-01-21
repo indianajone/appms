@@ -12,12 +12,7 @@ return array(
 	| You may specify it now so it is used for all of your workbenches.
 	|
 	*/
-
-<<<<<<< HEAD
 	'name' => 'Ravi Vaisayawan',
-=======
-	'name' => 'Phasupong Yingampol',
->>>>>>> Max
 
 	/*
 	|--------------------------------------------------------------------------
@@ -30,10 +25,6 @@ return array(
 	|
 	*/
 
-<<<<<<< HEAD
 	'email' => 'mmer555@hotmail.com',
-=======
-	'email' => 'phasupong@gmail.com',
->>>>>>> Max
 
 );
