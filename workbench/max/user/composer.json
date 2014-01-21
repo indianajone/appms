@@ -3,17 +3,22 @@
     "description": "",
     "authors": [
         {
-            "name": "",
-            "email": ""
+            "name": "Phasupong Yingampol",
+            "email": "phasupong@gmail.com"
         }
     ],
     "require": {
         "php": ">=5.3.0",
-        "illuminate/support": "4.1.x"
+        "illuminate/support": "4.1.*"
     },
     "autoload": {
+        "classmap": [
+            "src/migrations",
+            "src/controllers",
+            "src/models"
+        ],
         "psr-0": {
-            "Max\\User": "src/"
+            "Max\\User\\": "src/"
         }
     },
     "minimum-stability": "dev"
