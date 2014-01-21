@@ -11,7 +11,7 @@ class ExistLoop extends \Illuminate\Validation\Validator
 			$results[] = $this->validateExists($i, $value, $parameters);
 			if(!$results[$i])
 			{
-				$this->setCustomMessages(array('existloop' => 'permission_id: '.$value.' does not exists.'));
+				$this->setCustomMessages(array('existloop' => $attribute.': '.$value.' does not exists.'));
 				return false;
 			} 
 		}
