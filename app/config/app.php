@@ -108,7 +108,8 @@ return array(
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
-		'Indianajone\Applications\ApplicationsServiceProvider'
+		'Indianajone\Applications\ApplicationsServiceProvider',
+		'Indianajone\Categories\CategoriesServiceProvider'
 	),
 
 	/*
