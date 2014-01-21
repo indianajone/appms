@@ -17,21 +17,23 @@ class UserController extends \BaseController {
             $field = Input::get('fields', null);
             $fields = $field ? explode(',', $field) : $field;
             $users = User::take($limit)->skip($offset)->get($fields);
-            return $users;
+            // return $users;
             foreach ($users as $user) {
                 $user->apps;
             }
             
             if($users->count() > 0)
-                return Response::listing(array(
-                    'code'=>200, 
-                    'message'=>'success'
-                ), $users, $offset, $limit);
+                return $users;
+                // return Response::listing(array(
+                //     'code'=>200, 
+                //     'message'=>'success'
+                // ), $users, $offset, $limit);
             else 
-                return Response::listing(array(
-                    'code'=>204, 
-                    'message'=>'no content'
-                ), null, $offset, $limit);
+                // return Response::listing(array(
+                //     'code'=>204, 
+                //     'message'=>'no content'
+                // ), null, $offset, $limit);
+                return 'false';
 	}
 
 	/**

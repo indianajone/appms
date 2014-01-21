@@ -48,12 +48,12 @@ Route::group(array('prefix' => 'api/v1'), function()
 //        Route::get('members/fields/{table}/{format?}', 'MemberController@fields');
 //        Route::get('members/login', 'MemberController@doLogin');        
         
-        Route::group(array('before' => 'chk_appkey'), function(){
+        // Route::group(array('before' => 'chk_appkey'), function(){
 //            Route::get('members/{id}/devices', 'MemberController@registerDevice');
             
             Route::resource('users', 'Max\\User\\Controllers\\UserController');
 //            Route::resource('members', 'MemberController');
 //            Route::resource('member/{id}/devices', 'DeviceController');
-        });   
+        // });   
         
 });

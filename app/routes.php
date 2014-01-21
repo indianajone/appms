@@ -16,9 +16,9 @@ Route::get('/', function()
 	return 'hello'; // View::make('hello');
 });
 
-Route::get('/users', function(){
-	return User::find(1)->with('apps')->get();
-});
+// Route::get('/users', function(){
+// 	return User::find(1)->with('apps')->get();
+// });
 
 // Route::get('/roles', function(){
 // 	return Indianajone\RolesAndPermissions\Role::all();
@@ -50,32 +50,32 @@ Route::get('/users', function(){
 // // 	$p->save();
 // // });
 
-Route::get('migrate/install', function(){
-	echo '<br>init migrate:install...';
-	Artisan::call('migrate:install');
-	echo 'done migrate:install';
-});
+// Route::get('migrate/install', function(){
+// 	echo '<br>init migrate:install...';
+// 	Artisan::call('migrate:install');
+// 	echo 'done migrate:install';
+// });
 
-Route::get('migrate/drop/{table}', function($table){
-	Schema::drop($table);
-	return 'Table '. $table .' has dropped.';
-});
+// Route::get('migrate/drop/{table}', function($table){
+// 	Schema::drop($table);
+// 	return 'Table '. $table .' has dropped.';
+// });
 
-// Use |(pine) instead of / 
-Route::get('migrate/{bench?}', function($bench){
-	if(isset($bench))
-	{
-		$b = str_replace('|', '/', $bench);
-		echo '<br>migrating bench '. $b .'...';
-		Artisan::call('migrate', ['--bench'=> $b]);
-		echo 'done migrate bench '. $b;
-	}
-	else
-	{
-		Artisan::call('migrate');
-		echo 'done migrate';
-	}
-});
+// // Use |(pine) instead of / 
+// Route::get('migrate/{bench?}', function($bench){
+// 	if(isset($bench))
+// 	{
+// 		$b = str_replace('|', '/', $bench);
+// 		echo '<br>migrating bench '. $b .'...';
+// 		Artisan::call('migrate', ['--bench'=> $b]);
+// 		echo 'done migrate bench '. $b;
+// 	}
+// 	else
+// 	{
+// 		Artisan::call('migrate');
+// 		echo 'done migrate';
+// 	}
+// });
 
 // Route::get('/auth/login', function(){
 // 	$user = array(
@@ -104,37 +104,37 @@ Route::get('migrate/{bench?}', function($bench){
 // 		return 'you are not logedin.';
 // 	}
 // });
-Route::get('/users/{id?}/children', function($id=1){
+// Route::get('/users/{id?}/children', function($id=1){
 
 	
-	$user = User::find($id);
-	$user->children;
-	// var_dump($users->children->count());
-	// dd($users->children()->getResults());
-	// if($users['children'] ?: null);
-	// dd($user->children->toArray());
-	// dd($user->children->modelKeys());
+// 	$user = User::find($id);
+// 	$user->children;
+// 	// var_dump($users->children->count());
+// 	// dd($users->children()->getResults());
+// 	// if($users['children'] ?: null);
+// 	// dd($user->children->toArray());
+// 	// dd($user->children->modelKeys());
 
-	return $user;
-});
+// 	return $user;
+// });
 
-Route::get('/users/create', function(){
-	User::create(
-		array(
-			'parent_id' => 4,
-			'first_name' => 'Ti',
-			'last_name' => 'sasas',
-			'email' => 'sada@job.com',
-			'username'=>'ti',
-			'password'=> Hash::make('test')
-		)
-	);
-});
+// Route::get('/users/create', function(){
+// 	User::create(
+// 		array(
+// 			'parent_id' => 4,
+// 			'first_name' => 'Ti',
+// 			'last_name' => 'sasas',
+// 			'email' => 'sada@job.com',
+// 			'username'=>'ti',
+// 			'password'=> Hash::make('test')
+// 		)
+// 	);
+// });
 
-Route::get('/users/{id?}', function($id=1){
-	$user = User::find(1)->with('roles.permits')->get();
-	// $user->roles->each(function($role) {
-	// 	$role->permits;	
-	// });
-	return $user;
-});
+// Route::get('/users/{id?}', function($id=1){
+// 	$user = User::find(1)->with('roles.permits')->get();
+// 	// $user->roles->each(function($role) {
+// 	// 	$role->permits;	
+// 	// });
+// 	return $user;
+// });

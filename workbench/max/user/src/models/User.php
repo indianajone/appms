@@ -5,7 +5,7 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 use Max\User\Models\BaseModel;
 
 class User extends BaseModel implements UserInterface, RemindableInterface {
-
+use HasRole; // Add this trait to your user model
 //    public $timestamps = false;
 //    protected $table = 'users';
 //    protected $primaryKey = 'user_id';
@@ -60,7 +60,8 @@ class User extends BaseModel implements UserInterface, RemindableInterface {
 //        }
 
         public function apps(){
-            return $this->belongsTo('Max\Application\Models\Application', 'id', 'user_id');
+            // return $this->belongsTo('Max\Application\Models\Application', 'id', 'user_id');
+            return $this->hasMany('Indianajone\Applications\Models\Application', 'user_id');
         }
         
         public function missingchild(){
