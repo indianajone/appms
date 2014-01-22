@@ -1,7 +1,8 @@
 <?php
 namespace Max\User\Controllers;
 
-use Validator, Input, Response, Hash, User;
+use Validator, Input, Response, Hash;
+use Max\User\Models\User;
 
 class UserController extends \BaseController {
 
@@ -16,11 +17,12 @@ class UserController extends \BaseController {
             $limit = Input::get('limit', 10);
             $field = Input::get('fields', null);
             $fields = $field ? explode(',', $field) : $field;
-            $users = User::take($limit)->skip($offset)->get($fields);
-            // return $users;
-            foreach ($users as $user) {
-                $user->apps;
-            }
+            $users = User::with('roles','apps')->take($limit)->skip($offset)->get($fields);
+            return $users;
+            // foreach ($users as $user) {
+            //     // $user->apps;
+            //     $user->with('roles', 'apps')->get();
+            // }
             
             if($users->count() > 0)
                 return $users;
@@ -396,5 +398,11 @@ class UserController extends \BaseController {
                         )
                 ));
             }
+        }
+
+        public function attachRole($id)
+        {
+            $user = User::find($id);
+            // dd($user->attachRole(1));
         }
 }

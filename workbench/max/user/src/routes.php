@@ -50,7 +50,7 @@ Route::group(array('prefix' => 'api/v1'), function()
         
         // Route::group(array('before' => 'chk_appkey'), function(){
 //            Route::get('members/{id}/devices', 'MemberController@registerDevice');
-            
+            Route::any('users/{id}/attach', 'Max\\User\\Controllers\\UserController@attachRole');
             Route::resource('users', 'Max\\User\\Controllers\\UserController');
 //            Route::resource('members', 'MemberController');
 //            Route::resource('member/{id}/devices', 'DeviceController');
