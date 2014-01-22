@@ -107,11 +107,11 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
-		'Max\User\UserServiceProvider',
-
 		'Indianajone\Applications\ApplicationsServiceProvider',
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
-		'Indianajone\Categories\CategoriesServiceProvider'
+		'Indianajone\Categories\CategoriesServiceProvider',
+
+		'Max\User\UserServiceProvider'
 	),
 
 	/*

@@ -108,24 +108,12 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
             
-        'Max\User\UserServiceProvider',
+        // 'Max\User\UserServiceProvider',
 
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Applications\ApplicationsServiceProvider',
 		'Indianajone\Categories\CategoriesServiceProvider'
 	),
-
-	/**
-	*
-	* Core\Response\ResponseServiceProvider',
-        		'Max\Application\ApplicationServiceProvider',
-                'Max\Device\DeviceServiceProvider',
-                'Max\Member\MemberServiceProvider',
-                'Max\User\UserServiceProvider',
-                'Max\Missingchild\MissingchildServiceProvider',
-	*
-	**/
-	
 
 	/*
 	|--------------------------------------------------------------------------
