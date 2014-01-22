@@ -20,16 +20,6 @@ class Response extends BaseResponse {
      *
      * */
     public static function listing($status, $data, $offset = 0, $limit = 10 ,$format = 'json') {
-//        return BaseResponse::make([
-//                    'header' => [
-//                        'code' => $status['code'],
-//                        'message' => $status['message']
-//                    ],
-//                    'offset' => $offset,
-//                    'limit' => $limit,
-//                    'total' => is_object($data) ? $data->count() : 0,
-//                    'entries' => is_object($data) ? $data->toArray() : $data
-//                        ], 200)->header('Content-Type', 'application/json');
         if(is_object($data)) {
             $total = $data->count();
         } else if (is_array($data)) {
@@ -50,9 +40,9 @@ class Response extends BaseResponse {
         );
         
         if($format == 'json') {
-            return $response;
+            return Response::make($response)->header('Content-Type', 'application/json');
         } else {
-            return Self::xml($response);
+            return Response::make(self::xml($response))->header('Content-Type', 'text/xml');
         }
 
     }
@@ -77,7 +67,7 @@ class Response extends BaseResponse {
         return (is_array($array) && 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
     }
 
-    public static function xml($data, $rootNodeName = 'ResultSet', &$xml = null) {
+    public static function xml($data, $rootNodeName = 'response', &$xml = null) {
         if (is_array($data)) {
             if (ini_get('zend.ze1_compatibility_mode') == 1) {
                 ini_set('zend.ze1_compatibility_mode', 0);
@@ -109,7 +99,7 @@ class Response extends BaseResponse {
                     }
                 }
             }
-            //header("Content-type: text/xml");
+            // header("Content-type: text/xml");
             return $xml->asXML();
         } else {
             return "Is not array";
