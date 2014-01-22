@@ -1,6 +1,6 @@
 <?php
 
-Route::group(array('prefix' => 'articles'), function(){
+Route::group(array('prefix' => 'api/v1/articles'), function(){
     // GET
     Route::get('fields','ArticlesController@fields');
     Route::get('/','ArticlesController@lists');
