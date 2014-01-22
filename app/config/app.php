@@ -114,7 +114,7 @@ return array(
 
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Applications\ApplicationsServiceProvider',
-		'Indianajone\Categories\CategoriesServiceProvider'
+		'Indianajone\Categories\CategoriesServiceProvider',
         
                 // 'Core\Plugin\PluginServiceProvider',
         'Articles\Article\ArticleServiceProvider',
@@ -192,6 +192,6 @@ return array(
 
 		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 
-	),
+	)
 
 );

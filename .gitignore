@@ -1,8 +1,10 @@
-/workbench
+/app
+/bootstrap
+/public
 /vendor
 .DS_Store
-/public/uploads
 .gitignore
-/nbproject/private/
+artisan
+*.json
 *.lock
 _*.php
