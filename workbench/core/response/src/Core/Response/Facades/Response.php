@@ -19,7 +19,7 @@ class Response extends BaseResponse {
      * @return JsonResponse
      *
      * */
-    public static function listing($status, $data, $offset = 0, $limit = 10) {
+    public static function listing($status, $data, $offset = 0, $limit = 10 ,$format = 'json') {
 //        return BaseResponse::make([
 //                    'header' => [
 //                        'code' => $status['code'],
@@ -30,6 +30,14 @@ class Response extends BaseResponse {
 //                    'total' => is_object($data) ? $data->count() : 0,
 //                    'entries' => is_object($data) ? $data->toArray() : $data
 //                        ], 200)->header('Content-Type', 'application/json');
+        if(is_object($data)) {
+            $total = $data->count();
+        } else if (is_array($data)) {
+            $total = count($data);
+        } else {
+            $total = 0;
+        }
+        
         $response = array(
             'header' => array(
                 'code' => $status['code'],
@@ -37,11 +45,16 @@ class Response extends BaseResponse {
             ),
             'offset' => $offset,
             'limit' => $limit,
-            'total' => is_object($data) ? $data->count() : 0,
+            'total' => $total,
             'entries' => is_object($data) ? $data->toArray() : $data
         );
+        
+        if($format == 'json') {
+            return $response;
+        } else {
+            return Self::xml($response);
+        }
 
-        return $response;
     }
 
     /**
@@ -171,4 +184,12 @@ class Response extends BaseResponse {
             return Response::xml($response);
         }
     }
+    
+//    public static function results($response , $format = 'json') {
+//        if($format == 'xml') {
+//            return Response::xml($response);
+//        } else {
+//            return $response;
+//        }
+//    }
 }

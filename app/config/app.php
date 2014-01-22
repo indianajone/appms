@@ -109,8 +109,10 @@ return array(
                 'Core\Response\ResponseServiceProvider',
                 'Core\Plugin\PluginServiceProvider',
                 'Articles\Article\ArticleServiceProvider',
+                'Galleries\Gallery\GalleryServiceProvider',
+                'Galleries\Media\MediaServiceProvider',
+                //'Galleries\Media\MediaServiceProvider',
                 'Kitti\Subproject\SubprojectServiceProvider',
-                
 	),
 
 	/*

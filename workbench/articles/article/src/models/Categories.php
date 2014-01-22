@@ -11,7 +11,8 @@ class Categories extends \Illuminate\Database\Eloquent\Model {
         }
         
         public function children() {
-            return $this->hasMany('Articles\Article\Models\Categories', 'parent_id','category_id')->with('children');
+            return $this->hasMany('Articles\Article\Models\Categories', 'parent_id','category_id')
+                    ->with('children');
+                    //->select(array('category_id', 'name'));
         }
-        
 }
