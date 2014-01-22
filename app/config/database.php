@@ -59,7 +59,7 @@ return array(
 			'username'  => 'thaimissing_rw',
 			'password'  => 's5sZFmbr8cNc',
 			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
+			'collation' => 'utf8_general_ci',
 			'prefix'    => '',
 		),
 	),

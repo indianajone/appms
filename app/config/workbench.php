@@ -13,7 +13,6 @@ return array(
 	|
 	*/
 	'name' => 'Ravi Vaisayawan',
-
 	/*
 	|--------------------------------------------------------------------------
 	| Workbench Author E-Mail Address
@@ -24,7 +23,5 @@ return array(
 	| automatically after the package is created by the workbench tool.
 	|
 	*/
-
 	'email' => 'mmer555@hotmail.com',
-
 );

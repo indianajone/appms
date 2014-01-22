@@ -3,6 +3,6 @@
 .DS_Store
 /public/uploads
 .gitignore
-/nbproject/private
+/nbproject/private/
 *.lock
 _*.php

@@ -1,0 +1,25 @@
+{
+    "name": "kitti/subproject",
+    "description": "",
+    "authors": [
+        {
+            "name": "kitti klinbua",
+            "email": "codetotti@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.x"
+    },
+    "autoload": {
+        "classmap": [
+          "src/controllers",
+          "src/models",
+          "src/migrations"
+        ],
+        "psr-0": {
+            "Kitti\\Subproject": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

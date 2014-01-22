@@ -107,12 +107,21 @@ return array(
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
-            
-        // 'Max\User\UserServiceProvider',
+        
+        'Core\Response\ResponseServiceProvider',
+
+        'Max\User\UserServiceProvider',
 
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Applications\ApplicationsServiceProvider',
 		'Indianajone\Categories\CategoriesServiceProvider'
+        
+                // 'Core\Plugin\PluginServiceProvider',
+        'Articles\Article\ArticleServiceProvider',
+                // 'Galleries\Gallery\GalleryServiceProvider',
+                // 'Galleries\Media\MediaServiceProvider',
+                //'Galleries\Media\MediaServiceProvider',
+                // 'Kitti\Subproject\SubprojectServiceProvider',
 	),
 
 	/*
@@ -164,11 +173,13 @@ return array(
 		'Mail'            => 'Illuminate\Support\Facades\Mail',
 		'Paginator'       => 'Illuminate\Support\Facades\Paginator',
 		'Password'        => 'Illuminate\Support\Facades\Password',
+                'Plugin'          => 'Core\Plugin\Facades\Plugin',
 		'Queue'           => 'Illuminate\Support\Facades\Queue',
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
 		'Request'         => 'Illuminate\Support\Facades\Request',
-		'Response'        => 'Illuminate\Support\Facades\Response',
+		//'Response'        => 'Illuminate\Support\Facades\Response',
+		'Response'        => 'Core\Response\Facades\Response',
 		'Route'           => 'Illuminate\Support\Facades\Route',
 		'Schema'          => 'Illuminate\Support\Facades\Schema',
 		'Seeder'          => 'Illuminate\Database\Seeder',
