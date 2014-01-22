@@ -1,4 +1,5 @@
-<?php namespace Indianajone\Applications;
+<?php 
+namespace Indianajone\Applications;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -39,7 +40,7 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array('application');
 	}
 
 }

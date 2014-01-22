@@ -4,7 +4,7 @@ use \BaseController;
 use \Input;
 use \Response;
 use \Validator;
-use \Indianajone\Applications\Models\Application as Appl;
+use \Indianajone\Applications\Application as Appl;
 use \Image;
 
 class ApplicationController extends BaseController
