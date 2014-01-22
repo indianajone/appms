@@ -50,4 +50,9 @@ class Application extends \BaseModel
 	{
 		return $this->rules;
 	}
+
+	public function getAppIDByKey($key)
+	{
+		return $this->where('appkey', $key)->first();
+	}
 }
