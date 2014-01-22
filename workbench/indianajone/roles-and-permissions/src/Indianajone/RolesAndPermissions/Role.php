@@ -29,6 +29,6 @@ class Role extends EntrustRole {
      */
     public function users()
     {
-        return $this->belongsToMany('User', 'user_roles');
+        return $this->belongsToMany('Max\User\Models\User', 'user_roles');
     }
 }

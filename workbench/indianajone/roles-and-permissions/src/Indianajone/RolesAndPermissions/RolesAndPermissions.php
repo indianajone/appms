@@ -5,5 +5,8 @@ use Zizaco\Entrust\Entrust;
 
 class RolesAndPermissions extends Entrust
 {
-
+	function __construct($app)
+	{
+		parent::__construct($app);
+	}
 }

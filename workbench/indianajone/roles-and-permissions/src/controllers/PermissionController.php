@@ -5,6 +5,7 @@ use \Input;
 use \Response;
 use \Validator;
 use \Indianajone\RolesAndPermissions\Permission;
+use \Max\User\Models\User;
 
 class PermissionController extends BaseController {
 
