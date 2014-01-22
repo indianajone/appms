@@ -1,1 +1,10 @@
-/nbproject/private/
+/app
+/bootstrap
+/public
+/vendor
+.DS_Store
+.gitignore
+artisan
+*.json
+*.lock
+_*.php

@@ -13,7 +13,7 @@ return array(
 	|
 	*/
 
-	'debug' => true,
+	'debug' => TRUE,
 
 	/*
 	|--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'url' => 'http://localhost',
+	'url' => 'http://api-thaimissing.truelife.com',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return array(
 	|
 	*/
 
-	'timezone' => 'UTC',
+	'timezone' => 'Asia/Bangkok',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -65,7 +65,8 @@ return array(
 	|
 	*/
 
-	'key' => 'YourSecretKey!!!',
+	'key' => 'ObhZ0ddptMXcaiJVvVWqKr1hLvWL3kUj',
+
 
 	/*
 	|--------------------------------------------------------------------------
@@ -106,13 +107,24 @@ return array(
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
-                'Core\Response\ResponseServiceProvider',
-                'Core\Plugin\PluginServiceProvider',
-                'Articles\Article\ArticleServiceProvider',
-                'Galleries\Gallery\GalleryServiceProvider',
-                'Galleries\Media\MediaServiceProvider',
-                //'Galleries\Media\MediaServiceProvider',
-                'Kitti\Subproject\SubprojectServiceProvider',
+        
+        'Core\Response\ResponseServiceProvider',
+
+        'Max\User\UserServiceProvider',
+
+		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
+		'Indianajone\Applications\ApplicationsServiceProvider',
+		'Indianajone\Categories\CategoriesServiceProvider',
+        
+
+        // 'Core\Plugin\PluginServiceProvider',
+        //'Articles\Article\ArticleServiceProvider',
+	    // 'Galleries\Gallery\GalleryServiceProvider',
+        // 'Galleries\Media\MediaServiceProvider',
+        //'Galleries\Media\MediaServiceProvider',
+        // 'Kitti\Subproject\SubprojectServiceProvider',
+        'Baum\BaumServiceProvider',
+        'Kitti\Articles\ArticlesServiceProvider',
 	),
 
 	/*
@@ -164,7 +176,7 @@ return array(
 		'Mail'            => 'Illuminate\Support\Facades\Mail',
 		'Paginator'       => 'Illuminate\Support\Facades\Paginator',
 		'Password'        => 'Illuminate\Support\Facades\Password',
-                'Plugin'          => 'Core\Plugin\Facades\Plugin',
+        'Plugin'          => 'Core\Plugin\Facades\Plugin',
 		'Queue'           => 'Illuminate\Support\Facades\Queue',
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
@@ -180,6 +192,9 @@ return array(
 		'URL'             => 'Illuminate\Support\Facades\URL',
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
-	),
+
+		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
+
+	)
 
 );

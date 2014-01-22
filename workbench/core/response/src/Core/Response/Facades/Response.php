@@ -20,16 +20,6 @@ class Response extends BaseResponse {
      *
      * */
     public static function listing($status, $data, $offset = 0, $limit = 10 ,$format = 'json') {
-//        return BaseResponse::make([
-//                    'header' => [
-//                        'code' => $status['code'],
-//                        'message' => $status['message']
-//                    ],
-//                    'offset' => $offset,
-//                    'limit' => $limit,
-//                    'total' => is_object($data) ? $data->count() : 0,
-//                    'entries' => is_object($data) ? $data->toArray() : $data
-//                        ], 200)->header('Content-Type', 'application/json');
         if(is_object($data)) {
             $total = $data->count();
         } else if (is_array($data)) {
@@ -49,12 +39,15 @@ class Response extends BaseResponse {
             'entries' => is_object($data) ? $data->toArray() : $data
         );
         
+        return self::result($response, $format);
+    }
+
+    public static function result($response , $format) {
         if($format == 'json') {
             return $response;
         } else {
-            return Self::xml($response);
+            return Response::make(self::xml($response))->header('Content-Type', 'text/xml');
         }
-
     }
 
     /**
@@ -132,11 +125,7 @@ class Response extends BaseResponse {
                 )
             );
 
-            if ($format == 'json') {
-                return Response::json($response, $status['code']);
-            } else {
-                return Response::xml($response);
-            }
+            return self::result($response, $format);
         } else {
             return "Please set status code ans message.";
         }
@@ -178,18 +167,6 @@ class Response extends BaseResponse {
             'fields' => $display
         );
 
-        if ($format == 'json') {
-            return Response::json($response, 200);
-        } else {
-            return Response::xml($response);
-        }
+        return self::result($response, $format);
     }
-    
-//    public static function results($response , $format = 'json') {
-//        if($format == 'xml') {
-//            return Response::xml($response);
-//        } else {
-//            return $response;
-//        }
-//    }
 }

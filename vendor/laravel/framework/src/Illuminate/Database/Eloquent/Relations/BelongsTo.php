@@ -259,5 +259,8 @@ class BelongsTo extends Relation {
 	{
 		return $this->related->getTable().'.'.$this->otherKey;
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> best
 }
