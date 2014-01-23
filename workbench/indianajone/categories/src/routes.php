@@ -14,5 +14,8 @@
 		**/
 		// Apps
 		// Route::post('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApplicationController@delete');
+		Route::get('categories/fields', function(){
+			return Response::fields('categories', Input::get('format', 'json'));
+		});
 		Route::resource('categories', 'Indianajone\\Categories\\Controllers\\CategoryController');
 	});

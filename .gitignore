@@ -1,6 +1,11 @@
-*/vendor/
+/vendor
 .DS_Store
 /public/uploads
+/app/storage/logs
+/app/storage/meta
+/app/storage/sessions
+
 .gitignore
 /nbproject/private/
 
+composer.lock

@@ -25,8 +25,9 @@ $app = new Illuminate\Foundation\Application;
 */
 
 $env = $app->detectEnvironment(array(
-	'local' => array('local.*','*.local'),
-	'production' => array('api-thaimissing.truelife.com')
+
+	'local' => array('*.local', 'local.*'),
+
 ));
 
 /*

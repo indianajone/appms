@@ -4,7 +4,8 @@ use \BaseController;
 use \Input;
 use \Response;
 use \Validator;
-use \Indianajone\Applications\Models\Application as Appl;
+use \Appl;
+// use \Indianajone\Applications\Application as Appl;
 use \Indianajone\Categories\Category;
 
 class CategoryController extends BaseController
@@ -24,21 +25,17 @@ class CategoryController extends BaseController
 
 		if($field)
 	 		$cats->each(function($cat) use ($fields){
-	 			$cat->setVisible($fields);
+	 			$cat->setVisible($fields);	
 	 		});
-
-	 	return Response::json(
-        	array(
-        		'header' => array(
-        			'code' => 200,
-        			'message' => 'success'
-        		),
-        		'offset' => (int) $offset,
-        		'limit' => (int) $limit,
-        		'total' => $cats->count(),
-        		'entries' => $cats->count() >= 1 ? $cats->toArray() : null
-        	)
-        );
+	 	
+	 	return Response::listing(
+	 		array(
+	 			'code'=>200,
+	 			'message'=> 'success'
+	 		),
+	 		$cats,
+	 		0, 10, Input::get('format', 'json')
+	 	);
 	}
 
 	/**
@@ -58,42 +55,31 @@ class CategoryController extends BaseController
 	 */
 	public function store()
 	{
-		// $rules = array(
-		// 	'user_id' 	=> 'required|exists:users,id',
-		// 	'name'		=> 'required'
-		// );
+		$validator = Validator::make(Input::all(), Category::$rules['save'], Category::$messages);
 
-		// $messages = array(
-		// 	'exists' => 'The given :attribute does not exists'
-		// );
-
-		$validator = Validator::make(Input::all(), Category::$rules['save']);
-
-		// $validator = Validator::make(Input::all(), $rules, $messages);
 		if ($validator->passes()) {
 			$cat = Category::create(array(
 				'name' => Input::get('name'),
-				// 'app_id' => Appl::getAppID()
-				'app_id' => 1,
+				'app_id' => Appl::getAppIDByKey(Input::get('appkey'))->id,
 				'parent_id' => Input::get('parent_id')
 			));
-		
-		// 	$picture = Input::get('picture', null);
-		// 	if($picture)
-		// 	{
-		// 		$response = Image::upload($picture);
-		// 		if(is_object($response)) return $response;
-		// 		$app->picture = $response;
-			// }
 
-		// 	if($app->save())
-			return Response::json(array(
-				'header'=> [
-	        		'code'=> 200,
-	        		'message'=> 'success'
-	        	],
-				'id'=> $cat->id
-			), 200); 
+			$picture = Input::get('picture', null);
+			if($picture)
+			{
+				$response = Image::upload($picture);
+				if(is_object($response)) return $response;
+				$app->picture = $response;
+			}
+
+			if($cat->save())
+				return Response::json(array(
+					'header'=> [
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	],
+					'id'=> $cat->id
+				), 200); 
 		}
 
 		return Response::json(array(

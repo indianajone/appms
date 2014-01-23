@@ -1,4 +1,5 @@
-<?php namespace Indianajone\Applications;
+<?php 
+namespace Indianajone\Applications;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -29,7 +30,10 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app->bind('appl', function($app)
+        {
+            return new Application();
+        });
 	}
 
 	/**
@@ -39,7 +43,7 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array('appl');
 	}
 
 }

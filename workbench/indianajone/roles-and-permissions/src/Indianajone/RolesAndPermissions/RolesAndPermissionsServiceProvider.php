@@ -1,7 +1,7 @@
 <?php namespace Indianajone\RolesAndPermissions;
 
 use Illuminate\Support\ServiceProvider;
-use Zizaco\Entrust\Entrust;
+use Indianajone\RolesAndPermissions\RolesAndPermissions;
 
 class RolesAndPermissionsServiceProvider extends ServiceProvider {
 
@@ -32,7 +32,7 @@ class RolesAndPermissionsServiceProvider extends ServiceProvider {
 	{
 		$this->app->bind('RolesAndPermissions', function($app)
         {
-            return new Entrust($app);
+            return new RolesAndPermissions($app);
         });	}
 
 	/**

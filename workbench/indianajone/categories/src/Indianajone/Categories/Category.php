@@ -24,8 +24,9 @@ class Category extends Node {
 
   public static $rules = array(
     'save' => array(
+      'appkey' => 'required|exists:applications,appkey',
       'name' => 'required',
-      'app_id' => 'required|exists:applications,id',
+      // 'app_id' => 'required|exists:applications,id',
       'parent_id' => 'exists:categories,id'
     ),
     'update' => array(
@@ -34,6 +35,10 @@ class Category extends Node {
     'delete' => array(
       'id' => 'required|exists:categories'
     )
+  );
+
+  public static $messages = array(
+    'exists' => 'The given :attribute is invalid.'    
   );
 
   //////////////////////////////////////////////////////////////////////////////
@@ -145,5 +150,81 @@ class Category extends Node {
     else
       $this->makeRoot();
   }
+
+  public function getChildrenAttribute($value)
+  {
+    return $value ?: null;
+  }
+
+  public function setChildrenAttribute($value)
+  {
+    dd($value);
+  }
+
+  public function addHidden($attribute)
+{
+    $hidden = $this->getHidden();
+
+    array_push($hidden, $attribute);
+
+    $this->setHidden($hidden);
+
+    // Make method chainable
+    return $this;
+}
+
+/**
+ * Convert appended collections into a list of attributes
+ *
+ * @param  object       $data       Model OR Collection
+ * @param  string|array $levels     Levels to iterate over
+ * @param  string       $attribute  The attribute we want to get listified
+ * @param  boolean      $hideOrigin Hide the original relationship data from the result set
+ * @return Model
+ */
+public function listAttributes($data, $levels, $attribute = 'id', $hideOrigin = true)
+{
+
+    // Set some defaults on first call of this function (because this function is recursive)
+    if (! is_array($levels))
+        $levels = explode('.', $levels);
+
+    if ($data instanceof Illuminate\Database\Eloquent\Collection) // Collection of Model objects
+    {
+        // We are dealing with an array here, so iterate over its contents and use recursion to look deeper:
+        foreach ($data as $row)
+        {
+            $this->listAttributes($row, $levels, $attribute, $hideOrigin);
+        }
+    }
+    else
+    {
+        // Fetch the name of the current level we are looking at
+        $curLevel = array_shift($levels);
+
+        if (is_object($data->{$curLevel}))
+        {
+            if (! empty($levels))
+            {
+                // We are traversing the right section, but are not at the level of the list yet... Let's use recursion to look deeper:
+                $this->listAttributes($data->{$curLevel}, $levels, $attribute, $hideOrigin);
+            }
+            else
+            {
+                // Hide the appended collection itself from the result set, if the user didn't request it
+                if ($hideOrigin)
+                    $data->addHidden($curLevel);
+
+                // Convert Collection to Eloquent lists()
+                if (is_array($attribute)) // Use specific attributes as key and value
+                    $data->{$curLevel . '_' . $attribute[0]} = $data->{$curLevel}->lists($attribute[0], $attribute[1]);
+                else // Use specific attribute as value (= numeric keys)
+                    $data->{$curLevel . '_' . $attribute} = $data->{$curLevel}->lists($attribute);
+            }
+        }
+    }
+
+    return $data ?: null;
+}
 
 }

@@ -13,7 +13,7 @@ return array(
 	|
 	*/
 
-	'debug' => TRUE,
+	'debug' => true,
 
 	/*
 	|--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'url' => 'http://api-thaimissing.truelife.com',
+	'url' => 'http://localhost',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ return array(
 	|
 	*/
 
-	'key' => 'ObhZ0ddptMXcaiJVvVWqKr1hLvWL3kUj',
+	'key' => 'YourSecretKey!!!',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -107,9 +107,6 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
-		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
-		'Indianajone\Applications\ApplicationsServiceProvider',
-		'Indianajone\Categories\CategoriesServiceProvider'
 	),
 
 	/*
@@ -176,7 +173,6 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
-		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 	),
 
 );

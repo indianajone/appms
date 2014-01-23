@@ -13,7 +13,7 @@ return array(
 	|
 	*/
 
-	'name' => 'Ravi Vaisayawan',
+	'name' => '',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -26,6 +26,6 @@ return array(
 	|
 	*/
 
-	'email' => 'mmer555@hotmail.com',
+	'email' => '',
 
 );
