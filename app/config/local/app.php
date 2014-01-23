@@ -107,7 +107,6 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
-		'Articles\Article\ArticleServiceProvider',
 		'Core\Response\ResponseServiceProvider',
 
 		'Indianajone\Applications\ApplicationsServiceProvider',
