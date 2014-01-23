@@ -23,15 +23,10 @@ class CategoryController extends BaseController
 		$fields = explode(',', $field);
 		$cats = Category::with('children')->offset($offset)->limit($limit)->get();
 
-		// if($field)
+		if($field)
 	 		$cats->each(function($cat) use ($fields){
-	 			// $cat->setVisible($fields);	
-	 			// if (count($cat->getAttribute('children')) === 0 )
-	 				// $cat->setAttribute('children',	$cat->getAttribute('children'));	
-	 			// exit;
+	 			$cat->setVisible($fields);	
 	 		});
-
-
 	 	
 	 	return Response::listing(
 	 		array(
