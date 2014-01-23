@@ -44,7 +44,7 @@ class Response extends BaseResponse {
 
     public static function result($response , $format) {
         if($format == 'json') {
-            return $response;
+            return Response::make($response)->header('Content-Type', 'text/json');
         } else {
             return Response::make(self::xml($response))->header('Content-Type', 'text/xml');
         }
