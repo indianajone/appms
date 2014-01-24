@@ -33,8 +33,7 @@ class CategoryController extends BaseController
 	 			'code'=>200,
 	 			'message'=> 'success'
 	 		),
-	 		$cats,
-	 		0, 10, Input::get('format', 'json')
+	 		$cats, $offset, $limit
 	 	);
 	}
 
@@ -72,22 +71,16 @@ class CategoryController extends BaseController
 				$app->picture = $response;
 			}
 
-			if($cat->save())
-				return Response::json(array(
-					'header'=> [
+			if($cat)
+				return Response::result(array(
+					'header'=> array(
 		        		'code'=> 200,
 		        		'message'=> 'success'
-		        	],
-					'id'=> $cat->id
-				), 200); 
+		        	), 'id'=> $cat->id
+				));
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
 	}
 
 	/**
@@ -101,26 +94,19 @@ class CategoryController extends BaseController
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
 		$cat = Category::with('children')->find($id);
-
 		if($cat)
-			return Response::json(
+		{
+			return Response::result(
 				array(
 	        		'header' => array(
 	        			'code' => 200,
 	        			'message' => 'success'
 	        		),
 	        		'entry' => $cat->toArray()
-	        	), 200
+	        	)
 			);
-
-		return Response::json(
-        	array(
-        		'header' => array(
-        			'code' => 204,
-        			'message' => 'Application id: '. $id .' does not exists.'
-        		)
-        	), 200
-        );	
+		}
+		return Response::message(204, 'Application id: '. $id .' does not exists.'); 
 	}
 
 
@@ -165,22 +151,11 @@ class CategoryController extends BaseController
 			}
 
 			if($cat->save())
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 200,
-		        			'message' => 'Updated category_id: '.$id.' success!'
-		        		)
-		        	), 200
-		        ); 
+				return Response::message(200, 'Updated category_id: '.$id.' success!'); 
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
+
 	}
 
 	/**
@@ -202,25 +177,13 @@ class CategoryController extends BaseController
 	 */
 	public function destroy($id)
 	{
-		$validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
+		$validator = Validator::make(array( 'id' => $id), Category::$rules['delete']);
 
 		if ($validator->passes()) {
-			$app->find($id)->delete();
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'Deleted category_'.$id.' success!'
-	        		)
-	        	), 200
-	        );
+			Category::find($id)->delete();
+			return Response::message(200, 'Deleted category_'.$id.' success!'); 
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
 	}
 }

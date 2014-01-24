@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+
 class BaseModel extends Eloquent 
 {
 	/** 
@@ -10,4 +12,16 @@ class BaseModel extends Eloquent
     {
         return 'U';
     }
+
+    public function getCreatedAtAttribute($value)
+	{
+		$format = \Input::get('date_format', null);
+		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+	}
+
+	public function getUpdatedAtAttribute($value)
+	{
+		$format = \Input::get('date_format', null);
+		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+	}
 }

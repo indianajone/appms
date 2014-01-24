@@ -2,10 +2,9 @@
 
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
-use Max\User\Models\BaseModel;
 use Zizaco\Entrust\HasRole;
 
-class User extends BaseModel implements UserInterface, RemindableInterface {
+class User extends \BaseModel implements UserInterface, RemindableInterface {
 use HasRole; // Add this trait to your user model
 //    public $timestamps = false;
 //    protected $table = 'users';

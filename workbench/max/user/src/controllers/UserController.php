@@ -245,11 +245,11 @@ class UserController extends \BaseController {
             }
 	}
         
-        public function fields()
-        {
-            $user = new User();
-            return $user->getAllColumnsNames();
-        }
+        // public function fields()
+        // {
+        //     $user = new User();
+        //     return $user->getAllColumnsNames();
+        // }
         
         public function hasParent(){
             $rules = array(

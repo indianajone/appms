@@ -43,7 +43,9 @@ Route::group(array('prefix' => 'api/v1'), function()
         Route::get('users/hasParent', 'Max\\User\\Controllers\\UserController@hasParent');
         Route::get('users/resetPassword', 'Max\\User\\Controllers\\UserController@resetPassword');
         
-        Route::get('users/fields', 'Max\\User\\Controllers\\UserController@fields');
+        Route::get('users/fields', function(){
+            return Response::fields('users');
+        });
         
 //        Route::get('members/fields/{table}/{format?}', 'MemberController@fields');
 //        Route::get('members/login', 'MemberController@doLogin');        

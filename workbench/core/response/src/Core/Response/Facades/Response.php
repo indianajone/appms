@@ -39,12 +39,15 @@ class Response extends BaseResponse {
             'entries' => is_object($data) ? $data->toArray() : $data
         );
         
-        if($format == 'json') {
-            return Response::make($response)->header('Content-Type', 'application/json');
+        return self::result($response);
+    }
+
+    public static function result($response) {
+        if(\Input::get('format', 'json') == 'json') {
+            return Response::make($response)->header('Content-Type', 'text/json');
         } else {
             return Response::make(self::xml($response))->header('Content-Type', 'text/xml');
         }
-
     }
 
     /**
@@ -67,7 +70,7 @@ class Response extends BaseResponse {
         return (is_array($array) && 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
     }
 
-    public static function xml($data, $rootNodeName = 'response', &$xml = null) {
+    public static function xml($data, $rootNodeName = 'ResultSet', &$xml = null) {
         if (is_array($data)) {
             if (ini_get('zend.ze1_compatibility_mode') == 1) {
                 ini_set('zend.ze1_compatibility_mode', 0);
@@ -99,7 +102,7 @@ class Response extends BaseResponse {
                     }
                 }
             }
-            // header("Content-type: text/xml");
+            //header("Content-type: text/xml");
             return $xml->asXML();
         } else {
             return "Is not array";
@@ -113,23 +116,15 @@ class Response extends BaseResponse {
         return $result;
     }
 
-    public static function message($status, $format = 'json') {
-        if (is_array($status)) {
-            $response = array(
+    public static function message($code, $message) {
+        return self::result(
+            array(
                 'header' => array(
-                    'code' => $status['code'],
-                    'message' => $status['message']
+                    'code' => $code,
+                    'message' => $message
                 )
-            );
-
-            if ($format == 'json') {
-                return Response::json($response, $status['code']);
-            } else {
-                return Response::xml($response);
-            }
-        } else {
-            return "Please set status code ans message.";
-        }
+            )
+        );
     }
     
     /**
@@ -168,18 +163,6 @@ class Response extends BaseResponse {
             'fields' => $display
         );
 
-        if ($format == 'json') {
-            return Response::json($response, 200);
-        } else {
-            return Response::xml($response);
-        }
+        return self::result($response);
     }
-    
-//    public static function results($response , $format = 'json') {
-//        if($format == 'xml') {
-//            return Response::xml($response);
-//        } else {
-//            return $response;
-//        }
-//    }
 }
