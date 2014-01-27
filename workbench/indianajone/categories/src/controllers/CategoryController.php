@@ -5,7 +5,7 @@ use \Input;
 use \Response;
 use \Validator;
 use \Appl;
-// use \Indianajone\Applications\Application as Appl;
+use Carbon\Carbon;
 use \Indianajone\Categories\Category;
 
 class CategoryController extends BaseController
@@ -21,7 +21,19 @@ class CategoryController extends BaseController
 		$limit= Input::get('limit', 10);
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
-		$cats = Category::with('children')->offset($offset)->limit($limit)->get();
+	
+		$updated_at = Input::get('updated_at', null);
+		$created_at = Input::get('created_at', null);
+
+		$cats = Category::with('children');
+		if($updated_at || $created_at)
+		{
+			if($updated_at) $cats = $cats->time('updated_at');
+			else $cats = $cats->time('created_at');
+		}
+		
+		$cats = $cats->offset($offset)->limit($limit)->get();
+	
 
 		if($field)
 	 		$cats->each(function($cat) use ($fields){
@@ -93,20 +105,23 @@ class CategoryController extends BaseController
 	{
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
-		$cat = Category::with('children')->find($id);
+		$cat = Category::find($id);
+
 		if($cat)
 		{
+			$cat['children'] = $cat->getDescendants()->toHierarchy()->toArray();
 			return Response::result(
 				array(
 	        		'header' => array(
 	        			'code' => 200,
 	        			'message' => 'success'
 	        		),
+	        		// #Fixed Collection with key in Baum\Extensions\Eloquent\Collection.
 	        		'entry' => $cat->toArray()
 	        	)
 			);
 		}
-		return Response::message(204, 'Application id: '. $id .' does not exists.'); 
+		return Response::message(204, 'Category id: '. $id .' does not exists.'); 
 	}
 
 

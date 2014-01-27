@@ -1,6 +1,9 @@
 <?php namespace Indianajone\Categories;
+
+
 use Baum\Node;
 use Carbon\Carbon;
+use Indianajone\Categories\Collection;
 
 /**
 * MODEL
@@ -163,13 +166,8 @@ class Category extends Node {
     $children = $this->hasMany(get_class($this), $this->getParentColumnName())
                 ->orderBy($this->getLeftColumnName());
 
-    return $children->with('children');
+    return $children;
   }
-
-  // private function hello($result)
-  // {
-  //   $child::find($child->parent_id);
-  // }
 
   public function updateParent($id)
   {
@@ -177,6 +175,13 @@ class Category extends Node {
       $this->makeChildOf($id);
     else
       $this->makeRoot();
+  }
+
+  public function scopeTime($query, $field)
+  {
+      $updated_at = \Input::get($field);
+      $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
+      return $query->where($field, '>=', $time->timestamp);
   }
 
 }

@@ -12,6 +12,6 @@
 		Route::get('apps/fields', function(){
 			return Response::fields('applications');
 		});
-		Route::post('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApplicationController@delete');
+		Route::get('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApplicationController@delete');
 		Route::resource('apps', 'Indianajone\\Applications\Controllers\\ApplicationController');
 	});

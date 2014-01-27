@@ -173,7 +173,7 @@ class ApplicationController extends BaseController
 		$validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
 
 		if ($validator->passes()) {
-			$app->find($id)->delete();
+			$app = Appl::find($id)->delete();
 			return Response::message(200, 'Deleted Application: '.$id.' success!');
 		}
 
