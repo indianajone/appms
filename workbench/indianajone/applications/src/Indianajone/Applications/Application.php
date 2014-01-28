@@ -1,6 +1,5 @@
 <?php namespace Indianajone\Applications;
 
-
 class Application extends \BaseModel
 {
 	/**
@@ -41,18 +40,22 @@ class Application extends \BaseModel
 		return $this->belongsTo('User', 'user_id');
 	}
 
-	public function check($key)
+	public function genKey()
 	{
-		return $this->appkey();
-	}
-
-	public function getRules()
-	{
-		return $this->rules;
+		return str_random(32);
 	}
 
 	public function getAppIDByKey($key)
 	{
 		return $this->where('appkey', $key)->first();
 	}
+
+	/*==========  Example on how to convent back to unixtime  ==========*/
+	
+	// public function getUnixtimeAttribute()
+	// {
+	// 	$format = \Input::get('date_format', null);
+	// 	$time = Carbon::createFromTimeStamp($this->attributes['created_at'])->format($format);
+	// 	return Carbon::createFromFormat($format, $time, \Config::get('app.timezone'))->timestamp;
+	// }
 }

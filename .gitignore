@@ -9,3 +9,5 @@
 /nbproject/private/
 
 composer.lock
+
+/workbench/*/*/vendor

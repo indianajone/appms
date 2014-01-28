@@ -27,18 +27,13 @@ class ApplicationController extends BaseController
 	 			$app->setVisible($fields);
 	 		});
 
-	 	return Response::json(
-        	array(
-        		'header' => array(
-        			'code' => 200,
-        			'message' => 'success'
-        		),
-        		'offset' => (int) $offset,
-        		'limit' => (int) $limit,
-        		'total' => $apps->count(),
-        		'entries' => $apps->count() >= 1 ? $apps->toArray() : null
-        	)
-        );
+	 	return Response::listing(
+	 		array(
+	 			'code' 		=> 200,
+	 			'message' 	=> 'success'
+	 		),
+	 		$apps, $offset, $limit
+	 	);
 	}
 
 	/**
@@ -74,7 +69,7 @@ class ApplicationController extends BaseController
 			$app->name = Input::get('name');
 			$app->user_id = Input::get('user_id');
 			$app->description = Input::get('description', '');
-			$app->appkey = str_random(32);
+			$app->appkey = Appl::genKey();
 			$picture = Input::get('picture', null);
 			if($picture)
 			{
@@ -84,21 +79,18 @@ class ApplicationController extends BaseController
 			}
 
 			if($app->save())
-				return Response::json(array(
-					'header'=> [
-		        		'code'=> 200,
-		        		'message'=> 'success'
-		        	],
-					'id'=> $app->id
-				), 200); 
+				return Response::result(
+					array(
+						'header'=> array(
+			        		'code'=> 200,
+			        		'message'=> 'success'
+			        	),
+						'id'=> $app->id
+					)
+				); 
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first());
 	}
 
 	/**
@@ -114,24 +106,15 @@ class ApplicationController extends BaseController
 		$app = Appl::with('owner')->find($id);
 
 		if($app)
-			return Response::json(
-				array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'success'
-	        		),
-	        		'entry' => $app->toArray()
-	        	), 200
-			);
-
-		return Response::json(
-        	array(
+			return Response::result(array(
         		'header' => array(
-        			'code' => 204,
-        			'message' => 'Application id: '. $id .' does not exists.'
-        		)
-        	), 200
-        );	
+        			'code' => 200,
+        			'message' => 'success'
+        		),
+        		'entry' => $app->toArray()
+        	));
+
+		return Response::message(204, 'Application id: '. $id .' does not exists.');	
 	}
 
 
@@ -162,22 +145,10 @@ class ApplicationController extends BaseController
 			$app->description = Input::get('description', $app->description);
 			$app->picture = Input::get('picture', null);
 			if($app->save())
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 200,
-		        			'message' => 'Updated app_id: '.$id.' success!'
-		        		)
-		        	), 200
-		        );
+				return Response::message(200, 'Updated app_id: '.$id.' success!');
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400,$validator->messages()->first());
 	}
 
 	/**
@@ -202,22 +173,10 @@ class ApplicationController extends BaseController
 		$validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
 
 		if ($validator->passes()) {
-			$app->find($id)->delete();
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'Deleted Application: '.$id.' success!'
-	        		)
-	        	), 200
-	        );
+			$app = Appl::find($id)->delete();
+			return Response::message(200, 'Deleted Application: '.$id.' success!');
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
 	}
 }

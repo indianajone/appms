@@ -1,5 +1,9 @@
 <?php namespace Indianajone\Categories;
+
+
 use Baum\Node;
+use Carbon\Carbon;
+use Indianajone\Categories\Collection;
 
 /**
 * MODEL
@@ -13,20 +17,10 @@ class Category extends Node {
    */
   protected $table = 'categories';
 
-  /** 
-   * Override getDateFormat to unixtime stamp.
-   * @return String
-   */
-  protected function getDateFormat()
-  {
-      return 'U';
-  }
-
   public static $rules = array(
     'save' => array(
-      'appkey' => 'required|exists:applications,appkey',
+      // 'appkey' => 'required|exists:applications,appkey',
       'name' => 'required',
-      // 'app_id' => 'required|exists:applications,id',
       'parent_id' => 'exists:categories,id'
     ),
     'update' => array(
@@ -40,6 +34,30 @@ class Category extends Node {
   public static $messages = array(
     'exists' => 'The given :attribute is invalid.'    
   );
+
+  protected $hidden = array('lft', 'rgt');
+
+  /** 
+   * Override getDateFormat to unixtime stamp.
+   * @return String
+   */
+  protected function getDateFormat()
+  {
+      return 'U';
+  }
+
+  public function getCreatedAtAttribute($value)
+  {
+    $format = \Input::get('date_format', null);
+    return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+  }
+
+  public function getUpdatedAtAttribute($value)
+  {
+    $format = \Input::get('date_format', null);
+    return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+  }
+
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -143,6 +161,14 @@ class Category extends Node {
   //   });
   // }
 
+   public function children() {
+
+    $children = $this->hasMany(get_class($this), $this->getParentColumnName())
+                ->orderBy($this->getLeftColumnName());
+
+    return $children;
+  }
+
   public function updateParent($id)
   {
     if($id >= 1)
@@ -151,80 +177,11 @@ class Category extends Node {
       $this->makeRoot();
   }
 
-  public function getChildrenAttribute($value)
+  public function scopeTime($query, $field)
   {
-    return $value ?: null;
+      $updated_at = \Input::get($field);
+      $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
+      return $query->where($field, '>=', $time->timestamp);
   }
-
-  public function setChildrenAttribute($value)
-  {
-    dd($value);
-  }
-
-  public function addHidden($attribute)
-{
-    $hidden = $this->getHidden();
-
-    array_push($hidden, $attribute);
-
-    $this->setHidden($hidden);
-
-    // Make method chainable
-    return $this;
-}
-
-/**
- * Convert appended collections into a list of attributes
- *
- * @param  object       $data       Model OR Collection
- * @param  string|array $levels     Levels to iterate over
- * @param  string       $attribute  The attribute we want to get listified
- * @param  boolean      $hideOrigin Hide the original relationship data from the result set
- * @return Model
- */
-public function listAttributes($data, $levels, $attribute = 'id', $hideOrigin = true)
-{
-
-    // Set some defaults on first call of this function (because this function is recursive)
-    if (! is_array($levels))
-        $levels = explode('.', $levels);
-
-    if ($data instanceof Illuminate\Database\Eloquent\Collection) // Collection of Model objects
-    {
-        // We are dealing with an array here, so iterate over its contents and use recursion to look deeper:
-        foreach ($data as $row)
-        {
-            $this->listAttributes($row, $levels, $attribute, $hideOrigin);
-        }
-    }
-    else
-    {
-        // Fetch the name of the current level we are looking at
-        $curLevel = array_shift($levels);
-
-        if (is_object($data->{$curLevel}))
-        {
-            if (! empty($levels))
-            {
-                // We are traversing the right section, but are not at the level of the list yet... Let's use recursion to look deeper:
-                $this->listAttributes($data->{$curLevel}, $levels, $attribute, $hideOrigin);
-            }
-            else
-            {
-                // Hide the appended collection itself from the result set, if the user didn't request it
-                if ($hideOrigin)
-                    $data->addHidden($curLevel);
-
-                // Convert Collection to Eloquent lists()
-                if (is_array($attribute)) // Use specific attributes as key and value
-                    $data->{$curLevel . '_' . $attribute[0]} = $data->{$curLevel}->lists($attribute[0], $attribute[1]);
-                else // Use specific attribute as value (= numeric keys)
-                    $data->{$curLevel . '_' . $attribute} = $data->{$curLevel}->lists($attribute);
-            }
-        }
-    }
-
-    return $data ?: null;
-}
 
 }

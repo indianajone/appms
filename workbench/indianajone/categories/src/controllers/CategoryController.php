@@ -5,7 +5,7 @@ use \Input;
 use \Response;
 use \Validator;
 use \Appl;
-// use \Indianajone\Applications\Application as Appl;
+use Carbon\Carbon;
 use \Indianajone\Categories\Category;
 
 class CategoryController extends BaseController
@@ -21,7 +21,19 @@ class CategoryController extends BaseController
 		$limit= Input::get('limit', 10);
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
-		$cats = Category::with('children')->offset($offset)->limit($limit)->get();
+	
+		$updated_at = Input::get('updated_at', null);
+		$created_at = Input::get('created_at', null);
+
+		$cats = Category::with('children');
+		if($updated_at || $created_at)
+		{
+			if($updated_at) $cats = $cats->time('updated_at');
+			else $cats = $cats->time('created_at');
+		}
+		
+		$cats = $cats->offset($offset)->limit($limit)->get();
+	
 
 		if($field)
 	 		$cats->each(function($cat) use ($fields){
@@ -33,8 +45,7 @@ class CategoryController extends BaseController
 	 			'code'=>200,
 	 			'message'=> 'success'
 	 		),
-	 		$cats,
-	 		0, 10, Input::get('format', 'json')
+	 		$cats, $offset, $limit
 	 	);
 	}
 
@@ -72,22 +83,16 @@ class CategoryController extends BaseController
 				$app->picture = $response;
 			}
 
-			if($cat->save())
-				return Response::json(array(
-					'header'=> [
+			if($cat)
+				return Response::result(array(
+					'header'=> array(
 		        		'code'=> 200,
 		        		'message'=> 'success'
-		        	],
-					'id'=> $cat->id
-				), 200); 
+		        	), 'id'=> $cat->id
+				));
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
 	}
 
 	/**
@@ -100,27 +105,23 @@ class CategoryController extends BaseController
 	{
 		$field = Input::get('fields', null);
 		$fields = explode(',', $field);
-		$cat = Category::with('children')->find($id);
+		$cat = Category::find($id);
 
 		if($cat)
-			return Response::json(
+		{
+			$cat['children'] = $cat->getDescendants()->toHierarchy()->toArray();
+			return Response::result(
 				array(
 	        		'header' => array(
 	        			'code' => 200,
 	        			'message' => 'success'
 	        		),
+	        		// #Fixed Collection with key in Baum\Extensions\Eloquent\Collection.
 	        		'entry' => $cat->toArray()
-	        	), 200
+	        	)
 			);
-
-		return Response::json(
-        	array(
-        		'header' => array(
-        			'code' => 204,
-        			'message' => 'Application id: '. $id .' does not exists.'
-        		)
-        	), 200
-        );	
+		}
+		return Response::message(204, 'Category id: '. $id .' does not exists.'); 
 	}
 
 
@@ -165,22 +166,11 @@ class CategoryController extends BaseController
 			}
 
 			if($cat->save())
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 200,
-		        			'message' => 'Updated category_id: '.$id.' success!'
-		        		)
-		        	), 200
-		        ); 
+				return Response::message(200, 'Updated category_id: '.$id.' success!'); 
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
+
 	}
 
 	/**
@@ -202,25 +192,13 @@ class CategoryController extends BaseController
 	 */
 	public function destroy($id)
 	{
-		$validator = Validator::make(array( 'id' => $id), Appl::$rules['delete']);
+		$validator = Validator::make(array( 'id' => $id), Category::$rules['delete']);
 
 		if ($validator->passes()) {
-			$app->find($id)->delete();
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'Deleted category_'.$id.' success!'
-	        		)
-	        	), 200
-	        );
+			Category::find($id)->delete();
+			return Response::message(200, 'Deleted category_'.$id.' success!'); 
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $validator->messages()->first()); 
 	}
 }
