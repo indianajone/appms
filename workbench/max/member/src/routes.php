@@ -16,6 +16,6 @@ Route::group(array('prefix' => 'api/v1'), function()
 	Route::get('members/fields', function(){
         return Response::fields('members');
     });
-	Route::post('members/{id}/delete', 'Max\\Member\\Controllers\\MemberController@delete')
+	Route::post('members/{id}/delete', 'Max\\Member\\Controllers\\MemberController@delete');
 	Route::resource('members', 'Max\\Member\\Controllers\\MemberController');
 });
