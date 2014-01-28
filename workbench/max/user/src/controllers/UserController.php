@@ -1,7 +1,7 @@
 <?php
 namespace Max\User\Controllers;
 
-use Validator, Input, Response;
+use Validator, Input, Response, Hash;
 use Max\User\Models\User;
 use Indianajone\RolesAndPermissions\Role;
 
@@ -149,7 +149,7 @@ class UserController extends \BaseController {
             $user = User::find($id);
             if($user)
             {
-                $inputs = Input::only('parent_id', 'username', 'password', 'first_name', 'last_name', 'email', 'gender', 'birthday'
+                $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday'
                 );
 
                 foreach ($inputs as $key => $val) {
@@ -219,7 +219,7 @@ class UserController extends \BaseController {
        
     public function doLogout()
     {
-        Session::flush();
+        \Auth::logout();
         return Response::message(200, 'success');
     }
         
