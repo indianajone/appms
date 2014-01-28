@@ -3,8 +3,9 @@
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
 use Zizaco\Entrust\HasRole;
+use \BaseModel;
 
-class User extends \BaseModel implements UserInterface, RemindableInterface 
+class User extends BaseModel implements UserInterface, RemindableInterface 
 {
     public static $rules = array(
         'chk_id' => array(
@@ -67,7 +68,7 @@ class User extends \BaseModel implements UserInterface, RemindableInterface
      */
     public function getAuthIdentifier()
     {
-            return $this->getKey();
+        return $this->getKey();
     }
 
     /**
@@ -77,7 +78,7 @@ class User extends \BaseModel implements UserInterface, RemindableInterface
      */
     public function getAuthPassword()
     {
-            return $this->password;
+        return $this->password;
     }
 
     /**
@@ -87,7 +88,7 @@ class User extends \BaseModel implements UserInterface, RemindableInterface
      */
     public function getReminderEmail()
     {
-            return $this->email;
+        return $this->email;
     }
 
     public function checkPassword($password)
