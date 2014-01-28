@@ -13,10 +13,6 @@
 
 Route::group(array('prefix' => 'api/v1'), function()
 {
-	Route::get('/', function()
-	{
-	    return 'User Package';
-	});
     // Auth
     Route::any('auth/login', 'Max\\User\\Controllers\\UserController@doLogin');
     Route::any('auth/logout', 'Max\\User\\Controllers\\UserController@doLogout');
