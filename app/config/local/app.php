@@ -113,7 +113,8 @@ return array(
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Categories\CategoriesServiceProvider',
 
-		'Max\User\UserServiceProvider'
+		'Max\User\UserServiceProvider',
+		'Max\Member\MemberServiceProvider'
 	),
 
 	/*
