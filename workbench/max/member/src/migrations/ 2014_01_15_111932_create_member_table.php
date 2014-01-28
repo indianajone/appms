@@ -35,8 +35,8 @@ class CreateMemberTable extends Migration {
             $table->integer('birthday')->nullable();
             $table->string('description', 255)->nullable();
             $table->string('type', 10);
-            $table->integer('create_at');
-            $table->integer('update_at');
+            $table->integer('created_at');
+            $table->integer('updated_at');
             $table->integer('last_seen');
             $table->boolean('status')->default(0);
         });
