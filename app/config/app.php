@@ -106,7 +106,14 @@ return array(
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
+                'Core\Response\ResponseServiceProvider',
 
+		'Indianajone\Applications\ApplicationsServiceProvider',
+		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
+		'Indianajone\Categories\CategoriesServiceProvider',
+
+		'Max\User\UserServiceProvider',
+		'Max\Member\MemberServiceProvider'
 	),
 
 	/*
@@ -162,7 +169,7 @@ return array(
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
 		'Request'         => 'Illuminate\Support\Facades\Request',
-		'Response'        => 'Illuminate\Support\Facades\Response',
+//		'Response'        => 'Illuminate\Support\Facades\Response',
 		'Route'           => 'Illuminate\Support\Facades\Route',
 		'Schema'          => 'Illuminate\Support\Facades\Schema',
 		'Seeder'          => 'Illuminate\Database\Seeder',
@@ -172,7 +179,7 @@ return array(
 		'URL'             => 'Illuminate\Support\Facades\URL',
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
-
+                'Response'        => 'Core\Response\Facades\Response',
 	),
 
 );
