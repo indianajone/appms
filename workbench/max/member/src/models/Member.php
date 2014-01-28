@@ -1,9 +1,10 @@
 <?php
 namespace Max\Member\Models;
 
+use Illuminate\Auth\UserInterface;
 use \BaseModel;
 
-class Member extends BaseModel {
+class Member extends BaseModel implements UserInterface{
 	/**
      * The database table used by the model.
      *
@@ -35,12 +36,46 @@ class Member extends BaseModel {
         ),
         'delete' => array(
             'id' => 'required|exists:members'
-        )
+        ),
+        'login' => array(
+            'username'  => 'required|exists:members,username',
+            'password'  => 'required'
+        ),
+        'resetPwd' => array(
+            'username'    => 'required|exists:members,username',
+            'password' => 'required',
+            'new_password' => 'required'
+        ),
     );
 
     public function scopeActive($query)
     {
         return $query->whereStatus(1);
+    }
+
+    /**
+     * Get the unique identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getAuthIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    public function checkPassword($password)
+    {
+        return \Hash::check($password, $this->getAuthPassword());
     }
 
 }
