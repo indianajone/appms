@@ -53,7 +53,7 @@ class UserController extends \BaseController {
 	 */
 	public function create()
 	{
-        $this->store();
+        return $this->store();
 	}
 
 	/**
@@ -63,7 +63,7 @@ class UserController extends \BaseController {
 	 */
 	public function store()
 	{
-         $validator = Validator::make(Input::all(), User::$rules['create']);
+        $validator = Validator::make(Input::all(), User::$rules['create']);
 
         if ($validator->passes())
         {
