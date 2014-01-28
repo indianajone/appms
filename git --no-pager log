@@ -1,0 +1,33 @@
+[33md035e6c[m HEAD@{0}: checkout: moving from ti to master
+[33m72cc038[m HEAD@{1}: checkout: moving from Ti to ti
+[33m72cc038[m HEAD@{2}: checkout: moving from master to Ti
+[33md035e6c[m HEAD@{3}: checkout: moving from ti to master
+[33m72cc038[m HEAD@{4}: checkout: moving from master to ti
+[33md035e6c[m HEAD@{5}: checkout: moving from ti to master
+[33m72cc038[m HEAD@{6}: checkout: moving from master to ti
+[33md035e6c[m HEAD@{7}: checkout: moving from ti to master
+[33m72cc038[m HEAD@{8}: checkout: moving from master to ti
+[33md035e6c[m HEAD@{9}: checkout: moving from Ti to master
+[33m72cc038[m HEAD@{10}: commit: update
+[33m1b3fe1e[m HEAD@{11}: commit: Medias beta
+[33m3321f59[m HEAD@{12}: commit: Galleries beta
+[33m89288b3[m HEAD@{13}: commit: Response v 1.1
+[33m0d8857f[m HEAD@{14}: commit: Articles v2
+[33m5a41e90[m HEAD@{15}: checkout: moving from best to Ti
+[33m48f41d9[m HEAD@{16}: pull: Fast-forward
+[33m3927f8b[m HEAD@{17}: checkout: moving from Ti to best
+[33m5a41e90[m HEAD@{18}: commit: Update Framework
+[33mbdb1c8e[m HEAD@{19}: commit: Work-update3
+[33m9513b59[m HEAD@{20}: commit: Work-update 2
+[33m34a275c[m HEAD@{21}: commit: Work-update
+[33m6352506[m HEAD@{22}: commit: Update Response & Articles
+[33m9480a22[m HEAD@{23}: commit: Articles
+[33mf02fec6[m HEAD@{24}: commit: Update Plugin Service
+[33mcdb502b[m HEAD@{25}: commit: Create Plugin Service
+[33m7ce8183[m HEAD@{26}: commit: Create Plugin inventory
+[33m0ec8b30[m HEAD@{27}: checkout: moving from Max to Ti
+[33m8732a75[m HEAD@{28}: checkout: moving from Ti to Max
+[33m0ec8b30[m HEAD@{29}: commit: Create Response v.1
+[33mb939c00[m HEAD@{30}: commit: Create Ti's workbench
+[33md035e6c[m HEAD@{31}: checkout: moving from master to Ti
+[33md035e6c[m HEAD@{32}: clone: from https://github.com/indianajone/appms.git

@@ -2,7 +2,7 @@
 
 class Members extends \Illuminate\Database\Eloquent\Model {
 	protected $table = 'members';
-        protected $primaryKey = "member_id";
+    protected $primaryKey = "id";
         
 //        public function entries() {
 //            return $this->belongTo('Articles\Article\Models\Likes','member_id');

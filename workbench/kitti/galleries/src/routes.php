@@ -2,8 +2,9 @@
 Route::group(array('prefix' => 'api/v1/galleries'), function(){
     Route::get('fields', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@fields'));
     Route::get('/', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@lists'));
-    Route::get('{id}', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@listsId'))->where('id', '[0-9]+');
-    //Route::get('/find', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@find'));
+    Route::get('/{content_type}/{content_id}', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@content'))->where(array('content_id' => '[0-9]+', 'content_type' => '[a-z]+'));
+    Route::get('{id}', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@listId'))->where('id', '[0-9]+');
+    Route::get('{id}/medias', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@medias'))->where('id', '[0-9]+');
     Route::get('{id}/like', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@like'))->where('id', '[0-9]+');
     Route::get('{id}/unlike', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@unlike'))->where('id', '[0-9]+');
 
