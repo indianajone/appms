@@ -1,7 +1,7 @@
 <?php
 namespace Max\Member\Controllers;
 
-use Validator, Input, Response, Appl;
+use Validator, Input, Response, Hash, Appl;
 use Max\Member\Models\Member;
 use Carbon\Carbon;
 
@@ -60,7 +60,7 @@ class MemberController extends \BaseController {
                     'fbid'          => Input::get('fbid'),
                     'fbtoken'       => Input::get('fbtoken'),
                     'username'      => Input::get('username'),
-                    'password'      => Input::get('password'),
+                    'password'      => Hash::make(Input::get('password')),
                     'title'         => Input::get('title'),
                     'first_name'    => Input::get('first_name'),
                     'last_name'     => Input::get('last_name'),
@@ -122,7 +122,7 @@ class MemberController extends \BaseController {
 
     public function update($id)
     {
-        $inputs = array_merge(array('id' => $id), Input::only('parent_id', 'fbid', 'fbtoken', 'username', 'password', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
+        $inputs = array_merge(array('id' => $id), Input::only('parent_id', 'fbid', 'fbtoken', 'username', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
         $validator = Validator::make($inputs, Member::$rules['update']);
 
         if($validator->passes())
@@ -143,7 +143,7 @@ class MemberController extends \BaseController {
             if($member->update($inputs))
                 return Response::message(200, 'Updated member id: '.$id.' success!');
 
-            return Response::message(500, 'Something wrong when trying to update member.');;
+            return Response::message(500, 'Something wrong when trying to update member.');
         }
 
         return Response::message(400, $validator->messages()->first()); 
@@ -162,6 +162,56 @@ class MemberController extends \BaseController {
         {
             $member = Member::find($id)->delete();
             return Response::message(200, 'Deleted Member: '.$id.' success!');
+        }
+
+        return Response::message(400, $validator->messages()->first()); 
+    }
+
+    public function doLogin()
+    {
+        $validator = Validator::make(Input::all(), Member::$rules['login']);
+
+        if($validator->passes())
+        {
+
+            $member = Member::whereUsername(Input::get('username'))->first(array('id', 'password'));
+            if($member->checkPassword(Input::get('password')))
+            {
+                $inputs = array('last_seen' => Carbon::now()->timestamp); 
+                if($member->update($inputs))
+                    return Response::message(200, 'success');
+
+                return Response::message(500, 'Something wrong when trying to login.');
+            }
+            return Response::message(400, 'Username or Password is incorrect');
+        }
+
+        return Response::message(400, $validator->messages()->first()); 
+    }
+
+    public function doLogout()
+    {
+        return Response::message(200, 'success');
+    }
+
+    public function resetPassword($id)
+    {
+        $validator = Validator::make(Input::only('username', 'password', 'new_password'), Member::$rules['resetPwd']);
+
+        if($validator->passes())
+        {
+            $user = Member::find($id);
+
+            if($user->checkPassword(Input::get('password')))
+            {
+                $user->update(array(
+                    'password' => Hash::make(Input::get('new_password'))
+                ));
+
+                return Response::message(200, 'Update password for Member id: '. $id . ' Success!');
+            }
+
+            return Response::message(204, 'Username or Password is incorrect');
         }
 
         return Response::message(400, $validator->messages()->first()); 
