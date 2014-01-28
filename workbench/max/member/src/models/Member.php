@@ -1,8 +1,6 @@
 <?php
 namespace Max\Member\Models;
 
-use Illuminate\Auth\UserInterface;
-use Illuminate\Auth\Reminders\RemindableInterface;
 use \BaseModel;
 
 class Member extends BaseModel {
@@ -18,12 +16,31 @@ class Member extends BaseModel {
      *
      * @var array
      */
-    protected $hidden = array('app_id', 'password');
+    protected $hidden = array('app_id', 'password', 'status');
+    protected $guarded = array('id');
 
-    public static $rules = array();
+    public static $rules = array(
+    	'create' => array(
+    		'username' => 'required|unique:members,username',
+    		'password'  => 'required',
+    		'confirm_password' => 'required|same:password',
+    		'first_name' => 'required',
+    		'last_name' => 'required',
+    		'email' => 'required|email|unique:members,email',
+    		'type' => 'required'
+    	),
+        'update' => array(
+            'id' => 'required|exists:members',
+            'email' => 'required|email|exists:members,email'
+        ),
+        'delete' => array(
+            'id' => 'required|exists:members'
+        )
+    );
 
-	public function apps(){
-		return $this->hasMany('Indianajone\Applications\Application', 'appkey');
-	}
+    public function scopeActive($query)
+    {
+        return $query->whereStatus(1);
+    }
 
 }
