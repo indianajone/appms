@@ -43,14 +43,14 @@ class GalleriesController extends BaseController {
             $galleries->name = Input::get('name');
 
             // Optional
-            $galleries->description = Input::get('gallery_id', null);
+            $galleries->description = Input::get('description', null);
             $picture = Input::get('picture', null);
 
             /**
             #TODO: BASE64 Image test
             **/
-            $getcontent = file_get_contents('http://3.bp.blogspot.com/-dFUF-DvQJP4/UZJ1uwO88EI/AAAAAAAAABE/y_YDbwLx7k4/s1600/%E0%B8%94%E0%B8%A7%E0%B8%87%E0%B8%94%E0%B8%B2%E0%B8%A7.jpg');
-            $picture = base64_encode($getcontent);
+            // $getcontent = file_get_contents('http://3.bp.blogspot.com/-dFUF-DvQJP4/UZJ1uwO88EI/AAAAAAAAABE/y_YDbwLx7k4/s1600/%E0%B8%94%E0%B8%A7%E0%B8%87%E0%B8%94%E0%B8%B2%E0%B8%A7.jpg');
+            // $picture = base64_encode($getcontent);
 
             if($picture != null)
             {
@@ -84,6 +84,47 @@ class GalleriesController extends BaseController {
         return Response::result($response, $format);
     }
 
+    public function getLike($id) {
+        $format = Input::get('format','json');
+        $offset = Input::get('offset', 0);
+        $limit = Input::get('limit', 10);
+        $validator = Validator::make(
+            Input::all(), array(
+                'appkey' => 'required'
+            )
+        );
+
+        if($validator->passes()) {
+            $like = Likes::where('content_id','=',$id)->where('likes.type','=','gallery')
+            ->join('members', 'likes.member_id', '=', 'members.id')
+            ->select('members.id', 'members.parent_id','username' ,'first_name','last_name',
+                'gender','email','phone','mobile','verified','fbid','fbtoken','birthday',
+                'members.type','members.created_at','members.updated_at')
+            ->skip($offset)->take($limit)
+            ->get();
+
+            $response = array(
+            'header' => array(
+                'code' => '200',
+                'message' => 'success'),
+            'offset' => $offset,
+            'limit' => $limit,
+            'total' => $like->count(),
+            'entries' => $like->toArray()
+            );
+        } else {
+            $response = array(
+                'header' => array(
+                    'code' => '204',
+                    'message' => $validator->messages()->first()
+                )
+            );
+        }
+
+        return Response::result($response, $format);
+        //return $response;
+    }
+
     public function like($id) {
         //$input = Input::all();
         $format = Input::get('format', 'json');
@@ -98,7 +139,7 @@ class GalleriesController extends BaseController {
             $likes = new Likes();
             // $likes->app_id  = Appl::getAppID();
             $likes->app_id = 1;
-            $likes->member_id = Input::get('memeber_id');
+            $likes->member_id = Input::get('member_id');
             $likes->type = 'gallery';
             $likes->content_id = $id;
             $likes->status = Input::get('status', 1);
@@ -108,7 +149,7 @@ class GalleriesController extends BaseController {
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success'),
-                	'id'	=> $likes->like_id
+                	'id'	=> $likes->id
             	);
             }
 
@@ -170,8 +211,8 @@ class GalleriesController extends BaseController {
                     /**
         #TODO: BASE64 Image test
         **/
-        $getcontent = file_get_contents('http://3.bp.blogspot.com/-dFUF-DvQJP4/UZJ1uwO88EI/AAAAAAAAABE/y_YDbwLx7k4/s1600/%E0%B8%94%E0%B8%A7%E0%B8%87%E0%B8%94%E0%B8%B2%E0%B8%A7.jpg');
-        $picture = base64_encode($getcontent);
+        // $getcontent = file_get_contents('http://3.bp.blogspot.com/-dFUF-DvQJP4/UZJ1uwO88EI/AAAAAAAAABE/y_YDbwLx7k4/s1600/%E0%B8%94%E0%B8%A7%E0%B8%87%E0%B8%94%E0%B8%B2%E0%B8%A7.jpg');
+        // $picture = base64_encode($getcontent);
 
         if($picture)
         {
@@ -306,6 +347,9 @@ class GalleriesController extends BaseController {
             $this->media = $media->count();
             if($media->count() > 0) {
                 $galleries[$key]['medias'] = $media->toArray();
+                // $galleries[$key]['medias']['url'] = $galleries[$key]['medias']['path'].$galleries[$key]['medias']['filename'];
+                // unset($galleries[$key]['medias']['path']);
+                // unset($galleries[$key]['medias']['filename']);
             }
 
             //Find Owner
@@ -338,6 +382,10 @@ class GalleriesController extends BaseController {
             ->select('members.id', 'members.first_name', 'members.last_name','members.username')
             ->get();
 
+
+            $media[$key]['url'] = $media[$key]['path'].$media[$key]['filename'];
+            unset($media[$key]['path']);
+            unset($media[$key]['filename']);
             $media[$key]['like']['total'] = $like->count();
             $media[$key]['like']['members'] = $like->toArray();
         }

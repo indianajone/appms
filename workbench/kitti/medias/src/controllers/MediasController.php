@@ -44,15 +44,21 @@ class MediasController extends BaseController {
             /**
             #TODO UPLOAD MEDIA
             **/
-            $content = file_get_contents("http://localhost/dev/appms/public/filetest/9.mp4");
-            $base64 = base64_encode($content);
-            $response = FileUpload::upload($base64);
+            // $content = file_get_contents("http://localhost/dev/appms/public/filetest/9.mp4");
+            // $base64 = base64_encode($content);
+            // $response = FileUpload::upload($base64);
             // echo $response['path'];
             // echo $response['filename'];
             /**
             #TODO REMOVE COMMENT FOR REAL CODE BELOW
             **/
-            //$response = FileUpload::upload(Input::get('data'));
+            $response = FileUpload::upload(Input::get('data'));
+            if(!is_array($response)) {
+                $response = json_decode($response);
+                if($response['code'] == 400) {
+                    return $response;
+                }
+            }
 
             $medias->path = $response['path'];
             $medias->filename = $response['filename'];
@@ -183,8 +189,6 @@ class MediasController extends BaseController {
                 // $content = file_get_contents("http://localhost/dev/appms/public/filetest/4.gif");
                 // $base64 = base64_encode($content);
                 $response = FileUpload::upload($base64);
-                // echo $response['path'];
-                // echo $response['filename'];
                 /**
                 #TODO REMOVE COMMENT FOR REAL CODE BELOW
                 **/
@@ -246,7 +250,7 @@ class MediasController extends BaseController {
         $input = Input::all();
         $format = Input::get('format','json');
         
-        $fields = array('id','name','description','path','type','latitude','longitude','created_at','updated_at');
+        $fields = array('id','name','description','path','filename','type','latitude','longitude','created_at','updated_at');
         $medias = Medias::where('id','=',$id)->get($fields)->toArray();
 
         $like = Likes::where('content_id','=', $id)->where('likes.type','=','media')
@@ -292,7 +296,7 @@ class MediasController extends BaseController {
             'offset' => $offset,
             'limit' => $limit,
             'total' => $like->count(),
-            'entry' => $like->toArray()
+            'entries' => $like->toArray()
             );
         } else {
             $response = array(
@@ -303,6 +307,6 @@ class MediasController extends BaseController {
             );
         }
 
-        return $response;
+        return Response::result($response, $format);
     }
 }

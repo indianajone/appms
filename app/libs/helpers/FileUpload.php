@@ -48,7 +48,12 @@ class FileUpload
 						$format = 'mp3';break;break;
 				}
 			} else {
-
+				return \Response::json(array(
+				'header'=> [
+	        		'code'=> 400,
+	        		'message'=> 'Can not upload medias. Please check your file data.'
+	        	]
+			), 200);
 			}
 		}
 

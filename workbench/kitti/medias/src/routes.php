@@ -1,6 +1,6 @@
 <?php
 Route::group(array('prefix' => 'api/v1/medias'), function(){
-    Route::get('test', 'Kitti\\Medias\\Controllers\\MediasController@test');
+    //Route::get('test', 'Kitti\\Medias\\Controllers\\MediasController@test');
     Route::get('fields', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Medias\\Controllers\\MediasController@fields'));
     // Route::get('/', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Medias\\Controllers\\MediasController@lists'));
     Route::get('{id}', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Medias\\Controllers\\MediasController@lists'))->where('id', '[0-9]+');
