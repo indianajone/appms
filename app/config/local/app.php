@@ -114,7 +114,10 @@ return array(
 		'Indianajone\Categories\CategoriesServiceProvider',
 
 		'Max\User\UserServiceProvider',
-		'Max\Member\MemberServiceProvider'
+		'Max\Member\MemberServiceProvider',
+
+		'Kitti\Galleries\GalleriesServiceProvider',
+		'Kitti\Medias\MediasServiceProvider'
 	),
 
 	/*
