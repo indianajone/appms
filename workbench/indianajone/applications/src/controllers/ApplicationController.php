@@ -69,7 +69,7 @@ class ApplicationController extends BaseController
 			$app->name = Input::get('name');
 			$app->user_id = Input::get('user_id');
 			$app->description = Input::get('description', '');
-			$app->appkey = Appl::genKey();
+			$app->appkey = $app->genKey();
 			$picture = Input::get('picture', null);
 			if($picture)
 			{
