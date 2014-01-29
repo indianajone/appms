@@ -31,4 +31,14 @@ class BaseModel extends Eloquent
 	    $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
 	    return $query->where($field, '>=', $time->timestamp);
 	}
+
+	public function scopeApp($query)
+    {
+        return $query->whereAppId(Appl::getAppIdByKey(Input::get('appkey')));
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereStatus(1);
+    }
 }
