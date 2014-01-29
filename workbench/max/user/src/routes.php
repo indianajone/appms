@@ -23,7 +23,7 @@ Route::group(array('prefix' => 'api/v1'), function()
     });
     Route::post('users/{id}/delete', 'Max\\User\\Controllers\\UserController@delete');
     Route::get('users/{id}/resetPassword', 'Max\\User\\Controllers\\UserController@resetPassword'); 
-    Route::post('users/{id}/roles/{action}', 'Max\\User\\Controllers\\UserController@manageRole'); 
+    Route::any('users/{id}/roles/{action}', 'Max\\User\\Controllers\\UserController@manageRole'); 
     Route::resource('users', 'Max\\User\\Controllers\\UserController');
         
 });
