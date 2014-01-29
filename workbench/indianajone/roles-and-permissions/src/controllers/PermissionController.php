@@ -57,14 +57,17 @@ class PermissionController extends BaseController {
             'name'          => 'required',
             'display_name'  => 'required'
         );
-
-		// #TODO Need to look for Ardent Fixed issue.
+		/**
+		 #TODO Need to look for Ardent Fixed issue.
+		*/ 
 		$validator = Validator::make(Input::all(), $rules);
 		if($validator->passes())
 		{
-			$perm = Permission::create(Input::all());
-
-			if($perm)
+			$perm = new Permission();
+			$perm->name = Input::get('name');
+			$perm->display_name = Input::get('display_name');
+			$perm->save();
+			// if($perm->save())
 				return Response::result(array(
 					'header'=> array(
 		        		'code'=> 200,
