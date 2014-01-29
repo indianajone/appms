@@ -21,7 +21,11 @@ class Member extends BaseModel implements UserInterface{
     protected $guarded = array('id');
 
     public static $rules = array(
+        'show' => array(
+            'appkey'    => 'required|exists:applications,appkey',
+        ),
     	'create' => array(
+            'appkey'    => 'required|exists:applications,appkey',
     		'username' => 'required|unique:members,username',
     		'password'  => 'required',
     		'confirm_password' => 'required|same:password',
@@ -47,11 +51,6 @@ class Member extends BaseModel implements UserInterface{
             'new_password' => 'required'
         ),
     );
-
-    public function scopeActive($query)
-    {
-        return $query->whereStatus(1);
-    }
 
     /**
      * Get the unique identifier for the user.
