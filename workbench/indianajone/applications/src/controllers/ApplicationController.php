@@ -106,6 +106,8 @@ class ApplicationController extends BaseController
 		$app = Appl::with('owner')->find($id);
 
 		if($app)
+		{
+			
 			return Response::result(array(
         		'header' => array(
         			'code' => 200,
@@ -113,6 +115,7 @@ class ApplicationController extends BaseController
         		),
         		'entry' => $app->toArray()
         	));
+		}
 
 		return Response::message(204, 'Application id: '. $id .' does not exists.');	
 	}
