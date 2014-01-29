@@ -5,17 +5,9 @@ use Carbon\Carbon;
 
 class Permission extends EntrustPermission {
 
-    protected $guarded = array();
-	protected $hidden = array('pivot', 'method_id');
-
-    // public static $rules = array(
-    //     'save'      => array(
-    //         'name'          => 'required',
-    //         'display_name'  => 'required'
-    //     ),
-    //     'update'    => array(),
-    //     'delete'    => array()
-    // );
+    protected $guarded = array('id');
+	protected $hidden = array('pivot');
+    public static $rules = array();
 
 	/** 
 	 * Override getDateFormat to unixtime stamp.
