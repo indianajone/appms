@@ -14,10 +14,10 @@ class CreateMemberTable extends Migration {
     {
         Schema::create('members', function(Blueprint $table)
         {
-            $table->increments('id')->unique();
+            $table->increments('id');
             $table->integer('app_id')->unsigned();
             $table->foreign('app_id')->references('id')->on('applications');
-            $table->integer('parent_id')->default(0);
+            $table->integer('parent_id')->default(null);
             $table->string('fbid', 40)->nullable();
             $table->text('fbtoken')->nullable();
             $table->string('username', 40)->unique();
@@ -38,7 +38,7 @@ class CreateMemberTable extends Migration {
             $table->integer('created_at');
             $table->integer('updated_at');
             $table->integer('last_seen');
-            $table->boolean('status')->default(0);
+            $table->boolean('status')->default(1);
         });
     }
 
