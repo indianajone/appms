@@ -35,7 +35,7 @@ class CreateGalleries extends Migration {
          */
         public function down()
         {
-                Schema::drop('galleries');
+            Schema::drop('galleries');
         }
 
 }
