@@ -32,7 +32,7 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	{
 		$this->app->bind('appl', function($app)
         {
-            return new Application();
+            return new Appl();
         });
 	}
 
