@@ -47,7 +47,7 @@ class Application extends \BaseModel
 
 	public function getAppIDByKey($key)
 	{
-		return $this->where('appkey', $key)->first();
+		return $this->whereAppkey($key)->first();
 	}
 
 	/*==========  Example on how to convent back to unixtime  ==========*/
