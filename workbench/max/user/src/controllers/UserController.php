@@ -2,6 +2,7 @@
 namespace Max\User\Controllers;
 
 use Validator, Input, Response, Hash;
+use Carbon\Carbon;
 use Max\User\Models\User;
 use Indianajone\RolesAndPermissions\Role;
 
@@ -76,7 +77,8 @@ class UserController extends \BaseController {
                     'last_name'     => Input::get('last_name'),
                     'email'         => Input::get('email'),
                     'gender'        => Input::get('gender'),
-                    'birthday'      => Input::get('birthday')
+                    'birthday'      => Input::get('birthday'),
+                    'last_seen'     => Carbon::now()->timestamp
                 )
             );
 
