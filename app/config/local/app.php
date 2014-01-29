@@ -185,7 +185,7 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
-		'Appl'			  => 'Indianajone\Applications\Facades\ApplicationFacade',
+		'Appl'			  => 'Indianajone\Applications\Facades\Application',
 		'Image'			  => 'Libs\Helpers\Facades\Image',
 		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 	),
