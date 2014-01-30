@@ -1,5 +1,9 @@
 <?php
 Route::group(array('prefix' => 'api/v1/galleries'), function(){
+    Route::get('install', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@install'));
+    Route::get('uninstall', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@uninstall'))->where('id', '[0-9]+');
+    Route::get('/', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@lists'));
+    Route::get('/', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@lists'));
     Route::get('fields', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@fields'));
     Route::get('/', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@lists'));
     Route::get('/{content_type}/{content_id}', array('before' => 'chk_appkey2', 'uses' => 'Kitti\\Galleries\\Controllers\\GalleriesController@content'))->where(array('content_id' => '[0-9]+', 'content_type' => '[a-z]+'));

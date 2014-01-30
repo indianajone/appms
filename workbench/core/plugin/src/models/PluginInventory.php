@@ -6,9 +6,7 @@ class PluginInventory extends \Illuminate\Database\Eloquent\Model {
     
     protected $table = 'plugin_inventory';
     protected $fillable = array('name', 'description', 'version','author','author_email','protected','status');
-    protected $primaryKey = "plugin_id";
-    public $timestamps = false;
-    
+    //protected $primaryKey = "id";
     
     public function plugin_method() {
         return $this->hasMany('Core\Plugin\Models\PluginMethod','plugin_id');

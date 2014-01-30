@@ -109,6 +109,7 @@ return array(
 		'Illuminate\Workbench\WorkbenchServiceProvider',
         
         'Core\Response\ResponseServiceProvider',
+        'Core\Plugin\PluginServiceProvider',
 
         'Max\User\UserServiceProvider',
 
@@ -172,7 +173,6 @@ return array(
 		'Mail'            => 'Illuminate\Support\Facades\Mail',
 		'Paginator'       => 'Illuminate\Support\Facades\Paginator',
 		'Password'        => 'Illuminate\Support\Facades\Password',
-        'Plugin'          => 'Core\Plugin\Facades\Plugin',
 		'Queue'           => 'Illuminate\Support\Facades\Queue',
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
@@ -192,7 +192,8 @@ return array(
 		'Appl'                => 'Indianajone\Applications\Facades\ApplicationFacade',
         'Image'               => 'Libs\Helpers\Facades\Image',
         'FileUpload'          => 'Libs\Helpers\Facades\FileUpload',
-        'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
+        'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions',
+        //'Plugin'          => 'Core\Plugin\Facades\Plugin',
 	)
 
 );

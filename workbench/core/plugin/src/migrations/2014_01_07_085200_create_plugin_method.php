@@ -12,11 +12,12 @@ class CreatePluginMethod extends Migration {
 	public function up()
 	{
 		Schema::create('plugin_method', function($table) {
-                    $table->increments('method_id',4);
-                    $table->integer('plugin_id',false);
-                    $table->string('name',40);
-                    $table->string('description',100);
-                });
+            $table->increments('id',4);
+            $table->integer('plugin_id', false)->unsigned();
+   			$table->foreign('plugin_id')->references('id')->on('plugin_inventory');
+            $table->string('name',40);
+            $table->string('description',100);
+        });
 	}
 
 	/**

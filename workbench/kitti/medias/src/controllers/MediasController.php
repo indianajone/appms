@@ -197,11 +197,7 @@ class MediasController extends BaseController {
                 $input['path'] = $response['path'];
                 $input['filename'] = $response['filename'];
             }
-
-            // echo '<pre>';
-            // print_r($input);
-            // exit;
-
+            
             $medias = Medias::where('id', '=', $id)->where('name','=', $input['name'])->update($input);
             
             $response = array();

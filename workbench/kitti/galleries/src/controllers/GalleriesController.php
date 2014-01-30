@@ -8,9 +8,28 @@ use \Kitti\Galleries\Galleries;
 use \Kitti\Medias\Likes;
 use \Kitti\Medias\Medias;
 use \Kitti\Medias\Members;
+use \Plugin;
 
 class GalleriesController extends BaseController {
     private $media;
+
+    public function install() {
+        $data = array(
+            'name' => 'galleries',
+            'description' => 'galleries module',
+            'version' => '1.0',
+            'author' => 'Kitti Klinbua',
+            'author_email' => 'codetotti@gmail.com',
+            'protected' => '1',
+            'status' => '1'
+        );
+        return Plugin::install($data);
+        //return Plugin::uninstall(1);
+    }
+
+    public function uninstall($id) {
+        return Plugin::uninstall('galleries');
+    }
 
 	public function fields() {
         if(Input::get('format') == 'xml') {

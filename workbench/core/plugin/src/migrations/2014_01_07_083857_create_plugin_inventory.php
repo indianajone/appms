@@ -12,7 +12,7 @@ class CreatePluginInventory extends Migration {
 	public function up()
 	{
 		Schema::create('plugin_inventory', function($table) {
-                    $table->increments('plugin_id',4);
+                    $table->increments('id',4);
                     $table->string('name',40);
                     $table->string('description',100);
                     $table->string('version',10);
@@ -20,8 +20,8 @@ class CreatePluginInventory extends Migration {
                     $table->string('author_email',40);
                     $table->boolean('protected');
                     $table->boolean('status');
-                    $table->timestamp('create_date');
-                    $table->timestamp('update_date');
+                    $table->integer('created_at');
+                    $table->integer('updated_at');
                 });
 	}
 
