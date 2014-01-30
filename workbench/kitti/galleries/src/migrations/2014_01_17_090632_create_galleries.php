@@ -20,7 +20,7 @@ class CreateGalleries extends Migration {
                 $table->string('name',255);
                 $table->string('description',255)->nullable();
                 $table->string('picture',100)->nullable();
-                $table->integer('like', false)->unsigned();
+                $table->integer('like', false)->unsigned()->default(0);
                 $table->integer('created_at', false);
                 $table->integer('updated_at', false);
                 $table->integer('publish_at', false);
