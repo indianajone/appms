@@ -117,7 +117,8 @@ return array(
 		'Max\Member\MemberServiceProvider',
 
 		'Kitti\Galleries\GalleriesServiceProvider',
-		'Kitti\Medias\MediasServiceProvider'
+		'Kitti\Medias\MediasServiceProvider',
+		'Kitti\Articles\ArticlesServiceProvider'
 	),
 
 	/*
