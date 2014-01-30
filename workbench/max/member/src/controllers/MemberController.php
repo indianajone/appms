@@ -132,7 +132,7 @@ class MemberController extends \BaseController {
 
     public function update($id)
     {
-        $inputs = array_merge(array('id' => $id), Input::only('parent_id', 'fbid', 'fbtoken', 'username', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
+        $inputs = array_merge(array('id' => $id), Input::only('appkey', 'parent_id', 'fbid', 'fbtoken', 'username', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
         $validator = Validator::make($inputs, Member::$rules['update']);
 
         if($validator->passes())
@@ -141,7 +141,9 @@ class MemberController extends \BaseController {
             foreach ($inputs as $key => $val) {
                 if( $val == null || 
                     $val == '' || 
-                    $val == $member[$key]) 
+                    $val == $member[$key] ||
+                    $key == 'appkey' ||
+                    $key == 'id') 
                 {
                     unset($inputs[$key]);
                 }
