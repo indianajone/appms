@@ -146,7 +146,15 @@ class ApplicationController extends BaseController
 			$app = Appl::find($id);
 			$app->name = Input::get('name', $app->name);
 			$app->description = Input::get('description', $app->description);
-			$app->picture = Input::get('picture', null);
+			
+			$picture = Input::get('picture', null);
+			if($picture)
+			{
+				$response = Image::upload($picture);
+				if(is_object($response)) return $response;
+				$app->picture = $response;
+			}
+			
 			if($app->save())
 				return Response::message(200, 'Updated app_id: '.$id.' success!');
 		}
