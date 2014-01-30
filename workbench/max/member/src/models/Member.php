@@ -35,10 +35,12 @@ class Member extends BaseModel implements UserInterface{
     		'type' => 'required'
     	),
         'update' => array(
+            'appkey'   => 'required|exists:applications,appkey',
             'id' => 'required|exists:members',
             'email' => 'required|email|exists:members,email'
         ),
         'delete' => array(
+            'appkey'   => 'required|exists:applications,appkey',
             'id' => 'required|exists:members'
         ),
         'login' => array(
