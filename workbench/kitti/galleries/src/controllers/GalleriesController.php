@@ -18,19 +18,26 @@ class GalleriesController extends BaseController
         $limit= Input::get('limit', 10);
         $field = Input::get('fields', null);
         $fields = explode(',', $field);
+        
+        $validator = Validator::make(Input::all(), Gallery::$rules['show']);
 
-        $galleries = Gallery::active()->with('owner')->offset($offset)->limit($limit)->get();
-        $galleries->each(function($gallery) use ($fields, $field){
-            if($field) $gallery->setVisible($fields);   
-        });
+        if($validator->passes())
+        {
+            $galleries = Gallery::active()->app()->with('owner')->offset($offset)->limit($limit)->get();
+            $galleries->each(function($gallery) use ($fields, $field){
+                if($field) $gallery->setVisible($fields);   
+            });
 
-        return Response::listing(
-            array(
-                'code'      => 200,
-                'message'   => 'success'
-            ),
-            $galleries, $offset, $limit
-        );
+            return Response::listing(
+                array(
+                    'code'      => 200,
+                    'message'   => 'success'
+                ),
+                $galleries, $offset, $limit
+            );
+        }
+
+        return Response::message(204, $validator->messages()->first());
     }
 
     public function create()
@@ -46,16 +53,12 @@ class GalleriesController extends BaseController
         {
             $gallery = Gallery::create(
                 array(
-                    // 'app_id' => Appl::getAppIDByKey(Input::get('appkey'));
-                    'app_id' => 1, // for testing
+                    'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
                     'content_id' => Input::get('content_id'),
-                    // 'content_type' => $inputs['content_type'],
-                    'type' => Input::get('content_type'), // for testing
+                    'content_type' => $inputs['content_type'],
                     'name' => Input::get('name'),
                     'description' => Input::get('description'),
                     'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
-                    'like' => Input::get('like',0), // for testing
-                    'status' => Input::get('status',1), // for testing
                 )
             );
 
@@ -85,7 +88,8 @@ class GalleriesController extends BaseController
 
     public function show($id)
     {
-        $validator = Validator::make(array('id'=>$id), Gallery::$rules['show']);
+        $inputs = array_merge(array('id'=>$id), Input::all());
+        $validator = Validator::make($inputs, Gallery::$rules['show_with_id']);
 
         if($validator->passes())
         {
@@ -157,7 +161,8 @@ class GalleriesController extends BaseController
 
         $gallery = Gallery::find($id);
 
-        $validator = Validator::make(array('id'=>$id), Gallery::$rules['show']);
+        $inputs = array_merge(array('id'=>$id), Input::all());
+        $validator = Validator::make($inputs, Gallery::$rules['show_with_id']);
 
         if($validator->passes())
         {
@@ -181,7 +186,46 @@ class GalleriesController extends BaseController
 
     public function update($id)
     {
+        $inputs = array_merge(
+            array('id'=>$id), 
+            Input::all()
+        );
 
+        $validator = Validator::make($inputs, Gallery::$rules['update']);
+
+        if($validator->passes())
+        {
+            $gallery = Gallery::find($id);
+
+            foreach ($inputs as $key => $val) {
+                if( $val == null || 
+                    $val == '' || 
+                    $val == $gallery[$key] ||
+                    $key == 'appkey' ||
+                    $key == 'id') 
+                {
+                    unset($inputs[$key]);
+                }
+            }
+
+            if(!count($inputs))
+                return Response::message(200, 'Nothing is update.');
+
+            $picture = Input::get('picture', null);
+            if($picture)
+            {
+                $response = Image::upload($picture);
+                if(is_object($response)) return $response;
+                $inputs['picture'] = $response;
+            }
+
+            if($gallery->update($inputs))
+                 return Response::message(200, 'Updated gallery id: '.$id.' success!');
+
+            return Response::message(500, 'Something wrong when trying to update gallery.');
+        }
+
+        return Response::message(400,$validator->messages()->first());
     }
 
     public function delete($id)
@@ -191,7 +235,15 @@ class GalleriesController extends BaseController
 
     public function destroy($id)
     {
+         $validator = Validator::make(array('id'=>$id), Gallery::$rules['delete']);
 
+         if($validator->passes())
+        {
+            $gallery = Gallery::find($id)->delete();
+            return Response::message(200, 'Deleted Gallery: '.$id.' success!');
+        }
+
+        return Response::message(400, $validator->messages()->first()); 
     }
 
 }
