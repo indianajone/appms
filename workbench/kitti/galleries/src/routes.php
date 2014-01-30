@@ -20,7 +20,8 @@
         Route::any('galleries/fields', function(){
             return Response::fields('galleries');
         });
-        Route::any('galleries/{id}/medias', 'Kitti\\Galleries\\Controllers\\GalleriesController@showMedias');
-        Route::any('galleries/{type}/{id}', 'Kitti\\Galleries\\Controllers\\GalleriesController@showByOwner');
+        Route::post('galleries/{id}/medias', 'Kitti\\Galleries\\Controllers\\GalleriesController@showMedias');
+        Route::post('galleries/{id}/delete', 'Kitti\\Galleries\\Controllers\\GalleriesController@delete');
+        Route::post('galleries/{type}/{id}', 'Kitti\\Galleries\\Controllers\\GalleriesController@showByOwner');
         Route::resource('galleries', 'Kitti\\Galleries\\Controllers\\GalleriesController');
     });
