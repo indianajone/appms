@@ -113,7 +113,9 @@ return array(
 		'Indianajone\Categories\CategoriesServiceProvider',
 
 		'Max\User\UserServiceProvider',
-		'Max\Member\MemberServiceProvider'
+		'Max\Member\MemberServiceProvider',
+                'Max\Missingchild\MissingchildServiceProvider',
+                'Max\Device\DeviceServiceProvider',
 	),
 
 	/*
@@ -180,6 +182,10 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
                 'Response'        => 'Core\Response\Facades\Response',
+            
+                'Appl'			  => 'Indianajone\Applications\Facades\ApplicationFacade',
+		'Image'			  => 'Libs\Helpers\Facades\Image',
+		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 	),
 
 );

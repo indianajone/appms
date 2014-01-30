@@ -28,11 +28,11 @@ class ArticleMissingchild extends \Eloquent {
     }
     
     public function article(){
-        return $this->hasOne('Max\Missingchild\Models\Article', 'id', 'article_id');
+        return $this->hasMany('Max\Missingchild\Models\Article', 'id', 'article_id');
     }
     
     public function missingchild(){
-        return $this->hasOne('Max\Missingchild\Models\Missingchild', 'id', 'missingchild_id');
+        return $this->belongsTo('Max\Missingchild\Models\Missingchild', 'id', 'missingchild_id');
     }
 }
 ?>

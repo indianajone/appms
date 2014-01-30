@@ -32,9 +32,15 @@ Route::filter('chk_appkey', function()
 
 Route::group(array('prefix' => 'api/v1'), function()
 {        
-        Route::get('missingchild/fields', 'Max\\Missingchild\\Controllers\\MissingchildController@fields'); 
+        Route::get('missingchilds/fields', function(){
+            return Response::fields('missingchilds');
+        });
+        Route::get('article_missingchild/fields', function(){
+            return Response::fields('article_missingchild');
+        });
         
-//        Route::group(array('before' => 'chk_appkey'), function(){            
+//        Route::group(array('before' => 'chk_appkey'), function(){     
+            Route::post('missingchild/{id}/delete', 'Max\\MissingchildController\\Controllers\\MissingchildController@delete');
             Route::resource('missingchild', 'Max\\Missingchild\\Controllers\\MissingchildController');
             Route::resource('article_missingchild', 'Max\\Missingchild\\Controllers\\ArticleMissingchildController');
 //        });   

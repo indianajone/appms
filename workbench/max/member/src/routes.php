@@ -19,9 +19,13 @@ Route::group(array('prefix' => 'api/v1'), function()
 
     // Member
 	Route::get('members/fields', function(){
-        return Response::fields('members');
-    });
+            return Response::fields('members');
+        });
+        
 	Route::post('members/{id}/delete', 'Max\\Member\\Controllers\\MemberController@delete');
 	Route::get('members/{id}/resetPassword', 'Max\\Member\\Controllers\\MemberController@resetPassword'); 
 	Route::resource('members', 'Max\\Member\\Controllers\\MemberController');
+        
+        Route::get('members/{id}/otp', 'Max\\Member\\Controllers\\MemberController@requestOTP');
+        Route::post('members/{id}/otp/{otp}', 'Max\\Member\\Controllers\\MemberController@requestOTP');
 });

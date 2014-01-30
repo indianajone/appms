@@ -1,8 +1,10 @@
 <?php
 namespace Max\Missingchild\Controllers;
 
-use Validator, Input, Response;
-use Max\Missingchild\Models\Article, Max\Missingchild\Models\ArticleMissingchild, Max\Application\Models\Application;
+use Validator, Input, Response, Appl;
+use Max\Missingchild\Models\Article;
+use Max\Missingchild\Models\ArticleMissingchild;
+use Max\Application\Models\Application;
 
 class ArticleMissingchildController extends \BaseController {
 
@@ -12,21 +14,37 @@ class ArticleMissingchildController extends \BaseController {
 	 * @return Response
 	 */
 	public function index()
-	{
+	{            
             $offset = Input::get('offset', 0);
-            $limit= Input::get('limit', 10);
-            $article_missing = ArticleMissingchild::take($limit)->skip($offset)->with('article', 'missingchild')->get();
+            $limit = Input::get('limit', 10);
+            $field = Input::get('fields', null);
+            $fields = $field ? explode(',', $field) : $field;
             
-            if($article_missing->count() > 0)
-                return Response::listing(array(
-                        'code'=>200, 
-                        'message'=>'success'
-                ), $article_missing, $offset, $limit);
-            else 
-                return Response::listing(array(
-                        'code'=>204, 
-                        'message'=>'no content'
-                ), null, $offset, $limit);
+            $updated_at = Input::get('updated_at', null);
+            $created_at = Input::get('created_at', null);
+            
+            $article_missing = ArticleMissingchild::with('article');
+            
+            if($updated_at || $created_at)
+            {
+                if($updated_at) $article_missing = $article_missing->time('updated_at');
+                else $article_missing = $article_missing->time('created_at');
+            }
+            
+            $article_missing = $article_missing->offset($offset)->limit($limit)->get();
+            
+            if($field)
+                $article_missing->each(function($am) use ($fields){
+                    $am->setVisible($fields);  
+                });
+
+                return Response::listing(
+                    array(
+                        'code'=>200,
+                        'message'=> 'success'
+                    ),
+                    $article_missing, $offset, $limit
+                );
 	}
 
 	/**
@@ -36,25 +54,23 @@ class ArticleMissingchildController extends \BaseController {
 	 */
 	public function create()
 	{            
+            return $this->store();            
+	}
+
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @return Response
+	 */
+	public function store()
+	{
             $validator = Validator::make(Input::all(), ArticleMissingchild::$rules['create']);
             
             if ($validator->fails()) {
-                $msg = $validator->messages()->first();
-                return Response::json(array(
-                    'header'=> array(
-                        'code' => 204, 
-                        'message' => $msg
-                    )
-                ));
-            }else{                
-                $appkey = Input::get('appkey');
-                $apps = Application::select('id')->where('appkey', '=', $appkey)->get();
-                foreach ($apps as $app) {
-                    $app_id = $app->id;
-                }
-                
+                return Response::message(204, $validator->messages()->first());
+            }else{
                 $article = new Article();
-                $article->app_id = $app_id;
+                $article->app_id = Appl::getAppIDByKey(Input::get('appkey'))->id;
                 $article->gallery_id = Input::get('gallery_id');
                 $article->category_id = Input::get('category_id');
                 $article->pre_title = Input::get('pre_title');
@@ -74,35 +90,23 @@ class ArticleMissingchildController extends \BaseController {
                     $article_missings->missingchild_id = Input::get('missingchild_id');                
                     $article_missings->status = $article->status;
                     
-                    if($article_missings->save()){
-                        $arrResp['header']['code'] = 200;
-                        $arrResp['header']['message'] = 'Success';
-                        $arrResp['id'] = $article_missings->id;                
-                        return Response::json($arrResp);                    
+                    if($article_missings->save()){     
+                        return Response::result(array(
+                            'header' => array(
+                                'code'      => 200,
+                                'message'   => 'success'
+                            ),
+                            'id' => $article_missings->id
+                        ));
                     }else {
                         $article = Article::find($article->id)->delete();
                         
-                        $arrResp['header']['code'] = 204;
-                        $arrResp['header']['message'] = 'Cannot insert data';
-                        return Response::json($arrResp);
+                        return Response::message(500, 'Something wrong when trying to save article missingchild.');
                     }   
-                } 
-                else {    
-                    $arrResp['header']['code'] = 204;
-                    $arrResp['header']['message'] = 'Cannot insert data';
-                    return Response::json($arrResp);
+                }else{    
+                    return Response::message(500, 'Something wrong when trying to save article.');
                 }             
             }
-	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store()
-	{
-		//
 	}
 
 	/**
@@ -116,17 +120,11 @@ class ArticleMissingchildController extends \BaseController {
             $validator = Validator::make(array('id' => $id), ArticleMissingchild::$rules['show']);
             
             if ($validator->fails()) {
-                $msg = $validator->messages()->first();
-                return Response::json(array(
-                        'header'=> array(
-                            'code' => 204, 
-                            'message' => $msg
-                    )
-                ));
+                return Response::message(204, $validator->messages()->first());
             }else{    
                 $field = Input::get('fields');
                 $fields = $field ? explode(',', $field) : '*';
-                $article_missing = ArticleMissingchild::with('missingchild', 'article')->select($fields)->where('id', '=', $id)->get();
+                $article_missing = ArticleMissingchild::with('article')->select($fields)->where('id', '=', $id)->get();
 
                 return Response::json(array(
                     'header'=> array(
@@ -146,18 +144,37 @@ class ArticleMissingchildController extends \BaseController {
 	 */
 	public function edit($id)
 	{            
+            return $this->update($id);            
+	}
+
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function update($id)
+	{
             $validator = Validator::make(array('id' => $id), ArticleMissingchild::$rules['update']);
             
             if ($validator->fails()) {
-                $msg = $validator->messages()->first();
-                return Response::json(array(
-                    'header'=> array(
-                        'code' => 204, 
-                        'message' => $msg
-                    )
-                ));
+                return Response::message(204, $validator->messages()->first());
             }else{
                 $article_missing = ArticleMissingchild::find($id);
+                
+                foreach ($req as $key => $val) {
+//                    if( $val == null || 
+//                        $val == '' || 
+//                        $val == $mcs[$key]) 
+//                    {
+//                        unset($req[$key]);
+//                    }
+//                }
+//
+//                if(!count($req))
+//                    return Response::message(200, 'Nothing is update.');
+                    
+                }
                 $input_am = array(
                     'article_id' => Input::get('article_id', $article_missing->article_id),          
                     'missingchild_id' => Input::get('missingchild_id', $article_missing->missingchild_id),
@@ -183,38 +200,20 @@ class ArticleMissingchildController extends \BaseController {
                     );
                     
                     if($article->where('id', '=', $article_missing->article_id)->update($input))
-                        return Response::json(array(
-                            'header'=> array(
-                                'code'=>200, 
-                                'message'=>'success'
-                            ),
-                            'id'=> $article_missing->id
-                        ));
+                        return Response::message(200, 'Updated article missingchild id: '.$id.' success!');
                     else
-                        return Response::json(array(
-                            'code'=>204, 
-                            'message'=>'cannot update data'
-                        ));       
+                        return Response::message(500, 'Something wrong when trying to update article missingchild.');      
                 }else{
-                    return Response::json(array(
-                        'code'=>204, 
-                        'message'=>'cannot update data'
-                    ));  
+                    return Response::message(500, 'Something wrong when trying to update article.');
                 }
             }
 	}
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function update($id)
-	{
-		//
-	}
-
+        public function delete($id)
+        {
+            return $this->destroy($id);
+        }
+        
 	/**
 	 * Remove the specified resource from storage.
 	 *
@@ -226,31 +225,15 @@ class ArticleMissingchildController extends \BaseController {
             $validator = Validator::make(array('id' => $id), ArticleMissingchild::$rules['delete']);
             
             if ($validator->fails()) {
-                $msg = $validator->messages()->first();
-                return Response::json(array(
-                        'header'=> array(
-                            'code' => 204, 
-                            'message' => $msg
-                    )
-                ));
+                return Response::message(400, $validator->messages()->first());     
             }else{      
                 $article_missing = ArticleMissingchild::find($id);
                 $article = Article::find($article_missing->article_id);
                 
                 if($article_missing->delete() && $article->delete()){
-                    return Response::json(array(
-                        'header'=> array(
-                            'code'=>200, 
-                            'message'=>'success'
-                        )
-                    ));
+                    return Response::message(200, 'Deleted Article Missingchild id: '.$id.' success!');
                 }else{
-                    return Response::json(array(
-                        'header'=> array(
-                            'code'=>204, 
-                            'message'=>'cannot delete'
-                        )
-                    ));
+                    return Response::message(500, 'Something wrong when trying to delete article missingchild.'); 
                 }
             }
 	}

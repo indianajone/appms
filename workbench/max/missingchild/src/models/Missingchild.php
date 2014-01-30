@@ -1,11 +1,16 @@
 <?php
 namespace Max\Missingchild\Models;
 
+//use Collection;
+
+//use Max\Member\Models\Member;
+
 class Missingchild extends \BaseModel { 
     protected $table = 'missingchilds';
     
-    protected $guarded = array('member_id');
-    
+    protected $hidden = array('member_id', 'user_id');
+    protected $guarded = array('id', 'member_id', 'user_id');
+
     public static $rules = array(
         'show' => array(
             'id' => 'required|exists:missingchilds'
@@ -34,7 +39,8 @@ class Missingchild extends \BaseModel {
             'status' => 'required',
         ),
         'update' => array(
-            'id' => 'required|exists:missingchilds'
+            'id' => 'required|exists:missingchilds',
+            'email' => 'required|email|exists:members,email'
         ),
         'delete' => array(
             'id' => 'required|exists:missingchilds'
@@ -55,6 +61,11 @@ class Missingchild extends \BaseModel {
     
     public function member(){
         return $this->hasOne('Max\Member\Models\Member', 'id', 'member_id');
+    }
+    
+    public function newCollection(array $models = array())
+    {
+        return new Collection($models);
     }
 }
 ?>

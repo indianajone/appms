@@ -216,5 +216,62 @@ class MemberController extends \BaseController {
 
         return Response::message(400, $validator->messages()->first()); 
     }
+    
+    public function requestOTP($id){
+        $app_id = '28'; $secret = '018c4fab3425e25bddcf'; $project = 'tms';
+        
+        $members = Member::find($id);
+        
+        $url = 'http://widget3.truelife.com/msisdn_service/rest/?method=request_otp&project='.$project.'&app_id='.$app_id.'&secret='.$secret.'&type=register&msisdn='.$members->mobile.'&channel=web';
+        return $this->curl_get($url);
+    }
 
+    public function verifyOTP($id, $otp){
+        $app_id = '28'; $secret = '018c4fab3425e25bddcf'; $project = 'tms';
+        
+        $members = Member::find($id);
+        
+        $url = 'http://widget3.truelife.com/msisdn_service/rest/?method=validate_otp&project='.$project.'&app_id='.$app_id.'&secret='.$secret.'&type=register&msisdn='.$members->mobile.'&otp='.$otp.'&ln=en';
+        return $this->curl_get($url);
+    }
+    
+    /** $method          get/post
+    * $postData        array / xml / json
+    * $returnHeader    return http header array http_header(code,content_type,connect_time,total_time) */
+    function curl($url,$method='get',$postData="",$isPostXML=false,&$httpHeader=array(),$connectTimeOut=0,$waitTimeOut=0,$custom_header=array(),$isSSL=false,$sslVerifyPeer=false) {
+        $header = &$httpHeader;
+        $url = trim($url);
+        $method=(strtolower($method)=='get')?'get':'post';
+        $postFlag = (substr($method,0,1)=='p')?1:0;
+
+        $c = curl_init();
+        curl_setopt($c, CURLOPT_URL, $url);
+        if ($isPostXML) curl_setopt($c, CURLOPT_HTTPHEADER, array('content-type: text/xml') );
+        else if (!empty($custom_header)) curl_setopt($c, CURLOPT_HTTPHEADER, $custom_header);
+
+        //curl_setopt($c, CURLOPT_HEADER, 0);
+        curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($c, CURLOPT_CONNECTTIMEOUT, $connectTimeOut);
+        curl_setopt($c, CURLOPT_TIMEOUT, $waitTimeOut);
+        curl_setopt($c, CURLOPT_MAXREDIRS, 5);
+        curl_setopt($c, CURLOPT_POST, $postFlag);
+        if ($isSSL) curl_setopt($c, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
+        if ( !empty($postData)) curl_setopt($c, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($c);
+//        $header[code] = curl_getinfo($c, CURLINFO_HTTP_CODE);
+//        $header[content_type] = curl_getinfo($c, CURLINFO_CONTENT_TYPE);
+//        $header[connect_time] = curl_getinfo($c, CURLINFO_CONNECT_TIME);
+//        $header[total_time] = curl_getinfo($c, CURLINFO_TOTAL_TIME);
+        curl_close($c);
+
+        return $response;
+    }
+    
+    function curl_get($url,$timeOut=0) { return $this->curl($url,'get','',false,$header,0,$timeOut); }
+    function curl_get_with_header($url,&$header,$timeOut=0) { return $this->curl($url,'get','',false,$header,0,$timeOut); }
+    function curl_post($url,$params,$timeOut=0) { return $this->curl($url,'post',$params,false,array(),0,$timeOut); }
+    function curl_post_with_header($url,$params,&$header,$timeOut=0) { return $this->curl($url,'post',$params,false,$header,0,$timeOut); }
+    function curl_xml($url,$xml,$timeOut=0) { return $this->curl($url,'post',$xml,true,$header,0,$timeOut); }
+    function curl_xml_with_header($url,$xmlRequest,&$header,$timeOut=0) { return $this->curl($url,'post',$xml,true,$header,0,$timeOut); }
 }
