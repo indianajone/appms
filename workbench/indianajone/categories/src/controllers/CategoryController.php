@@ -71,7 +71,7 @@ class CategoryController extends BaseController
 		if ($validator->passes()) {
 			$cat = Category::create(array(
 				'name' => Input::get('name'),
-				'app_id' => Appl::getAppIDByKey(Input::get('appkey'))->id,
+				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
 				'parent_id' => Input::get('parent_id')
 			));
 
