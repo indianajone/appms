@@ -8,18 +8,31 @@ class Gallery extends \BaseModel
 
     public static $rules = array(
     	'show' => array(
+    		'appkey' => 'required|exists:applications,appkey',
+    	),
+        'show_with_id' => array(
+            'appkey' => 'required|exists:applications,appkey',
+            'id' => 'required|exists:galleries'
+        ),
+    	'show_by_owner' => array(
+            'appkey' => 'required|exists:applications,appkey',
+    		'type' => 'required|in:member,article',
     		'id' => 'required|exists:galleries'
     	),
-    	'show_by_owner' => array(
-    		'type' => 'required|in:member,article',
-    		'id' => 'required',
-    	),
     	'create' => array(
-    		// 'appkey' => 'required',
+    		'appkey' => 'required|exists:applications,appkey',
     		'content_id' => 'required',
     		'content_type' => 'required|in:member,article',
     		'name' => 'required'
-    	)
+    	),
+        'update' => array(
+            'appkey' => 'required|exists:applications,appkey',
+            'id' => 'required|exists:galleries'
+        ),
+        'delete' => array(
+            'appkey' => 'required|exists:applications,appkey',
+            'id' => 'required|exists:galleries'
+        )
     );
 
     public function owner()
