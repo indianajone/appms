@@ -3,7 +3,7 @@
 
 use Baum\Node;
 use Carbon\Carbon;
-use Indianajone\Categories\Collection;
+use Indianajone\Categories\Extensions\Eloquent\Collection;
 
 /**
 * MODEL
@@ -35,7 +35,7 @@ class Category extends Node {
     'exists' => 'The given :attribute is invalid.'    
   );
 
-  protected $hidden = array('lft', 'rgt');
+  protected $hidden = array('lft', 'rgt', 'pivot');
 
   /** 
    * Override getDateFormat to unixtime stamp.
@@ -169,6 +169,11 @@ class Category extends Node {
     return $children;
   }
 
+  public function articles()
+  {
+      return $this->belongsToMany('Kitti\\Articles\\Article', 'article_category', 'article_id');
+  }
+
   public function updateParent($id)
   {
     if($id >= 1)
@@ -182,6 +187,11 @@ class Category extends Node {
       $updated_at = \Input::get($field);
       $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
       return $query->where($field, '>=', $time->timestamp);
+  }
+
+  public function newCollection(array $models = array())
+  {
+    return new Collection($models);
   }
 
 }
