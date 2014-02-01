@@ -14,7 +14,11 @@ class CreateUserTable extends Migration {
 	{
 		Schema::create('users', function(Blueprint $table) {
 			$table->increments('id');
+<<<<<<< HEAD
 			$table->integer('parent_id')->unsigned()->default(0);
+=======
+			$table->integer('parent_id')->unsigned()->default(null);
+>>>>>>> best
 			$table->string('first_name', 100);
 			$table->string('last_name', 100);
 			$table->string('gender', 10)->nullable();
@@ -26,6 +30,7 @@ class CreateUserTable extends Migration {
 			$table->integer('updated_at');
 			$table->integer('last_seen');
 		});
+<<<<<<< HEAD
 
 		// // Creates password reminders table
   //       Schema::create('password_reminders', function($table)
@@ -37,6 +42,10 @@ class CreateUserTable extends Migration {
 	}
 
 
+=======
+	}
+
+>>>>>>> best
 	/**
 	 * Reverse the migrations.
 	 *

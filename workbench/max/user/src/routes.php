@@ -11,6 +11,7 @@
 |
 */
 
+<<<<<<< HEAD
 Route::filter('chk_appkey', function()
 {
     $appkey = Input::get('appkey');
@@ -55,5 +56,21 @@ Route::group(array('prefix' => 'api/v1'), function()
 //            Route::resource('members', 'MemberController');
 //            Route::resource('member/{id}/devices', 'DeviceController');
         // });   
+=======
+Route::group(array('prefix' => 'api/v1'), function()
+{
+    // Auth
+    Route::any('users/login', 'Max\\User\\Controllers\\UserController@doLogin');
+    Route::any('users/logout', 'Max\\User\\Controllers\\UserController@doLogout');
+    
+    // Users
+    Route::get('users/fields', function(){
+        return Response::fields('users');
+    });
+    Route::post('users/{id}/delete', 'Max\\User\\Controllers\\UserController@delete');
+    Route::get('users/{id}/resetPassword', 'Max\\User\\Controllers\\UserController@resetPassword'); 
+    Route::any('users/{id}/roles/{action}', 'Max\\User\\Controllers\\UserController@manageRole'); 
+    Route::resource('users', 'Max\\User\\Controllers\\UserController');
+>>>>>>> best
         
 });

@@ -36,7 +36,11 @@ class CreateRolesTable extends Migration {
         {
             $table->increments('id')->unsigned();
             $table->string('name');
+<<<<<<< HEAD
             $table->integer('method_id')->unsigned();
+=======
+            // $table->integer('method_id')->unsigned();
+>>>>>>> best
             $table->string('display_name');
             $table->integer('created_at');
 			$table->integer('updated_at');

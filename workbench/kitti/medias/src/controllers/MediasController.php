@@ -9,7 +9,11 @@ use \FileUpload;
 
 class MediasController extends BaseController {
 
+<<<<<<< HEAD
 	public function fields() {
+=======
+        public function fields() {
+>>>>>>> best
         if(Input::get('format') == 'xml') {
             return Response::fields('medias','xml');
         } else {
@@ -71,20 +75,35 @@ class MediasController extends BaseController {
             
             if ($medias->save()) {
                 $response = array(
+<<<<<<< HEAD
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success'),
                 	'id'	=> $medias->id
             	);
+=======
+                        'header' => array(
+                                'code' => '200',
+                                'message' => 'success'),
+                        'id'        => $medias->id
+                    );
+>>>>>>> best
             }
             
             
         } else {
             $response = array(
+<<<<<<< HEAD
             	'header' => array(
             		'code' => '400',
             		'message' => $validator->messages()->first()
     		));
+=======
+                    'header' => array(
+                            'code' => '400',
+                            'message' => $validator->messages()->first()
+                    ));
+>>>>>>> best
         }
 
         return Response::result($response, $format);
@@ -111,19 +130,34 @@ class MediasController extends BaseController {
 
             if ($likes->save()) {
                 $response = array(
+<<<<<<< HEAD
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success'),
                 	'id'	=> $likes->id
             	);
+=======
+                        'header' => array(
+                                'code' => '200',
+                                'message' => 'success'),
+                        'id'        => $likes->id
+                    );
+>>>>>>> best
             }
 
         } else {
             $response = array(
+<<<<<<< HEAD
             	'header' => array(
             		'code' => '400',
             		'message' => $validator->messages()->first()
     		));
+=======
+                    'header' => array(
+                            'code' => '400',
+                            'message' => $validator->messages()->first()
+                    ));
+>>>>>>> best
         }
 
         return Response::result($response, $format);
@@ -147,18 +181,32 @@ class MediasController extends BaseController {
                     ->delete();
             if ($result) {
                  $response = array(
+<<<<<<< HEAD
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success'
         		));
+=======
+                        'header' => array(
+                                'code' => '200',
+                                'message' => 'success'
+                        ));
+>>>>>>> best
             }
             
         } else {
             $response = array(
+<<<<<<< HEAD
             	'header' => array(
             		'code' => '400',
             		'message' => $validator->messages()->first()
     		));
+=======
+                    'header' => array(
+                            'code' => '400',
+                            'message' => $validator->messages()->first()
+                    ));
+>>>>>>> best
         }
         return Response::result($response, $format);
     }
@@ -197,25 +245,43 @@ class MediasController extends BaseController {
                 $input['path'] = $response['path'];
                 $input['filename'] = $response['filename'];
             }
+<<<<<<< HEAD
             
+=======
+
+            // echo '<pre>';
+            // print_r($input);
+            // exit;
+
+>>>>>>> best
             $medias = Medias::where('id', '=', $id)->where('name','=', $input['name'])->update($input);
             
             $response = array();
 
             if ($medias) {
                 $response = array(
+<<<<<<< HEAD
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success'
         			),
                 	'id'	=> $id
             	);
+=======
+                        'header' => array(
+                                'code' => '200',
+                                'message' => 'success'
+                                ),
+                        'id'        => $id
+                    );
+>>>>>>> best
             } else {
 
             }
             
         } else {
             $response = array(
+<<<<<<< HEAD
             	'header' => array(
             		'code' => '204',
             		'message' => $validator->messages()->first()
@@ -223,6 +289,15 @@ class MediasController extends BaseController {
         	);
         }
     	return Response::result($response, $format);
+=======
+                    'header' => array(
+                            'code' => '204',
+                            'message' => $validator->messages()->first()
+                        )
+                );
+        }
+            return Response::result($response, $format);
+>>>>>>> best
     }
 
     public function delete($id) {
@@ -232,11 +307,19 @@ class MediasController extends BaseController {
             $format = Input::get('format','json');
             if ($medias) {
                 $response = array(
+<<<<<<< HEAD
                 	'header' => array(
                 		'code' => '200',
                 		'message' => 'success')
             	);
             	return Response::result($response, $format);
+=======
+                        'header' => array(
+                                'code' => '200',
+                                'message' => 'success')
+                    );
+                    return Response::result($response, $format);
+>>>>>>> best
             }
         } 
     }
@@ -258,12 +341,21 @@ class MediasController extends BaseController {
         $medias[0]['like']['members'] = $like->toArray();
 
         $response = array(
+<<<<<<< HEAD
         	'header' => array(
         		'code' => '200',
         		'message' => 'success'),
         	'entry' => $medias
     	);
     	return Response::result($response, $format);
+=======
+                'header' => array(
+                        'code' => '200',
+                        'message' => 'success'),
+                'entry' => $medias
+            );
+            return Response::result($response, $format);
+>>>>>>> best
     }
 
     public function getLike($id) {

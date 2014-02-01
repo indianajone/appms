@@ -57,7 +57,11 @@ return array(
 			'host'      => 'localhost',
 			'database'  => 'appms',
 			'username'  => 'root',
+<<<<<<< HEAD
 			'password'  => '',
+=======
+			'password'  => 'truelife',
+>>>>>>> best
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',

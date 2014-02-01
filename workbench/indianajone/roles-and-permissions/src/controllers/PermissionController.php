@@ -28,6 +28,7 @@ class PermissionController extends BaseController {
 	 			$perm->setVisible($fields);
 	 		});
         
+<<<<<<< HEAD
         return Response::json(
         	array(
         		'header' => array(
@@ -39,6 +40,13 @@ class PermissionController extends BaseController {
         		'total' => $perms->count(),
         		'entries' => $perms->toArray()
         	)
+=======
+        return Response::listing(
+        	array(
+        		'code' => 200,
+        		'message' => 'success'
+        	), $perms, $offset, $limit
+>>>>>>> best
         );
 	}
 
@@ -60,6 +68,7 @@ class PermissionController extends BaseController {
 	public function store()
 	{
 		$rules = array(
+<<<<<<< HEAD
 			'name' => 'required',
 			'display_name' => 'required'
 		);
@@ -84,6 +93,31 @@ class PermissionController extends BaseController {
 					'id'=> $p->id
 				), 200); 
 		} 
+=======
+            'name'          => 'required',
+            'display_name'  => 'required'
+        );
+		/**
+		 #TODO Need to look for Ardent Fixed issue.
+		*/ 
+		$validator = Validator::make(Input::all(), $rules);
+		if($validator->passes())
+		{
+			$perm = new Permission();
+			$perm->name = Input::get('name');
+			$perm->display_name = Input::get('display_name');
+			$perm->save();
+			// if($perm->save())
+				return Response::result(array(
+					'header'=> array(
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	), 'id'=> $perm->id
+				));
+		} 
+
+		return Response::message(400, $validator->messages()->first()); 
+>>>>>>> best
 	}
 
 	/**
@@ -103,13 +137,18 @@ class PermissionController extends BaseController {
 			if($fields[0] == '' || in_array('permits', $fields)) $perm->permits;
 	 		if($field) $perm->setVisible($fields);
 
+<<<<<<< HEAD
 		 	return Response::json(
+=======
+		 	return Response::result(
+>>>>>>> best
 	        	array(
 	        		'header' => array(
 	        			'code' => 200,
 	        			'message' => 'success'
 	        		),
 	        		'entry' => $perm->toArray()
+<<<<<<< HEAD
 	        	), 200
 	        );
 		}
@@ -124,6 +163,12 @@ class PermissionController extends BaseController {
 	        	), 200
 	        );
 		}
+=======
+	        	)
+	        );
+		}
+		return Response::message(204, 'Permission id: '. $id .' does not exists.');
+>>>>>>> best
  		
 	}
 
@@ -154,6 +199,7 @@ class PermissionController extends BaseController {
 				'name'=> Input::get('name', $perm->name)
 			));
 
+<<<<<<< HEAD
 			if($result)
 			{
 				return Response::json(
@@ -188,6 +234,13 @@ class PermissionController extends BaseController {
 	        	), 200
 	        );
 		}
+=======
+			if($result) return Response::message(200, 'Updated permission_id: '.$id.' success!');
+			
+		}
+		
+		return Response::message(204, 'Permission id: '. $id .' does not exists.');
+>>>>>>> best
 	}
 
 	/**
@@ -213,6 +266,7 @@ class PermissionController extends BaseController {
 		if($perm) 
 		{
 			$perm->delete();
+<<<<<<< HEAD
 			return Response::json(
 	        	array(
 	        		'header' => array(
@@ -233,5 +287,11 @@ class PermissionController extends BaseController {
 	        	), 200
 	        );
 		}
+=======
+			return Response::message(200, 'Deleted permission_id: '.$id.' success!');
+		}
+		
+		return Response::message(204, 'Permission id: '. $id .' does not exists.');
+>>>>>>> best
 	}
 }

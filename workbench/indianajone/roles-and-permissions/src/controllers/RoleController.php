@@ -66,7 +66,11 @@ class RoleController extends BaseController {
 
 		if ($validator->passes()) {
 			$role = new Role();
+<<<<<<< HEAD
 			$role->name = Input::get('name', null);
+=======
+			$role->name = Input::get('name');
+>>>>>>> best
 			if($role->save())
 				return Response::json(array(
 					'header'=> [

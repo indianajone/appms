@@ -30,7 +30,10 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app->bind('appl', function($app)
+        {
+            return new Appl();
+        });
 	}
 
 	/**
@@ -40,7 +43,7 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('application');
+		return array('appl');
 	}
 
 }

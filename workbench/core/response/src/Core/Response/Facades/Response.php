@@ -38,12 +38,12 @@ class Response extends BaseResponse {
             'total' => $total,
             'entries' => is_object($data) ? $data->toArray() : $data
         );
-        
-        return self::result($response, $format);
+
+        return self::result($response);
     }
 
-    public static function result($response , $format) {
-        if($format == 'json') {
+    public static function result($response) {
+        if(\Input::get('format', 'json') == 'json') {
             return Response::make($response)->header('Content-Type', 'text/json');
         } else {
             return Response::make(self::xml($response))->header('Content-Type', 'text/xml');
@@ -116,19 +116,15 @@ class Response extends BaseResponse {
         return $result;
     }
 
-    public static function message($status, $format = 'json') {
-        if (is_array($status)) {
-            $response = array(
+    public static function message($code, $message) {
+        return self::result(
+            array(
                 'header' => array(
-                    'code' => $status['code'],
-                    'message' => $status['message']
+                    'code' => $code,
+                    'message' => $message
                 )
-            );
-
-            return self::result($response, $format);
-        } else {
-            return "Please set status code ans message.";
-        }
+            )
+        );
     }
     
     /**
@@ -167,6 +163,6 @@ class Response extends BaseResponse {
             'fields' => $display
         );
 
-        return self::result($response, $format);
+        return self::result($response);
     }
 }

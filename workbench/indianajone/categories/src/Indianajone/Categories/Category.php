@@ -1,5 +1,8 @@
 <?php namespace Indianajone\Categories;
+
 use Baum\Node;
+use Carbon\Carbon;
+use Indianajone\Categories\Collection;
 
 /**
 * MODEL
@@ -12,6 +15,26 @@ class Category extends Node {
    * @var string
    */
   protected $table = 'categories';
+  public static $rules = array(
+    'save' => array(
+      // 'appkey' => 'required|exists:applications,appkey',
+      'name' => 'required',
+      'parent_id' => 'exists:categories,id'
+    ),
+    'update' => array(
+      'parent_id' => 'integer|existsornull:categories,id'
+    ),
+    'delete' => array(
+      'id' => 'required|exists:categories'
+    )
+  );
+
+
+  public static $messages = array(
+    'exists' => 'The given :attribute is invalid.'    
+  );
+
+  protected $hidden = array('lft', 'rgt');
 
   /** 
    * Override getDateFormat to unixtime stamp.
@@ -22,19 +45,17 @@ class Category extends Node {
       return 'U';
   }
 
-  public static $rules = array(
-    'save' => array(
-      'name' => 'required',
-      'app_id' => 'required|exists:applications,id',
-      'parent_id' => 'exists:categories,id'
-    ),
-    'update' => array(
-      'parent_id' => 'integer|existsornull:categories,id'
-    ),
-    'delete' => array(
-      'id' => 'required|exists:categories'
-    )
-  );
+  public function getCreatedAtAttribute($value)
+  {
+    $format = \Input::get('date_format', null);
+    return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+  }
+
+  public function getUpdatedAtAttribute($value)
+  {
+    $format = \Input::get('date_format', null);
+    return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+  }
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -138,6 +159,14 @@ class Category extends Node {
   //   });
   // }
 
+   public function children() {
+
+    $children = $this->hasMany(get_class($this), $this->getParentColumnName())
+                ->orderBy($this->getLeftColumnName())->with('children');
+
+    return $children;
+  }
+
   public function updateParent($id)
   {
     if($id >= 1)
@@ -146,13 +175,19 @@ class Category extends Node {
       $this->makeRoot();
   }
 
-  // Ti Add
-  public function scopeGetall($query, $array)
+  public function scopeTime($query, $field)
   {
-      return $query->whereIn('id',$array);
+      $updated_at = \Input::get($field);
+      $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
+      return $query->where($field, '>=', $time->timestamp);
   }
-  
-  public function children() {
-      return $this->hasMany('Indianajone\Categories\Category','parent_id','id')->with('children')->select('id','name','parent_id');
+
+  /**
+  // Ti Add
+  **/
+  public function scopeCategories($query, $param)
+  {
+      return $query->whereIn('id', $param);
   }
+
 }
