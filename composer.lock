@@ -282,12 +282,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "1fa82fae0f47b3c112c5d62fa331f89177447eac"
+                "reference": "c9eaecb03832603fee8bca3cbae500501e55c9bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/1fa82fae0f47b3c112c5d62fa331f89177447eac",
-                "reference": "1fa82fae0f47b3c112c5d62fa331f89177447eac",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/c9eaecb03832603fee8bca3cbae500501e55c9bd",
+                "reference": "c9eaecb03832603fee8bca3cbae500501e55c9bd",
                 "shasum": ""
             },
             "require": {
@@ -391,7 +391,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2014-01-29 22:12:16"
+            "time": "2014-01-31 21:38:47"
         },
         {
             "name": "monolog/monolog",
@@ -653,12 +653,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "8876c820c3b31eb3f435ab6419f75aecef4b5412"
+                "reference": "8664b69e105a43fc707e0ee94d650c11a32a12b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/8876c820c3b31eb3f435ab6419f75aecef4b5412",
-                "reference": "8876c820c3b31eb3f435ab6419f75aecef4b5412",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/8664b69e105a43fc707e0ee94d650c11a32a12b2",
+                "reference": "8664b69e105a43fc707e0ee94d650c11a32a12b2",
                 "shasum": ""
             },
             "require": {
@@ -670,7 +670,7 @@
             "suggest": {
                 "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
                 "ext-mcrypt": "Install the Mcrypt extension in order to speed up a wide variety of cryptographic operations.",
-                "pear-pear/PHP_Compat": "Install PHP_Compat to get phpseclib working on PHP >= 4.3.3."
+                "pear-pear/PHP_Compat": "Install PHP_Compat to get phpseclib working on PHP < 4.3.3."
             },
             "type": "library",
             "extra": {
@@ -739,7 +739,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2014-01-22 03:16:33"
+            "time": "2014-01-30 14:21:47"
         },
         {
             "name": "predis/predis",

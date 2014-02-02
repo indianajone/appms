@@ -151,7 +151,7 @@ class ArticlesController extends BaseController {
             return $articles;
     }
 
-    public function saveLike($id) {
+    public function createLike($id) {
     		$validator = Validator::make(Input::all() , Like::$rules['like']);
     		if($validator->passes()) {
 
@@ -182,16 +182,12 @@ class ArticlesController extends BaseController {
     		return Response::message(400,$validator->messages()->first());
     }
 
-    public function saveUnlike($id) {
+    public function deleteLike($id) {
     		$validator = Validator::make(Input::all() , Like::$rules['like']);
     		if($validator->passes()) {
 				if ($validator->passes()) {
-					$param = array(
-						'id' => $id,
-						'member_id' => Input::get('member_id')
-					);
-					Like::deleteArticle($param);
-					return Response::message(200, 'Deleted like_'.$id.' success!'); 
+					Like::deleteLike($id, Input::get('member_id') , 'article');;
+					return Response::message(200, 'Deleted like_content_id_.$id.' success!'); 
 				}
 				return Response::message(400, $validator->messages()->first()); 
     		}
@@ -253,12 +249,12 @@ class ArticlesController extends BaseController {
     {
     	$validator = Validator::make(array( 'id' => $id), Article::$rules['delete']);
 
-		if ($validator->passes()) {
-			Article::find($id)->delete();
-			return Response::message(200, 'Deleted article'.$id.' success!'); 
-		}
+        if ($validator->passes()) {
+            Article::find($id)->delete();
+            return Response::message(200, 'Deleted article'.$id.' success!'); 
+        }
 
-		return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $validator->messages()->first()); 
     }
 }
 
