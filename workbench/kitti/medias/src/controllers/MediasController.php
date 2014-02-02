@@ -1,400 +1,276 @@
 <?php namespace Kitti\Medias\Controllers;
+
+use \Appl;
 use \BaseController;
+use \Carbon\Carbon;
 use \Input;
 use \Response;
 use \Validator;
-use \Kitti\Medias\Medias;
-use \Kitti\Medias\Likes;
+use \Image;
 use \FileUpload;
+use \Kitti\Medias\Media;
+use \Kitti\Articles\Like;
 
-class MediasController extends BaseController {
+class MediasController extends BaseController
+{
+	public function index() {
 
-<<<<<<< HEAD
-	public function fields() {
-=======
-        public function fields() {
->>>>>>> best
-        if(Input::get('format') == 'xml') {
-            return Response::fields('medias','xml');
-        } else {
-            return Response::fields('medias');
-        }
+		$offset = Input::get('offset', 0);
+        $limit= Input::get('limit', 10);
+        $field = Input::get('fields', null);
+        $fields = explode(',', $field);
+
+        $medias = Media::offset($offset)->limit($limit)->get();
+
+        $medias->each(function($medias) {
+            $like = Like::listByTypeMini($medias->id ,'media')->get();
+            $medias->url = $medias->path.$medias->filename;
+            unset($medias->path);
+            unset($medias->filename);
+            $medias->like = array( 'total' => $like->count(),'members' => $like->toArray());
+        });
+
+        $medias->each(function($medias) use ($fields, $field){
+            if($field) $medias->setVisible($fields);   
+        });
+
+        return Response::listing(
+            array(
+                'code'      => 200,
+                'message'   => 'success'
+            ),
+            $medias, $offset, $limit
+        );
+	}
+
+	public function showLike($id){
+        $offset = Input::get('offset', 0);
+        $limit= Input::get('limit', 10);
+        $like = Like::listByType($id, 'media')->get();
+
+        return Response::listing(
+            array(
+                'code'      => 200,
+                'message'   => 'success'
+            ),
+            $like, $offset, $limit
+        );
     }
 
-    public function create() {
-        $input = Input::all();
-        $validator = Validator::make(
-            $input, array(
-                'appkey' => 'required',
-                'gallery_id' => 'required',
-                'name' => 'required',
-                'data' => 'required',
-                'type' => 'required'
-            )
-        );
+    public function create()
+    {
+        return $this->store();
+    }
 
-        $format = Input::get('format','json');
-        
-        if ($validator->passes()) {
-            $medias = new Medias();
-            // Mandatory
-            // $medias->app_id  = Appl::getAppID();
-            $medias->app_id = 1;
-            $medias->member_id = Input::get('member_id', 0);
-            $medias->gallery_id = Input::get('gallery_id');
-            $medias->name = Input::get('name');
-            $medias->type = Input::get('type');
+    public function store()
+    {
+        $validator = Validator::make(Input::all(), Media::$rules['create']);
+
+        if($validator->passes())
+        {
+            $medias = Media::create(
+                array(
+                    // 'app_id' => Appl::getAppIDByKey(Input::get('appkey'));
+                    'app_id' => 1, // for testing
+                    'gallery_id' => Input::get('gallery_id'),
+                    'name' => Input::get('name'), // for testing
+                    // 'data' => Input::get('data'),
+                    'type' => Input::get('type'),
+                    'description' => Input::get('description' , null),
+                    'latitude' => Input::get('latitude' , null),
+                    'longitude' => Input::get('longitude' , null),
+                    'like' => Input::get('like',0), // for testing
+                    'status' => Input::get('status',1), // for testing
+                )
+            );
 
             /**
             #TODO UPLOAD MEDIA
             **/
             // $content = file_get_contents("http://localhost/dev/appms/public/filetest/9.mp4");
-            // $base64 = base64_encode($content);
-            // $response = FileUpload::upload($base64);
+            // $data = base64_encode($content);
+            // $file = FileUpload::upload($data);
             // echo $response['path'];
             // echo $response['filename'];
+            // exit;
             /**
             #TODO REMOVE COMMENT FOR REAL CODE BELOW
             **/
-            $response = FileUpload::upload(Input::get('data'));
-            if(!is_array($response)) {
-                $response = json_decode($response);
-                if($response['code'] == 400) {
-                    return $response;
+
+            $file = FileUpload::upload(Input::get('data'));
+            if(!is_array($file)) {
+                $file = json_decode($file);
+                if($file['code'] == 400) {
+                    return $file;
                 }
             }
 
-            $medias->path = $response['path'];
-            $medias->filename = $response['filename'];
-            // Optional
+            $medias->update(array('path' =>  $file['path'],'filename' => $file['filename']));
 
-            $medias->description = Input::get('gallery_id', null);
-            $medias->latitude = Input::get('latitude', null);
-            $medias->longitude = Input::get('longitude', null);
-            $medias->status = Input::get('status', 1);
-            
-            if ($medias->save()) {
-                $response = array(
-<<<<<<< HEAD
-                	'header' => array(
-                		'code' => '200',
-                		'message' => 'success'),
-                	'id'	=> $medias->id
-            	);
-=======
-                        'header' => array(
-                                'code' => '200',
-                                'message' => 'success'),
-                        'id'        => $medias->id
-                    );
->>>>>>> best
-            }
-            
-            
-        } else {
-            $response = array(
-<<<<<<< HEAD
-            	'header' => array(
-            		'code' => '400',
-            		'message' => $validator->messages()->first()
-    		));
-=======
-                    'header' => array(
-                            'code' => '400',
-                            'message' => $validator->messages()->first()
-                    ));
->>>>>>> best
+            if($medias)
+                return Response::result(
+                    array(
+                        'header'=> array(
+                            'code'=> 200,
+                            'message'=> 'success'
+                        ),
+                        'id'=> $medias->id
+                    )
+                ); 
         }
 
-        return Response::result($response, $format);
+        return Response::message(400,$validator->messages()->first());
     }
 
-    public function like($id) {
-        //$input = Input::all();
-        $format = Input::get('format', 'json');
-        $validator = Validator::make(
-            Input::all(), array(
-                'appkey' => 'required',
-                'member_id' => 'required'
-            )
-        );
-        
-        if($validator->passes()) {
-            $likes = new Likes();
-            // $likes->app_id  = Appl::getAppID();
-            $likes->app_id = 1;
-            $likes->member_id = Input::get('member_id');
-            $likes->type = 'media';
-            $likes->content_id = $id;
-            $likes->status = Input::get('status', 1);
+    public function show($id)
+    {
+        $validator = Validator::make(array('id'=>$id), Media::$rules['show']);
 
-            if ($likes->save()) {
-                $response = array(
-<<<<<<< HEAD
-                	'header' => array(
-                		'code' => '200',
-                		'message' => 'success'),
-                	'id'	=> $likes->id
-            	);
-=======
-                        'header' => array(
-                                'code' => '200',
-                                'message' => 'success'),
-                        'id'        => $likes->id
-                    );
->>>>>>> best
-            }
+        if($validator->passes())
+        {
+            $field = Input::get('fields', null);
+            $fields = explode(',', $field);
 
-        } else {
-            $response = array(
-<<<<<<< HEAD
-            	'header' => array(
-            		'code' => '400',
-            		'message' => $validator->messages()->first()
-    		));
-=======
-                    'header' => array(
-                            'code' => '400',
-                            'message' => $validator->messages()->first()
-                    ));
->>>>>>> best
+            $medias = Media::find($id)->get();
+
+            $medias->each(function($medias) {
+                $like = Like::listByTypeMini($medias->id ,'media')->get();
+                $medias->url = $medias->path.$medias->filename;
+	            unset($medias->path);
+	            unset($medias->filename);
+                $medias->like = array( 'total' => $like->count(),'members' => $like->toArray());
+            });
+            
+            if($field) $medias->setVisible($fields);  
+
+            return Response::result(array(
+                'header' => array(
+                    'code' => 200,
+                    'message' => 'success'
+                ),
+                'entry' => $medias->toArray()
+            ));
         }
 
-        return Response::result($response, $format);
+        return Response::message(400,$validator->messages()->first());
     }
 
-    public function unlike($id) {
-        $input = Input::all();
-        $format = Input::get('format', 'json');
-        $validator = Validator::make(
-            $input, array(
-                'appkey' => 'required',
-                'member_id' => 'required'
-            )
-        );
-        
-        $response = array();
-        if($validator->passes()) {
-            $result = Likes::where('id','=',$id)
-                    ->where('member_id','=',$input['member_id'])
-                    ->where('type', '=' , 'media')
-                    ->delete();
-            if ($result) {
-                 $response = array(
-<<<<<<< HEAD
-                	'header' => array(
-                		'code' => '200',
-                		'message' => 'success'
-        		));
-=======
-                        'header' => array(
-                                'code' => '200',
-                                'message' => 'success'
-                        ));
->>>>>>> best
-            }
-            
-        } else {
-            $response = array(
-<<<<<<< HEAD
-            	'header' => array(
-            		'code' => '400',
-            		'message' => $validator->messages()->first()
-    		));
-=======
-                    'header' => array(
-                            'code' => '400',
-                            'message' => $validator->messages()->first()
-                    ));
->>>>>>> best
-        }
-        return Response::result($response, $format);
-    }
+    public function createLike($id) {
+        $validator = Validator::make(Input::all() , Like::$rules['like']);
+            if($validator->passes()) {
 
-    public function update($id) {
-        $input = Input::all();
-        $format = Input::get('format','json');
-        $validator = Validator::make(
-            $input, array(
-                'appkey' => 'required',
-                'name' => 'required'
-            )
-        );
-        
-        if ($validator->passes()) {
-            
-            if(isset($input['format'])) { unset($input['format']);}
-            if(isset($input['id'])) { unset($input['id']);}
-            
-            // $app_id = $input['appkey'];
-            unset($input['appkey']);
-
-            if (Input::has('data')) {
-                $base64 = FileUpload::upload(Input::get('data'));
-                /**
-                #TODO UPLOAD MEDIA
-                **/
-                // $content = file_get_contents("http://localhost/dev/appms/public/filetest/4.gif");
-                // $base64 = base64_encode($content);
-                $response = FileUpload::upload($base64);
-                /**
-                #TODO REMOVE COMMENT FOR REAL CODE BELOW
-                **/
-                unset($input['data']);
-                //print_r($response);
-                $input['path'] = $response['path'];
-                $input['filename'] = $response['filename'];
-            }
-<<<<<<< HEAD
-            
-=======
-
-            // echo '<pre>';
-            // print_r($input);
-            // exit;
-
->>>>>>> best
-            $medias = Medias::where('id', '=', $id)->where('name','=', $input['name'])->update($input);
-            
-            $response = array();
-
-            if ($medias) {
-                $response = array(
-<<<<<<< HEAD
-                	'header' => array(
-                		'code' => '200',
-                		'message' => 'success'
-        			),
-                	'id'	=> $id
-            	);
-=======
-                        'header' => array(
-                                'code' => '200',
-                                'message' => 'success'
-                                ),
-                        'id'        => $id
-                    );
->>>>>>> best
-            } else {
-
-            }
-            
-        } else {
-            $response = array(
-<<<<<<< HEAD
-            	'header' => array(
-            		'code' => '204',
-            		'message' => $validator->messages()->first()
-        		)
-        	);
-        }
-    	return Response::result($response, $format);
-=======
-                    'header' => array(
-                            'code' => '204',
-                            'message' => $validator->messages()->first()
-                        )
+                $like = Like::create(
+                    array(
+                        // 'app_id' => Appl::getAppIDByKey(Input::get('appkey'));
+                        'app_id' => 1, // for testing
+                        'member_id' => Input::get('member_id'),
+                        'content_id' => $id,
+                        'type' => 'media',
+                        'status' => Input::get('status', 1)
+                    )
                 );
-        }
-            return Response::result($response, $format);
->>>>>>> best
-    }
 
-    public function delete($id) {
-        
-        if ($id) {
-            $medias = Medias::where('id', '=', $id)->delete();
-            $format = Input::get('format','json');
-            if ($medias) {
-                $response = array(
-<<<<<<< HEAD
-                	'header' => array(
-                		'code' => '200',
-                		'message' => 'success')
-            	);
-            	return Response::result($response, $format);
-=======
-                        'header' => array(
-                                'code' => '200',
-                                'message' => 'success')
+                if($like) {
+                    return Response::result(
+                        array(
+                            'header'=> array(
+                                'code'=> 200,
+                                'message'=> 'success'
+                            ),
+                            'id'=> $like->id
+                        )
                     );
-                    return Response::result($response, $format);
->>>>>>> best
+                }
             }
-        } 
+
+            return Response::message(400,$validator->messages()->first());
     }
 
-    public function lists($id) {
-
-        $input = Input::all();
-        $format = Input::get('format','json');
-        
-        $fields = array('id','name','description','path','filename','type','latitude','longitude','created_at','updated_at');
-        $medias = Medias::where('id','=',$id)->get($fields)->toArray();
-
-        $like = Likes::where('content_id','=', $id)->where('likes.type','=','media')
-        ->join('members', 'likes.member_id', '=', 'members.id')
-        ->select('members.id', 'members.first_name', 'members.last_name','members.username')
-        ->get();
-
-        $medias[0]['like']['total'] = $like->count();
-        $medias[0]['like']['members'] = $like->toArray();
-
-        $response = array(
-<<<<<<< HEAD
-        	'header' => array(
-        		'code' => '200',
-        		'message' => 'success'),
-        	'entry' => $medias
-    	);
-    	return Response::result($response, $format);
-=======
-                'header' => array(
-                        'code' => '200',
-                        'message' => 'success'),
-                'entry' => $medias
-            );
-            return Response::result($response, $format);
->>>>>>> best
+    public function deleteLike($id) {
+            $validator = Validator::make(Input::all() , Like::$rules['like']);
+            if($validator->passes()) {
+                if ($validator->passes()) {
+                    Like::deleteLike($id, Input::get('member_id') , 'media');
+                    return Response::message(200, 'Deleted like_content_id_'.$id.' success!'); 
+                }
+                return Response::message(400, $validator->messages()->first()); 
+            }
     }
 
-    public function getLike($id) {
-        $format = Input::get('format','json');
-        $offset = Input::get('offset', 0);
-        $limit = Input::get('limit', 10);
-        $validator = Validator::make(
-            Input::all(), array(
-                'appkey' => 'required'
-            )
-        );
+    public function edit($id)
+    {
+        return $this->update($id);
+    }
 
-        if($validator->passes()) {
-            $like = Likes::where('content_id','=',$id)->where('likes.type','=','media')
-            ->join('members', 'likes.member_id', '=', 'members.id')
-            ->select('members.id', 'members.parent_id','username' ,'first_name','last_name',
-                'gender','email','phone','mobile','verified','fbid','fbtoken','birthday',
-                'members.type','members.created_at','members.updated_at')
-            ->skip($offset)->take($limit)
-            ->get();
+    public function update($id)
+    {
+        /**
+        #TODO: Find a better place for resolver.
+        **/
+        Validator::resolver(function($translator, $data, $rules, $messages)
+        {
+            return new \Indianajone\Validators\Rules\ExistsOrNull($translator, $data, $rules, $messages);
+        });
 
-            $response = array(
-            'header' => array(
-                'code' => '200',
-                'message' => 'success'),
-            'offset' => $offset,
-            'limit' => $limit,
-            'total' => $like->count(),
-            'entries' => $like->toArray()
-            );
-        } else {
-            $response = array(
-                'header' => array(
-                    'code' => '204',
-                    'message' => $validator->messages()->first()
-                )
-            );
+        $validator = Validator::make(Input::all(), Media::$rules['update']);
+
+        if ($validator->passes()) {
+            $medias = Media::find($id);
+            $medias->gallery_id = Input::get('gallery_id', $medias->gallery_id);
+            $medias->type = Input::get('type', $medias->type);
+            $medias->name = Input::get('name', $medias->name);
+            $medias->description = Input::get('description', $medias->description);
+            $medias->latitude = Input::get('latitude', $medias->latitude);
+            $medias->longitude = Input::get('longitude', $medias->longitude);
+            $medias->status = Input::get('status', $medias->status);
+
+            $media = Input::get('data', '');
+
+            /**
+            #TODO TEST UPLOAD MEDIA
+            **/
+            // $content = file_get_contents("http://localhost/dev/appms/public/filetest/6.3gp");
+            // $media = base64_encode($content);
+            
+            if($media != '')
+            {
+
+            	$file = FileUpload::upload($media);
+
+	            if(!is_array($file)) {
+	                $file = json_decode($file);
+	                if($file['code'] == 400) {
+	                    return $file;
+	                }
+	            }
+
+	            $medias->update(array('path' =>  $file['path'],'filename' => $file['filename']));
+            } else {
+                $medias->path = $medias->path;
+                $medias->filename = $medias->filename;
+            }
+
+            if($medias->save())
+                return Response::message(200, 'Updated media_id: '.$id.' success!'); 
         }
 
-        return Response::result($response, $format);
+        return Response::message(400, $validator->messages()->first()); 
+    }
+
+    public function delete($id)
+    {
+        return $this->destroy($id);
+    }
+
+    public function destroy($id)
+    {
+        $validator = Validator::make(array( 'id' => $id), Media::$rules['delete']);
+
+        if ($validator->passes()) {
+            Media::find($id)->delete();
+            return Response::message(200, 'Deleted media_id: '.$id.' success!'); 
+        }
+
+        return Response::message(400, $validator->messages()->first()); 
     }
 }

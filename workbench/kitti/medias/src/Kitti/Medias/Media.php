@@ -3,17 +3,28 @@
 class Media extends \BaseModel
 {
         protected $table = 'medias';
+        protected $guarded = array('id');
         protected $hidden = array('app_id', 'gallery_id', 'status');    
-        // protected $fillable = array('app_id', 'gallery_id', 'categories_id','pre_title','picture','teaser','content','wrote_by','publish_at','views','tags','status');
-        // protected $guarded = array('id');
-        // public function scopeLike($query, $id) {
-        //         return $query->where('content_id','=', $id)->where('type','=','media')
-        // }
-
-        // public function like() {
-        //         return $this->hasMany('Kitti\Medias\Like','content_id','id')
-        //         ->leftJoin('members', 'likes.member_id', '=', 'members.id');
-        // }
+        
+        public static $rules = array(
+                'show' => array(
+                        'id' => 'required|exists:medias'
+                ),
+                'create' => array(
+                        // 'appkey' => 'required',
+                        'gallery_id' => 'required',
+                        'name' => 'required',
+                        'data' => 'required',
+                        'type' => 'required|in:image,video,audio'
+                ),
+                'update' => array(
+                        'name' => 'required',
+                        'type' => 'in:image,video,audio'
+                ),
+                'delete' => array(
+                  'id' => 'required|exists:medias'
+                )
+        );
 
         public function gallery()
         {

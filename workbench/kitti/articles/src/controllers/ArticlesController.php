@@ -187,7 +187,7 @@ class ArticlesController extends BaseController {
     		if($validator->passes()) {
 				if ($validator->passes()) {
 					Like::deleteLike($id, Input::get('member_id') , 'article');;
-					return Response::message(200, 'Deleted like_content_id_.$id.' success!'); 
+					return Response::message(200, 'Deleted like_content_id_'.$id.' success!'); 
 				}
 				return Response::message(400, $validator->messages()->first()); 
     		}
@@ -222,9 +222,9 @@ class ArticlesController extends BaseController {
 			$article->categories_id = Input::get('categories', $article->categories_id);
 			//$parent_id = Input::get('parent_id', $cat->parent_id, null);
 
-			$picture = Input::get('picture', null);
+			$picture = Input::get('picture', '');
             
-            if($picture)
+            if($picture != '')
             {
                 $response = Image::upload($picture);
                 if(is_object($response)) return $response;
@@ -251,7 +251,7 @@ class ArticlesController extends BaseController {
 
         if ($validator->passes()) {
             Article::find($id)->delete();
-            return Response::message(200, 'Deleted article'.$id.' success!'); 
+            return Response::message(200, 'Deleted article_id: '.$id.' success!'); 
         }
 
         return Response::message(400, $validator->messages()->first()); 

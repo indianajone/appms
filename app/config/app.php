@@ -121,7 +121,7 @@ return array(
   //       'Baum\BaumServiceProvider',
         'Kitti\Articles\ArticlesServiceProvider',
         'Kitti\Galleries\GalleriesServiceProvider',
-  //       'Kitti\Medias\MediasServiceProvider',
+        'Kitti\Medias\MediasServiceProvider',
 	),
 
 	/*

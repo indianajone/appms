@@ -17,11 +17,11 @@ class Like extends \BaseModel
 		return $this->hasOne('Kitti\\Medias\\Members', 'id' , 'member_id');
 	}
 
-	public function scopeDeleteArticle($query , $param) {
-		return $query->where('content_id','=', $param['id'])
-				->where('member_id','=', $param['member_id'])
-					->where('type','=','article')->delete();
-	}
+	// public function scopeDeleteArticle($query , $param) {
+	// 	return $query->where('content_id','=', $param['id'])
+	// 			->where('member_id','=', $param['member_id'])
+	// 				->where('type','=','article')->delete();
+	// }
 
 	public function scopeDeleteLike($query , $id , $member_id, $type) {
 		return $query->where('content_id','=', $id)

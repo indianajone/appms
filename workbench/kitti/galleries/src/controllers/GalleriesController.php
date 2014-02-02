@@ -65,6 +65,14 @@ class GalleriesController extends BaseController
                 )
             );
 
+            $response = FileUpload::upload(Input::get('data'));
+            if(!is_array($response)) {
+                $response = json_decode($response);
+                if($response['code'] == 400) {
+                    return $response;
+                }
+            }
+
             $picture = Input::get('picture', null);
             
             if($picture)
@@ -84,9 +92,9 @@ class GalleriesController extends BaseController
                         'id'=> $gallery->id
                     )
                 ); 
-        }
 
-        return Response::message(400,$validator->messages()->first());
+        return Response::message(400,$validator->messages()->first()); 
+        }
     }
 
     public function show($id)
@@ -306,7 +314,7 @@ class GalleriesController extends BaseController
 
         if ($validator->passes()) {
             Gallery::find($id)->delete();
-            return Response::message(200, 'Deleted gallery'.$id.' success!'); 
+            return Response::message(200, 'Deleted gallery_id : '.$id.' success!'); 
         }
 
         return Response::message(400, $validator->messages()->first()); 
