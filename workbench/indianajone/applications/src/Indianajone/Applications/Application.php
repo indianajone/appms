@@ -13,8 +13,14 @@ class Application extends \BaseModel
 
 
 	public static $rules = array(
+		'show' => array(
+			// 'appkey' => 'required|exists:applications,appkey'
+		),
+		'create' => array(
+			'user_id' 	=> 'required|exists:users,id',
+			'name'		=> 'required'
+		),
 		'update' => array(
-			'name' => 'required',
 			'user_id' => 'required'
 		),
 		'delete' => array(
@@ -37,7 +43,7 @@ class Application extends \BaseModel
 	**/
 	public function owner()
 	{
-		return $this->belongsTo('User', 'user_id');
+		return $this->belongsTo('Max\\User\\Models\\User', 'user_id');
 	}
 
 	public function genKey()

@@ -1,6 +1,7 @@
 <?php namespace Indianajone\Applications;
 
-use \DB;
+use DB;
+use Max\User\Models\User;
 
 class Appl
 {
