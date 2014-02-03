@@ -1,0 +1,24 @@
+{
+    "name": "max/missingchild",
+    "description": "",
+    "authors": [
+        {
+            "name": "Phasupong Yingampol",
+            "email": "phasupong@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations",
+            "src/controllers"
+        ],
+        "psr-0": {
+            "Max\\Missingchild": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
