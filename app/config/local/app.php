@@ -115,6 +115,7 @@ return array(
 
 		'Max\User\UserServiceProvider',
 		'Max\Member\MemberServiceProvider',
+		'Max\Missingchild\MissingchildServiceProvider',
 
 		'Kitti\Galleries\GalleriesServiceProvider',
 		'Kitti\Medias\MediasServiceProvider',
