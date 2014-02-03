@@ -20,6 +20,11 @@ class MemberServiceProvider extends ServiceProvider {
         {
             $this->package('max/member');
             include __DIR__.'/../../routes.php';
+
+            $this->app->validator->resolver(function($translator, $data, $rules, $messages)
+            {
+                return new \Indianajone\Validators\Rules\UniqueInApp($translator, $data, $rules, $messages);
+            });
         }
         
         /**

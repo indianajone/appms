@@ -31,7 +31,7 @@ class Member extends BaseModel implements UserInterface{
     		'confirm_password' => 'required|same:password',
     		'first_name' => 'required',
     		'last_name' => 'required',
-    		'email' => 'required|email|unique:members,email',
+    		'email' => 'required|email|uniqueinapp:members,email',
     		'type' => 'required'
     	),
         'update' => array(
