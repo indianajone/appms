@@ -1,9 +1,10 @@
 <?php namespace Indianajone\Categories;
 
-
+use Appl;
 use Baum\Node;
 use Carbon\Carbon;
 use Indianajone\Categories\Extensions\Eloquent\Collection;
+use Input;
 
 /**
 * MODEL
@@ -18,8 +19,11 @@ class Category extends Node {
   protected $table = 'categories';
 
   public static $rules = array(
+    'show' => array(
+      'appkey' => 'required|exists:applications,appkey',
+    ),
     'save' => array(
-      // 'appkey' => 'required|exists:applications,appkey',
+      'appkey' => 'required|exists:applications,appkey',
       'name' => 'required',
       'parent_id' => 'exists:categories,id'
     ),
@@ -35,7 +39,7 @@ class Category extends Node {
     'exists' => 'The given :attribute is invalid.'    
   );
 
-  protected $hidden = array('lft', 'rgt', 'pivot');
+  protected $hidden = array('lft', 'rgt', 'pivot', 'app_id');
 
   /** 
    * Override getDateFormat to unixtime stamp.
@@ -56,6 +60,16 @@ class Category extends Node {
   {
     $format = \Input::get('date_format', null);
     return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+  }
+
+  public function scopeApp($query)
+  {
+      return $query->whereAppId(Appl::getAppIdByKey(Input::get('appkey')));
+  }
+
+  public function scopeActive($query)
+  {
+      return $query->whereStatus(1);
   }
 
 
@@ -160,19 +174,6 @@ class Category extends Node {
   //     // YOUR CODE HERE
   //   });
   // }
-
-   public function children() {
-
-    $children = $this->hasMany(get_class($this), $this->getParentColumnName())
-                ->orderBy($this->getLeftColumnName());
-
-    return $children;
-  }
-
-  public function articles()
-  {
-      return $this->belongsToMany('Kitti\\Articles\\Article', 'article_category', 'article_id');
-  }
 
   public function updateParent($id)
   {

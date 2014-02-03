@@ -25,28 +25,34 @@ class CategoryController extends BaseController
 		$updated_at = Input::get('updated_at', null);
 		$created_at = Input::get('created_at', null);
 
-		$cats = Category::with('children');
-		if($updated_at || $created_at)
+		$validator = Validator::make(Input::all(), Category::$rules['show']);
+		if($validator->passes())
 		{
-			if($updated_at) $cats = $cats->time('updated_at');
-			else $cats = $cats->time('created_at');
-		}
+			$cats = Category::with('children')->app();
+			if($updated_at || $created_at)
+			{
+				if($updated_at) $cats = $cats->time('updated_at');
+				else $cats = $cats->time('created_at');
+			}
+			
+			$cats = $cats->offset($offset)->limit($limit)->get();
 		
-		$cats = $cats->offset($offset)->limit($limit)->get();
-	
 
-		if($field)
-	 		$cats->each(function($cat) use ($fields){
-	 			$cat->setVisible($fields);	
-	 		});
-	 	
-	 	return Response::listing(
-	 		array(
-	 			'code'=>200,
-	 			'message'=> 'success'
-	 		),
-	 		$cats, $offset, $limit
-	 	);
+			if($field)
+		 		$cats->each(function($cat) use ($fields){
+		 			$cat->setVisible($fields);	
+		 		});
+		 	
+		 	return Response::listing(
+		 		array(
+		 			'code'=>200,
+		 			'message'=> 'success'
+		 		),
+		 		$cats, $offset, $limit
+		 	);
+		}
+
+		return Response::message(400, $validator->messages()->first());
 	}
 
 	/**
@@ -72,15 +78,18 @@ class CategoryController extends BaseController
 			$cat = Category::create(array(
 				'name' => Input::get('name'),
 				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
-				'parent_id' => Input::get('parent_id')
 			));
+
+			$parents = Input::get('parent_id',null);
+			if(!is_null($parents))
+				$cat->updateParent($parents);
 
 			$picture = Input::get('picture', null);
 			if($picture)
 			{
 				$response = Image::upload($picture);
 				if(is_object($response)) return $response;
-				$app->picture = $response;
+				$cat->picture = $response;
 			}
 
 			if($cat)
@@ -109,6 +118,7 @@ class CategoryController extends BaseController
 
 		if($cat)
 		{
+			if($field) $cat->setVisible($fields);  
 			$cat['children'] = $cat->getDescendants()->toHierarchy()->toArray();
 			return Response::result(
 				array(
@@ -154,8 +164,26 @@ class CategoryController extends BaseController
 
 		$validator = Validator::make(Input::all(), Category::$rules['update']);
 
-		if ($validator->passes()) {
+		if ($validator->passes()) 
+		{
+
 			$cat = Category::find($id);
+
+			$inputs = Input::all();
+			foreach ($inputs as $key => $val) {
+                if( $val == null || 
+                    $val == '' || 
+                    $val == $cat[$key] ||
+                    $key == 'appkey' ||
+                    $key == 'id') 
+                {
+                    unset($inputs[$key]);
+                }
+            }
+
+            if(!count($inputs))
+                return Response::message(200, 'Nothing is update.');
+
 			$cat->name = Input::get('name', $cat->name);
 			$cat->description = Input::get('description', $cat->description);
 			$parent_id = Input::get('parent_id', $cat->parent_id, null);
