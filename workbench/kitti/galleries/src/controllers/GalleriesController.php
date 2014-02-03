@@ -23,7 +23,12 @@ class GalleriesController extends BaseController
 
         if($validator->passes())
         {
-            $galleries = Gallery::active()->app()->with('owner')->offset($offset)->limit($limit)->get();
+            $galleries = Gallery::active()->app()->with(array(
+                'medias' => function($query)
+                {
+                    $query->take(10);
+                })
+            )->offset($offset)->limit($limit)->get();
             $galleries->each(function($gallery) use ($fields, $field){
                 if($field) $gallery->setVisible($fields);   
             });
@@ -55,7 +60,7 @@ class GalleriesController extends BaseController
                 array(
                     'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
                     'content_id' => Input::get('content_id'),
-                    'content_type' => $inputs['content_type'],
+                    'content_type' => Input::get('content_type'),
                     'name' => Input::get('name'),
                     'description' => Input::get('description'),
                     'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
@@ -96,7 +101,7 @@ class GalleriesController extends BaseController
             $field = Input::get('fields', null);
             $fields = explode(',', $field);
 
-            $gallery = Gallery::with(array('owner',
+            $gallery = Gallery::with(array(
                 'medias' => function($query)
                 {
                     $query->take(10);
@@ -123,17 +128,18 @@ class GalleriesController extends BaseController
         $field = Input::get('fields', null);
         $fields = explode(',', $field);
 
-        $galleries = Gallery::with(array(
-            'medias' => function($query)
-            {
-                $query->take(10);
-            })
-        )->active()->owner($type, $id)->offset($offset)->limit($limit)->get();
-
-        $validator = Validator::make(array('id'=>$id, 'type'=>$type), Gallery::$rules['show_by_owner']);
+        $validator = Validator::make(array('id'=>$id, 'type'=>$type, 'appkey' => Input::get('appkey')), Gallery::$rules['show_by_owner']);
 
         if($validator->passes())
         {
+
+            $galleries = Gallery::with(array(
+                'medias' => function($query)
+                {
+                    $query->take(10);
+                })
+            )->active()->owner($type, $id)->offset($offset)->limit($limit)->get();
+
             $galleries->each(function($gallery) use ($fields, $field){
                 $gallery->setHidden(array('content_id','type','app_id','status'));
                 if($field) $gallery->setVisible($fields);   

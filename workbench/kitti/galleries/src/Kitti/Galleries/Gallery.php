@@ -37,19 +37,20 @@ class Gallery extends \BaseModel
 
     public function owner()
     {
-    	switch($this->attribute['type'])
+        // var_dump($this->attribute['content_type']);
+    	switch($this->attribute['content_type'])
     	{
+            case 'article':
+                $model = 'Kitti\\Articles\\Article';
+            break;
     		default: //case 'member':
     			$model = 'Max\\Member\\Models\\Member';
     		break;
     	}
 
-    	return $this->belongsTo($model, 'content_id');
-    }
+    	return $this->belongsTo($model, 'id');
 
-    public function media()
-    {
-    	return $this->morphMany('Media', 'imageable');
+        // dd(\DB::getQueryLog());
     }
 
     public function medias()
@@ -57,13 +58,8 @@ class Gallery extends \BaseModel
     	return $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
     }
 
-    public function scopeActive($query)
-    {
-        return $query->whereStatus(1);
-    }
-
     public function scopeOwner($query, $type, $id)
     {
-    	return $query->whereType($type)->whereContentId($id);
+    	return $query->whereContentType($type)->whereContentId($id);
     }
 }
