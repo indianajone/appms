@@ -24,8 +24,9 @@ class CreateMedias extends Migration {
 
                 $table->string('name',255);
                 $table->string('description',255)->nullable();
-                $table->string('path',100);
-                $table->string('filename',100)->nullable();
+                $table->string('picture',100);
+                $table->string('link', 255)->nullable();
+                // $table->string('filename',100)->nullable();
                 $table->string('type',10);
                 $table->string('latitude',25)->nullable();
                 $table->string('longitude',25)->nullable();
