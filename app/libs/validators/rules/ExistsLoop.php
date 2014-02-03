@@ -8,6 +8,8 @@ class ExistLoop extends \Illuminate\Validation\Validator
     	$values = explode(',', $value);
 		foreach ($values as $i => $value) 
 		{
+			$parameters[3] = 'app_id';
+			$parameters[4] = \Appl::getAppIDByKey(\Input::get('appkey')); 
 			$results[] = $this->validateExists($i, $value, $parameters);
 			if(!$results[$i])
 			{
