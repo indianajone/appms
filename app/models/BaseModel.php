@@ -25,6 +25,12 @@ class BaseModel extends Eloquent
 		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
 	}
 
+	public function getPublishAtAttribute($value)
+	{
+		$format = \Input::get('date_format', null);
+		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+	}
+
 	public function scopeTime($query, $field)
 	{
 	    $updated_at = \Input::get($field);
