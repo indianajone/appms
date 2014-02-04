@@ -4,7 +4,7 @@ class Article extends \BaseModel
 {
     protected $table = 'articles';
     protected $guarded = array('id');
-    protected $hidden = array('app_id', 'status');
+    protected $hidden = array('app_id', 'status', 'pivot');
 
     public static $rules = array(
     	'show' => array(
