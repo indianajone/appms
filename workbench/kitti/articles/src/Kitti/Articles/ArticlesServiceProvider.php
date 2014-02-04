@@ -20,6 +20,11 @@ class ArticlesServiceProvider extends ServiceProvider {
     {
         $this->package('kitti/articles');
         include __DIR__.'/../../routes.php';
+
+        $this->app->validator->resolver(function($translator, $data, $rules, $messages)
+		{
+		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
+		});
     }
 
 	/**
