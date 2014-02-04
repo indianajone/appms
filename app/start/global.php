@@ -79,3 +79,9 @@ App::down(function()
 */
 
 require app_path().'/filters.php';
+
+
+App::missing(function($exception)
+{
+    return Response::message(400, Request::segment(3). ' module does not exists.');
+});
