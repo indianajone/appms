@@ -4,10 +4,11 @@ class Image
 {
 	public function upload($base64)
 	{
+		$local_env = \App::environment('local');
 		$cdn = \Config::get('image.cdn');
 		$nas = \Config::get('image.nas');
 		$slug = \Config::get('image.slug').'/'.date('Y/m/d').'/';
-		$path = $cdn.$nas.$slug;
+		$path = ( $local_env ? $cdn : '').$nas.$slug;
 		$format = \Config::get('image.format');
 
 		// #FIXED iDevice base64 encode.
@@ -28,6 +29,7 @@ class Image
 			$format = $mime_type == 'image/jpeg' ? 'jpg' : 'png';
 		}
 		$filename = rand(0,1000).time().'.'.$format;
+		
 		if(!\File::exists($path))
 			\File::makeDirectory($path, 0777, true, true);
 		if(!\File::exists($path))
@@ -38,7 +40,7 @@ class Image
 	        	]
 			), 200);
 		if(\File::put($path.$filename,$picture))
-			return asset($slug.$filename);
+			return $local_env ? asset($slug.$filename) : $cdn.$slug.$filename;
 		else
 			return \Response::json(array(
 				'header'=> [
