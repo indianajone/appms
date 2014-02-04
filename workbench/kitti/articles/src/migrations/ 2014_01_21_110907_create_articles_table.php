@@ -47,6 +47,7 @@ class CreateArticlesTable extends Migration {
             $table->integer('category_id', false)->unsigned();
             $table->foreign('category_id')->references('id')->on('categories');
           });
+
         }
 
         /**
