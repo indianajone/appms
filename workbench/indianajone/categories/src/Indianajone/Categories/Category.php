@@ -39,7 +39,7 @@ class Category extends Node {
     'exists' => 'The given :attribute is invalid.'    
   );
 
-  protected $hidden = array('lft', 'rgt', 'pivot', 'app_id');
+  protected $visible = array('id', 'name');
 
   /** 
    * Override getDateFormat to unixtime stamp.
