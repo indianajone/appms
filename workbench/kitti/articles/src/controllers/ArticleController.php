@@ -24,7 +24,7 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$articles = Article::app()->active();
+			$articles = Article::app()->active()->with('gallery.medias');
 
 			$categories = Input::get('category_id', null);
 			if($categories)
@@ -217,7 +217,4 @@ class ArticleController extends BaseController
 
 		return Response::message(400, $validator->messages()->first());
 	}
-
-
-
 }
