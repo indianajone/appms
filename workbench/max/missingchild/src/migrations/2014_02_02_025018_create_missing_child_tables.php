@@ -19,7 +19,8 @@ class CreateMissingChildTables extends Migration {
             $table->foreign('user_id')->references('id')->on('users');
             $table->integer('gallery_id')->unsigned()->nullable();
             $table->foreign('gallery_id')->references('id')->on('galleries');
-            $table->string('title', 40)->nullable();
+            $table->string('title', 255);
+            $table->text('content');
             $table->string('first_name', 100);
             $table->string('last_name', 100);
             $table->string('nickname', 40)->nullable();
@@ -27,6 +28,7 @@ class CreateMissingChildTables extends Migration {
             $table->integer('lost_age');
             $table->string('picture', 100)->nullable();
             $table->integer('birth_date')->nullable();
+            $table->integer('age')->nullable();
             $table->string('notify_text')->nullable();
             $table->text('place_of_missing');
             $table->string('latitude',25)->nullable();
