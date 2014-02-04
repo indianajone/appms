@@ -187,6 +187,10 @@ return array(
 		'URL'             => 'Illuminate\Support\Facades\URL',
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
+
+		'Appl'			  => 'Indianajone\Applications\Facades\Application',
+		'Image'			  => 'Libs\Helpers\Facades\Image',
+		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
 	),
 
 );
