@@ -13,29 +13,37 @@ class BaseModel extends Eloquent
         return 'U';
     }
 
+    public function formatTime($value)
+    {
+    	$format = \Input::get('date_format', null);
+		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;    
+    }
+
     public function getCreatedAtAttribute($value)
 	{
-		$format = \Input::get('date_format', null);
-		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+		return $this->formatTime($value);
 	}
 
 	public function getUpdatedAtAttribute($value)
 	{
-		$format = \Input::get('date_format', null);
-		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+		return $this->formatTime($value);    
 	}
 
 	public function getPublishAtAttribute($value)
 	{
-		$format = \Input::get('date_format', null);
-		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
+		return $this->formatTime($value); 
 	}
 
 	public function scopeTime($query, $field)
 	{
-	    $updated_at = \Input::get($field);
-	    $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
-	    return $query->where($field, '>=', $time->timestamp);
+		$format = \Input::get('date_format', null);
+	    $from = \Input::get($field);
+	    if($format)
+	    {
+	    	$time = Carbon::createFromFormat($format, $from, \Config::get('app.timezone'));
+	    	return $query->where($field, '>=', $time->timestamp);
+	    }
+	    else return $query->where($field, '>=', $from);
 	}
 
 	public function scopeApp($query)
