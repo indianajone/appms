@@ -70,7 +70,7 @@ class UserController extends \BaseController {
         {
             $user = User::create(
                 array(
-                    'parent_id'     => Input::get('parent_id'),
+                    'parent_id'     => Input::get('parent_id', 0),
                     'username'      => Input::get('username'),
                     'password'      => Hash::make(Input::get('password')),
                     'first_name'    => Input::get('first_name'),
