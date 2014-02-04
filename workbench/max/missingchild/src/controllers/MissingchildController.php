@@ -1,6 +1,6 @@
 <?php namespace Max\Missingchild\Controllers;
 
-use Validator, Input, Response, Hash, Appl;
+use Validator, Input, Response, Hash, Appl, Image;
 use Indianajone\Categories\Category;
 use Max\Missingchild\Models\Missingchild as Child;
 use \Kitti\Galleries\Gallery;
@@ -20,6 +20,9 @@ class MissingchildController extends \BaseController {
             $limit = Input::get('limit', 10);
             $field = Input::get('fields', null);
             $fields = $field ? explode(',', $field) : $field;
+
+            $hidden = Input::get('hiddens', null);
+            $hiddens = $hidden ? explode(',', $hidden) : $hidden;
             
             $updated_at = Input::get('updated_at', null);
             $created_at = Input::get('created_at', null);
@@ -30,12 +33,15 @@ class MissingchildController extends \BaseController {
 			if($keyword)
 				$children = $children->where('first_name', 'like', '%'.$keyword.'%')->orWhere('last_name','like', '%'.$keyword.'%');
 
-            $categories = Input::get('category_id', null);
+			$categories = Input::get('category_id', null);
+            $categories = $categories ? explode(',', $categories) : null;
 			if($categories)
-				$children = $children->whereHas('type', function($q)
+				$children = $children->whereHas('type', function($q) use($categories)
 				{
-				    $cat = Category::find(Input::get('category_id'))->getDescendantsAndSelf(array('id'));
-				    $q->whereIn('category_id', array_flatten($cat->toArray()));
+				    $cats = Category::findMany($categories)->each(function($cat){
+				    	$cat->getDescendantsAndSelf(array('id'));
+				    });
+				    $q->whereIn('category_id', array_flatten($cats->toArray()));
 
 				});
 
@@ -49,15 +55,14 @@ class MissingchildController extends \BaseController {
             $orderBy = $order ? explode(',', $order) : $order;
             if($orderBy) 
             {
-            	/**
-            	#TODO need Validations
-            	**/
-            	$children = $children->orderBy($orderBy[0], $orderBy[1]);
+            	if(\Schema::hasColumn('missingchilds', $orderBy[0]))
+					$children = $children->orderBy($orderBy[0], $orderBy[1]);
             }
-            
+
             $children = $children->offset($offset)->limit($limit)->with('type', 'articles', 'gallery')->get();
-            $children->each(function($child) use ($fields, $field){
+            $children->each(function($child) use ($fields, $field, $hiddens, $hidden){
             	if($field) $child->setVisible($fields);  
+            	if($hidden) $child->setHidden(array_merge($hiddens, $child->getHidden()));
             });
 
             return Response::listing(
@@ -123,6 +128,7 @@ class MissingchildController extends \BaseController {
  				'nickname' => Input::get('nickname'),
  				'gender' => Input::get('gender'),
  				'lost_age' => Input::get('lost_age'),
+ 				'age' => Input::get('age'),
  				'place_of_missing' => Input::get('place_of_missing'),
  				'latitude' => Input::get('latitude'),
  				'longitude' => Input::get('longitude'),
@@ -131,14 +137,6 @@ class MissingchildController extends \BaseController {
  				'missing_date' => Input::get('missing_date'),
  				'report_date' => Input::get('report_date')
  			));
-
- 			$picture = Input::get('picture', null);
-			if($picture)
-			{
-				$response = Image::upload($picture);
-				if(is_object($response)) return $response;
-				$child->picture = $response;
-			}
 
 			$category_id = Input::get('category_id', null);
 			if($category_id) 
@@ -159,6 +157,14 @@ class MissingchildController extends \BaseController {
 
             if($gallery->save())
             	$child->gallery_id = $gallery->getKey();
+
+            $picture = Input::get('picture', null);
+			if($picture)
+			{
+				$response = Image::upload($picture);
+				if(is_object($response)) return $response;
+				$child->picture = $response;
+			}
             
 			if($child->save())
 				return Response::result(
