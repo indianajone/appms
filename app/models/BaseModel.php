@@ -131,12 +131,12 @@ class BaseModel extends Eloquent
     {
         if($ids != '*')
         {
-            $query->whereHas('types', function($type) use($ids){
+           $query = $query->whereHas('categories', function($type) use($ids){
                 $type->whereIn('category_id', $ids);
             });
         }
 
-        $query = $query->with('types');
+        // $query = $query->with('categories');
 
         return $query;
     }

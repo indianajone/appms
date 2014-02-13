@@ -8,8 +8,8 @@
 
 		Route::any('missingchilds/{id}/delete', 'Max\\Missingchild\\Controllers\\MissingchildController@delete');
 		// Route::any('missingchilds/{id}/clues', 'Max\\Missingchild\\Controllers\\MissingchildController@clues');
-		Route::any('missingchilds/{id}/clues/attach', 'Max\\Missingchild\\Controllers\\MissingchildController@attachArticles');
-		Route::any('missingchilds/{id}/clues/detach', 'Max\\Missingchild\\Controllers\\MissingchildController@detachArticles');
+		Route::any('missingchilds/{id}/article/attach', 'Max\\Missingchild\\Controllers\\MissingchildController@attachArticles');
+		Route::any('missingchilds/{id}/article/detach', 'Max\\Missingchild\\Controllers\\MissingchildController@detachArticles');
 		Route::resource('missingchilds', 'Max\\Missingchild\\Controllers\\MissingchildController');
 
 	});

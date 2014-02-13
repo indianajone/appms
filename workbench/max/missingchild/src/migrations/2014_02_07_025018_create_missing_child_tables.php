@@ -19,7 +19,7 @@ class CreateMissingChildTables extends Migration {
             $table->foreign('app_id')->references('id')->on('applications');
             $table->integer('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('article_id')->unsigned();
+            $table->integer('article_id')->unsigned()->nullable();
             $table->foreign('article_id')->references('id')->on('articles');
             $table->integer('gallery_id')->unsigned()->nullable();
             $table->foreign('gallery_id')->references('id')->on('galleries');

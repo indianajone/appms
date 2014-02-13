@@ -1,10 +1,51 @@
 <?php namespace Kitti\Articles;
 
-class Article extends \BaseModel
+use BaseModel;
+use Indianajone\Categories\Category;
+
+class Article extends BaseModel
 {
     protected $table = 'articles';
     protected $guarded = array('id');
     protected $hidden = array('app_id', 'status', 'pivot', 'gallery_id');
+
+    /*
+     * The following $map array maps the url query string to
+     * the corresponding model filter e.g.
+     *  ->order_by will handle Input::get('order_by')
+     */
+    protected $map = array(
+        // 'order_by' => 'order_by',
+        // 'limit' => 'limit',
+        // 'offset' => 'offset',
+        // 'search' => 'q',
+        'filterCats' => 'category_id',
+        // 'whereUpdated' => 'updated_at',
+        // 'whereCreated' => 'created_at'
+    );
+
+    /*
+     *  Default values for the url parameters
+     */
+    protected $defaults = array(
+        'order_by' => null,
+        'limit' => 10,
+        'offset' => 0,
+        'search' => null,
+        'filterCats' => '*',
+        'time' => null
+    );
+
+    /*
+     * The following filters are defined by
+     *  url parameters can have multiple
+     *  values separated by a delimiter
+     *  e.g. order_by, sort
+     */
+    protected $multiple = array(
+        'filterCats',
+        'order_by'
+    );
 
     public static $rules = array(
     	'show' => array(
@@ -58,13 +99,16 @@ class Article extends \BaseModel
     	if(is_array($category))
     		$category = $category['id'];
 
-    	$this->categories()->attach($category);
+        $cat = $this->categories()->where('category_id', '=', $category)->get();
+
+        if($cat->count() === 0)
+    	   $this->categories()->attach($category);
     }
 
     public function attachCategories($categories)
     {
     	foreach ($categories as $category) {
-    		$this->attachCategory($category);
+    	   	$this->attachCategory($category);
     	}
     }
 

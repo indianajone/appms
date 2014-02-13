@@ -9,6 +9,7 @@ use Response;
 use Validator;
 use Kitti\Articles\Article;
 use Indianajone\Categories\Category;
+use Indianajone\Categories\Extensions\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ArticleController extends BaseController
@@ -24,32 +25,42 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$articles = Article::app()->active()->with('gallery.medias');
+			$articles = Article::app()->active()->ApiFilter()->offset($offset)->limit($limit)->get();
 
-			$categories = Input::get('category_id', null);
-			if($categories)
-				$articles = $articles->whereHas('categories', function($q)
-				{
-				    $cat = Category::find(Input::get('category_id'))->getDescendantsAndSelf(array('id'));
-				    $q->whereIn('category_id', array_flatten($cat->toArray()));
+			// $categories = Input::get('category_id', null);
+			// if($categories)
+			// 	$articles = $articles->whereHas('categories', function($q)
+			// 	{
+			// 	    $cat = Category::find(Input::get('category_id'))->getDescendantsAndSelf(array('id'));
+			// 	    $q->whereIn('category_id', array_flatten($cat->toArray()));
 
-				});
+			// 	});
 			
-			$keyword = Input::get('q', null);
-			if($keyword)
-				$articles = $articles->where('title', 'like', '%'.$keyword.'%')->orWhere('content','like', '%'.$keyword.'%');
+			// $keyword = Input::get('q', null);
+			// if($keyword)
+			// 	$articles = $articles->where('title', 'like', '%'.$keyword.'%')->orWhere('content','like', '%'.$keyword.'%');
 
-			$articles = $articles->with('categories')->offset($offset)->limit($limit)->get();
+			// $articles = $articles->offset($offset)->limit($limit)->get();
 			
-			$articles->each(function($article) use ($fields, $field){
-	 			if($field) $article->setVisible($fields);
-	 			$categories = $article->getRelation('categories');
-	 			$categories->filter(function($category){
-	 				$category->setVisible(array('id','name'));
-	 			});
+			$articles->each(function($article) {
+				$article->fields();
 
-	 			$gallery = $article->getRelation('gallery');
-	 			if($gallery) $gallery->setVisible(array('id','name','picture','medias'));
+				$cats = $article->categories()->get(); 
+				foreach ($cats as $key => $cat) {
+					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
+				}
+
+				$gallery = $article->gallery()->with('medias')->first();
+				if($gallery) $article->setRelation('gallery', $gallery);
+				
+	 	// 		if($field) $article->setVisible($fields);
+	 	// 		$categories = $article->getRelation('categories');
+	 	// 		$categories->filter(function($category){
+	 	// 			$category->setVisible(array('id','name'));
+	 	// 		});
+
+	 	// 		$gallery = $article->getRelation('gallery');
+	 	// 		if($gallery) $gallery->setVisible(array('id','name','picture','medias'));
 	 		});
 
 	 		// dd(\DB::getQueryLog());
@@ -122,19 +133,19 @@ class ArticleController extends BaseController
 		$inputs = array_add(Input::all(),'id',$id);
 		$validator = Validator::make($inputs, Article::$rules['show_with_id']);
 
-		$field = Input::get('fields', null);
-		$fields = explode(',', $field);
-
 		if($validator->passes())
 		{
-			$article = Article::app()->active()->find($id);
+			$article = Article::whereId($id)->app()->active()->ApiFilter()->first();
 			if($article)
 			{
+				$article->fields();
+				$cats = $article->categories()->get(); 
+				foreach ($cats as $key => $cat) {
+					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
+				}
 
-				$article->setRelation('categories', $article->categories()->with('children')->first()->getDescendantsAndSelf()->toHierarchy());
-				$article->setRelation('gallery', $article->gallery()->with('medias')->first());
-
-				if($field) $article->setVisible($fields);  
+				$gallery = $article->gallery()->with('medias')->first();
+				if($gallery) $article->setRelation('gallery', $gallery);
 
 				return Response::result(array(
 	        		'header' => array(

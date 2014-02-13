@@ -21,7 +21,7 @@ class MissingchildController extends \BaseController {
 
             foreach ($children as $item => $child) {
             	$child->fields();
-            	$types = $child->types()->remember(1)->get();
+            	$types = $child->categories()->remember(1)->get();
             	$obj = [];
             	foreach ($types as $type) {
             		if(!$type->isRoot())
@@ -109,8 +109,10 @@ class MissingchildController extends \BaseController {
  		{
  			$app_id = Appl::getAppIDByKey(Input::get('appkey'));
  			$child = Child::create(array(
- 				'title' => Input::get('title'),
- 				'content' => Input::get('content'),
+ 				'app_id' => $app_id,
+ 				// 'title' => Input::get('title'),
+ 				'article_id' => null,
+ 				'description' => Input::get('content'),
  				'first_name' => Input::get('first_name'),
  				'last_name' => Input::get('last_name'),
  				'nickname' => Input::get('nickname'),
@@ -122,15 +124,16 @@ class MissingchildController extends \BaseController {
  				'longitude' => Input::get('longitude'),
  				'note' => Input::get('note'),
  				'order' => Input::get('order', 0),
- 				'missing_date' => Input::get('missing_date'),
- 				'report_date' => Input::get('report_date')
+ 				'missing_at' => Input::get('missing_date'),
+ 				'reported_place' => 'สถานีห้วยขวาง',
+ 				'reported_at' => Input::get('report_date')
  			));
 
 			$category_id = Input::get('category_id', null);
 			if($category_id) 
 			{
 				$ids = explode(',', $category_id); 
-				$child->attachRelations('types',$ids);
+				$child->attachRelations('categories',$ids);
 			}
 
 			$child->gallery()->create(
@@ -163,32 +166,33 @@ class MissingchildController extends \BaseController {
 				}
 			}
 
-			$child->articles()->create(array(
+			$child->app_content()->create(array(
 				'app_id' => $app_id,
-				'title' => $child->title,
-				'content' => $child->content,
+				'title' => Input::get('title'),
+				'content' => $child->description,
 				'wrote_by' => Input::get('wrote_by', 'Admin'),
 				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
 			));
 
-			$article_type = Input::get('article_type', null);
-			if($article_type) $article->attachCategory($article_type);
+			// $article_type = Input::get('article_type', null);
+			// if($article_type) $article->attachCategory($article_type);
 
-			$child->attachRelation('articles',$article->id);
+			// $child->attachRelation('articles',$article->id);
 
-			$article_gallery = Gallery::create(
-                array(
-                    'app_id' => $app_id,
-                    'content_id' => $article->id,
-                    'content_type' => 'article',
-                    'name' => $child->first_name .'\'s article images',             
-                    'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
-                )
-            );
+			// $article_gallery = Gallery::create(
+   //              array(
+   //                  'app_id' => $app_id,
+   //                  'content_id' => $article->id,
+   //                  'content_type' => 'article',
+   //                  'name' => $child->first_name .'\'s article images',             
+   //                  'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+   //              )
+   //          );
 
-            $article->update(array(
-            	'gallery_id' => $article_gallery->id
-            ));
+            // $article->update(array(
+            // 	'article_id' = $child->app
+            // 	// 'gallery_id' => $article_gallery->id
+            // ));
             
 			if($child->save())
 				return Response::result(
@@ -216,7 +220,7 @@ class MissingchildController extends \BaseController {
 			$child = Child::apiFilter()->with('gallery.medias', 'articles.gallery.medias')->find($id);
 			$child->fields();
         	
-        	$types = $child->getRelation('types');
+        	$types = $child->getRelation('categories');
         	$obj = array();
         	foreach ($types as $type) {
         		if(!$type->isRoot())
@@ -282,7 +286,7 @@ class MissingchildController extends \BaseController {
 			if($category_id)
 			{
 				$ids = explode(',', $category_id); 
-				$child->syncRelations('types', $ids);
+				$child->syncRelations('categories', $ids);
 				unset($inputs['category_id']);
 			}
 
@@ -327,7 +331,7 @@ class MissingchildController extends \BaseController {
 	        $child = Child::find($id);
         	// Detach Types
         	$ids = $child->types()->get()->lists('id');
-        	$child->detachRelations('types', $ids);
+        	$child->detachRelations('categories', $ids);
 
         	$ids = $child->articles->lists('id');
         	var_dump($ids);

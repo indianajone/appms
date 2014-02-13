@@ -27,7 +27,7 @@ class Missingchild extends \BaseModel
     /*
      *  Default values for the url parameters
      */
-    protected  $defaults = array(
+    protected $defaults = array(
         'order_by' => null,
         'limit' => 10,
         'offset' => 0,
@@ -42,7 +42,7 @@ class Missingchild extends \BaseModel
      *  values separated by a delimiter
      *  e.g. order_by, sort
      */
-    protected  $multiple = array(
+    protected $multiple = array(
         'filterCats',
         'order_by'
     );
@@ -92,10 +92,12 @@ class Missingchild extends \BaseModel
 
      public function app_content()
     {
-        return $this->articles()
-        ->whereHas('categories', function($q){
-            $q->where('name', '=', 'child_detail');
-        });
+        // return $this->articles()
+        // ->whereHas('categories', function($q){
+        //     $q->where('name', '=', 'child_detail');
+        // });
+
+        return $this->hasOne('Kitti\\Articles\\Article', 'article_id');
     }
 
     public function gallery()
@@ -109,7 +111,7 @@ class Missingchild extends \BaseModel
         return $this->belongsTo('Max\\User\\Models\\User', 'user_id')->select(array('id','username'));
     }
 
-    public function types()
+    public function categories()
     {
         return $this->belongsToMany('Indianajone\\Categories\\Category', 'category_missingchild');
     }
