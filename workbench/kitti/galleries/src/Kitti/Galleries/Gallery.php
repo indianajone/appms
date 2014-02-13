@@ -66,4 +66,9 @@ class Gallery extends \BaseModel
     {
     	return $query->whereContentType($type)->whereContentId($id);
     }
+
+    public function galleryable()
+    {
+        return $this->morphTo();
+    }
 }

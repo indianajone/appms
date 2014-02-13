@@ -39,12 +39,20 @@ class ArticleController extends BaseController
 			if($keyword)
 				$articles = $articles->where('title', 'like', '%'.$keyword.'%')->orWhere('content','like', '%'.$keyword.'%');
 
-			$articles = $articles->offset($offset)->limit($limit)->get();
+			$articles = $articles->with('categories')->offset($offset)->limit($limit)->get();
 			
 			$articles->each(function($article) use ($fields, $field){
 	 			if($field) $article->setVisible($fields);
-	 			$article->setRelation('categories', $article->categories()->with('children')->get());
+	 			$categories = $article->getRelation('categories');
+	 			$categories->filter(function($category){
+	 				$category->setVisible(array('id','name'));
+	 			});
+
+	 			$gallery = $article->getRelation('gallery');
+	 			if($gallery) $gallery->setVisible(array('id','name','picture','medias'));
 	 		});
+
+	 		// dd(\DB::getQueryLog());
 
 	 		return Response::listing(
 		 		array(
@@ -206,6 +214,7 @@ class ArticleController extends BaseController
 	        $article = Article::where('id','=',$id)->app()->first();
 	        if($article)
 	        {
+	        	$article->gallery()->first()->delete();
 	        	$article->detachCategories(array_flatten($article->getCategoryIds()));	
 				$article->delete();
 

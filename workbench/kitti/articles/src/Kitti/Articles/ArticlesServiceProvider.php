@@ -23,7 +23,7 @@ class ArticlesServiceProvider extends ServiceProvider {
 
         $this->app->validator->resolver(function($translator, $data, $rules, $messages)
 		{
-		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
+		    return new \Indianajone\Validators\Rules\ExistsLoop($translator, $data, $rules, $messages);
 		});
     }
 

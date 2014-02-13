@@ -16,7 +16,7 @@ class CreateGalleries extends Migration {
                 $table->integer('app_id', false)->unsigned();
                 $table->foreign('app_id')->references('id')->on('applications');
                 $table->integer('content_id', false);
-                $table->string('content_type', 10);
+                $table->string('content_type');
                 $table->string('name',255);
                 $table->string('description',255)->nullable();
                 $table->string('picture',100)->nullable();

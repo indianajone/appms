@@ -25,6 +25,11 @@ class MissingchildServiceProvider extends ServiceProvider {
         {
             return new \Indianajone\Validators\Rules\ExistsInApp($translator, $data, $rules, $messages);
         });
+
+        $this->app->validator->resolver(function($translator, $data, $rules, $messages)
+        {
+            return new \Indianajone\Validators\Rules\ExistsLoop($translator, $data, $rules, $messages);
+        });
 	}
 
 	/**

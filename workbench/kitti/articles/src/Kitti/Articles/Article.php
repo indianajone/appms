@@ -4,7 +4,7 @@ class Article extends \BaseModel
 {
     protected $table = 'articles';
     protected $guarded = array('id');
-    protected $hidden = array('app_id', 'status', 'pivot');
+    protected $hidden = array('app_id', 'status', 'pivot', 'gallery_id');
 
     public static $rules = array(
     	'show' => array(
@@ -19,13 +19,13 @@ class Article extends \BaseModel
             'title' => 'required',
             'content' => 'required',
             'wrote_by' => 'required',
-    		'category_id' => 'required|existloop:categories,id',
+    		'category_id' => 'required|existsloop:categories,id',
             'gallery_id' => 'exists:galleries,id'
     	),
         'update' => array(
             'appkey' => 'required|exists:applications,appkey',
             'id'    => 'required|exists:articles',
-            'category_id' => 'existloop:categories,id',
+            'category_id' => 'existsloop:categories,id',
             'gallery_id' => 'exists:galleries,id'
         ),
         'delete' => array(
@@ -34,6 +34,11 @@ class Article extends \BaseModel
         )
     );
 
+    public function articleable()
+    {
+        return $this->morphToMany();
+    }
+
     public function categories()
     {
     	return $this->belongsToMany('Indianajone\\Categories\\Category', 'article_category');
@@ -41,7 +46,9 @@ class Article extends \BaseModel
 
     public function gallery()
     {
-        return $this->hasOne('Kitti\\Galleries\\Gallery', 'content_id')->where('content_type', '=', 'article');
+        // return $this->hasOne('Kitti\\Galleries\\Gallery', 'content_id')->where('content_type', '=', 'article');
+
+        return $this->morphOne('Kitti\\Galleries\\Gallery', 'galleryable', 'content_type', 'content_id');
     }
 
     public function attachCategory($category)
