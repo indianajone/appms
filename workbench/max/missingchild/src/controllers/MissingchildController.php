@@ -17,16 +17,17 @@ class MissingchildController extends \BaseController {
 
         if($validator->passes())
         {
-            $children = Child::active()->apiFilter()->with('gallery.medias')->get(); 
+
+            $children = Child::active()->app()->apiFilter()->with('gallery.medias', 'app_content.gallery.medias')->get(); 
 
             foreach ($children as $item => $child) {
             	$child->fields();
-            	$types = $child->categories()->remember(1)->get();
+            	$types = $child->categories()->get(); //->remember(1)
             	$obj = [];
             	foreach ($types as $type) {
             		if(!$type->isRoot())
             		{
-            			$name = Category::whereId($type->getParentId())->remember(1)->first()->name;
+            			$name = Category::whereId($type->getParentId())->first()->name; //->remember(1)
             			if(!array_key_exists($name,$obj)) 
             				$obj[$name] = [];
 
@@ -37,12 +38,6 @@ class MissingchildController extends \BaseController {
             			$child->setRelation($key, new Collection($type));
             		}
             	}
-
-            	$content = $child->app_content()->get();
-
-            	if($content->count() >= 1) 
-            		$child->setRelation('app_content', $content->load('gallery.medias')->first());
-            	
             }
 
             // dd(\DB::getQueryLog());
@@ -108,10 +103,10 @@ class MissingchildController extends \BaseController {
  		if($validator->passes())
  		{
  			$app_id = Appl::getAppIDByKey(Input::get('appkey'));
+ 			// $child = Child::find(1);
+
  			$child = Child::create(array(
  				'app_id' => $app_id,
- 				// 'title' => Input::get('title'),
- 				'article_id' => null,
  				'description' => Input::get('content'),
  				'first_name' => Input::get('first_name'),
  				'last_name' => Input::get('last_name'),
@@ -124,9 +119,9 @@ class MissingchildController extends \BaseController {
  				'longitude' => Input::get('longitude'),
  				'note' => Input::get('note'),
  				'order' => Input::get('order', 0),
- 				'missing_at' => Input::get('missing_date'),
+ 				'missing_at' => Input::get('missing_at'),
  				'reported_place' => 'สถานีห้วยขวาง',
- 				'reported_at' => Input::get('report_date')
+ 				'reported_at' => Input::get('report_at')
  			));
 
 			$category_id = Input::get('category_id', null);
@@ -140,7 +135,6 @@ class MissingchildController extends \BaseController {
                 array(
                     'app_id' => $app_id,
                     'content_id' => $child->id,
-                    'content_type' => 'child',
                     'name' => $child->first_name .'\'s gallery',             
                     'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
                 )
@@ -151,22 +145,31 @@ class MissingchildController extends \BaseController {
 			{
 				if(filter_var($picture, FILTER_VALIDATE_URL))
 				{
-					$child->picture = $picture;
-				}
-				else if(base64_decode($picture, true))
-				{
-					dd('yeah');
-					$response = Image::upload($picture);
-					if(is_object($response)) return $response;
-					$child->picture = $response;
+					$child->update(array(
+						'picture' => $picture
+					));
 				}
 				else
 				{
-					dd('id');
+					$response = Image::upload($picture);
+					if(is_object($response)) 
+						return $response;
+
+					$child->gallery->medias()->create(array(
+						 'app_id' => $app_id,
+						 'gallery_id' => $child->gallery->id,
+						 'name' => $child->first_name,
+						 'picture' => $response,
+						 'type' => 'image'
+					));
+
+					$child->update(array(
+						'picture' => $response
+					));
 				}
 			}
 
-			$child->app_content()->create(array(
+			$app_content = $child->app_content()->create(array(
 				'app_id' => $app_id,
 				'title' => Input::get('title'),
 				'content' => $child->description,
@@ -174,25 +177,16 @@ class MissingchildController extends \BaseController {
 				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
 			));
 
-			// $article_type = Input::get('article_type', null);
-			// if($article_type) $article->attachCategory($article_type);
+			$child->update(array(
+				'article_id' => $app_content->id
+			));
 
-			// $child->attachRelation('articles',$article->id);
-
-			// $article_gallery = Gallery::create(
-   //              array(
-   //                  'app_id' => $app_id,
-   //                  'content_id' => $article->id,
-   //                  'content_type' => 'article',
-   //                  'name' => $child->first_name .'\'s article images',             
-   //                  'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
-   //              )
-   //          );
-
-            // $article->update(array(
-            // 	'article_id' = $child->app
-            // 	// 'gallery_id' => $article_gallery->id
-            // ));
+			$app_content->gallery()->create(array(
+				'app_id' => $app_id,
+				'content_id' => $app_content->id,
+				'name' => $app_content->id,
+				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp)
+			));
             
 			if($child->save())
 				return Response::result(
@@ -217,12 +211,13 @@ class MissingchildController extends \BaseController {
 
 		if($validator->passes())
 		{
-			$child = Child::apiFilter()->with('gallery.medias', 'articles.gallery.medias')->find($id);
+			$child = Child::apiFilter()->with('categories', 'gallery.medias', 'articles.gallery.medias')->find($id);
 			$child->fields();
-        	
-        	$types = $child->getRelation('categories');
+
+			$types = $child->getRelation('categories');
         	$obj = array();
         	foreach ($types as $type) {
+        		$type->setVisible(array('id','name'));
         		if(!$type->isRoot())
         		{
         			$name = $type->getRoot()->name;
@@ -230,6 +225,11 @@ class MissingchildController extends \BaseController {
         				$obj[$name] = [];
 
         			array_push($obj[$name], $type->toArray());
+        		}
+        		else
+        		{
+        			$name = $type->name;
+        			$obj[$name] = $type->toArray();
         		}
         	}
         	

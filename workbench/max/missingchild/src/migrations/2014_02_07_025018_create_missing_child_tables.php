@@ -45,7 +45,6 @@ class CreateMissingChildTables extends Migration {
             $table->boolean('notify')->default(0);
             $table->string('notify_text')->nullable();
 
-            $table->text('clue')->nullable();
             $table->text('note')->nullable();
             $table->text('tags')->nullable();
 
@@ -57,7 +56,7 @@ class CreateMissingChildTables extends Migration {
             
             $table->integer('created_at');
             $table->integer('updated_at');
-            $table->boolean('status')->default(0);    
+            $table->boolean('status')->default(1);    
         });
 
         Schema::create('category_missingchild', function(Blueprint $table)

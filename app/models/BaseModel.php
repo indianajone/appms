@@ -4,7 +4,7 @@ use Carbon\Carbon;
 
 class BaseModel extends Eloquent 
 {
-
+    protected $hidden = array();
 	/*
      * The following $map array maps the url query string to
      * the corresponding model filter e.g.
@@ -122,8 +122,12 @@ class BaseModel extends Eloquent
 
         $hidden = Input::get('hidden', null);
         $hiddens = $hidden ? explode(',', $hidden) : $hidden;
+
+
+        // dd($this->getHidden());
         
         if($fields) $this->setVisible($fields);
+        // else $this->setHidden(parent::getHidden());
         if($hiddens) $this->setHidden($hiddens);
     }
 
@@ -135,8 +139,6 @@ class BaseModel extends Eloquent
                 $type->whereIn('category_id', $ids);
             });
         }
-
-        // $query = $query->with('categories');
 
         return $query;
     }

@@ -7,7 +7,7 @@ class Missingchild extends \BaseModel
 {
 	protected $table = 'missingchilds';
     protected $guarded = array('id');
-    protected $hidden = array('order', 'status', 'gallery_id', 'user_id', 'types', 'title');
+    protected $hidden = array('status', 'app_id', 'gallery_id', 'article_id', 'user_id', 'types', 'title', 'categories');
 
     /*
      * The following $map array maps the url query string to
@@ -65,8 +65,8 @@ class Missingchild extends \BaseModel
         	'last_name'			=> 'required',
         	'lost_age'			=> 'required|integer',
         	'place_of_missing' 	=> 'required',
-        	'missing_date'		=> 'required',
-        	'report_date'		=> 'required',
+        	'missing_at'		=> 'required',
+        	'report_at'		=> 'required',
         	'user_id'			=> 'exists:users,id',
         	'order'				=> 'integer'
         ),
@@ -97,7 +97,7 @@ class Missingchild extends \BaseModel
         //     $q->where('name', '=', 'child_detail');
         // });
 
-        return $this->hasOne('Kitti\\Articles\\Article', 'article_id');
+        return $this->hasOne('Kitti\\Articles\\Article', 'id', 'article_id');
     }
 
     public function gallery()

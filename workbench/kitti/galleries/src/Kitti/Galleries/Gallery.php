@@ -43,7 +43,6 @@ class Gallery extends \BaseModel
 
     public function owner()
     {
-        // var_dump($this->attribute['content_type']);
     	switch($this->attribute['content_type'])
     	{
             case 'article':
@@ -59,7 +58,12 @@ class Gallery extends \BaseModel
 
     public function medias()
     {
-    	return $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
+        $media = $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
+        $media->app();
+        if($media->getResults()->isEmpty())
+            return $this->hasOne('Kitti\\Medias\\Media')->app();
+        else
+            return $media;
     }
 
     public function scopeOwner($query, $type, $id)
