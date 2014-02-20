@@ -11,6 +11,6 @@
 		Route::get('categories/fields', function(){
 			return Response::fields('categories');
 		});
-		Route::get('categories/{id}/delete', 'Indianajone\\Categories\\Controllers\\CategoryController@delete');
+		Route::post('categories/{id}/delete', 'Indianajone\\Categories\\Controllers\\CategoryController@delete');
 		Route::resource('categories', 'Indianajone\\Categories\\Controllers\\CategoryController');
 	});

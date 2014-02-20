@@ -1,13 +1,15 @@
 <?php namespace Max\Missingchild\Models;
 
-use Input;
-use Response;
+use Input, Response;
+use Max\Missingchild\Collection;
+use Indianajone\Categories\Category;
 
 class Missingchild extends \BaseModel 
 {
 	protected $table = 'missingchilds';
+    protected $softDelete = true;
     protected $guarded = array('id');
-    protected $hidden = array('status', 'app_id', 'gallery_id', 'article_id', 'user_id', 'types', 'title', 'categories');
+    protected $hidden = array('status', 'app_id', 'gallery_id', 'article_id', 'user_id', 'title', 'categories', 'deleted_at');
 
     /*
      * The following $map array maps the url query string to
@@ -53,20 +55,19 @@ class Missingchild extends \BaseModel
         ),
         'show_with_id' => array(
             'appkey'    => 'required|exists:applications,appkey',
-            'id'        => 'required|exists:missingchilds,id'
+            'id'        => 'required|existsinapp:missingchilds,id,Max\\Missingchild\\Models\\Missingchild'
         ),
         'create' => array(
         	'appkey'			=> 'required|exists:applications,appkey',
             'category_id'       => 'required|existsloop:categories,id',
-            // 'article_type'      => 'required|exists:categories,id',
             'title'             => 'required',
-            'content'           => 'required',
+            'description'           => 'required',
         	'first_name'		=> 'required',
         	'last_name'			=> 'required',
         	'lost_age'			=> 'required|integer',
         	'place_of_missing' 	=> 'required',
         	'missing_at'		=> 'required',
-        	'report_at'		=> 'required',
+        	'reported_at'		=> 'required',
         	'user_id'			=> 'exists:users,id',
         	'order'				=> 'integer'
         ),
@@ -77,7 +78,7 @@ class Missingchild extends \BaseModel
         ),
         'update' => array(
             'appkey'    => 'required|exists:applications,appkey',
-            'id'        => 'required|exists:missingchilds,id'
+            'id'        => 'required|existsinapp:missingchilds,id,Max\\Missingchild\\Models\\Missingchild'
         ),
         'delete' => array(
             'appkey'    => 'required|exists:applications,appkey',
@@ -85,24 +86,50 @@ class Missingchild extends \BaseModel
         )
     );
 
+    public function scopeFilterCats($query, $ids)
+    {
+
+        /**
+            #TODO Check if Root include in serch.
+        **/
+        if($ids != '*')
+        {
+            $categories = Category::findMany($ids);
+            
+            // dd($categories);
+
+            foreach($categories as $category)
+            {
+                // var_dump($category);
+                if($category->isRoot()) 
+                    $ids = array_merge($ids, $category->getDescendants(array('id'))->lists('id'));
+            }
+
+            // var_dump($ids);
+
+            $query->whereIn('id', function($type) use($ids) {
+                $type->select('missingchild_id')->from('category_missingchild')->whereIn('category_id', $ids)->groupBy('missingchild_id')->havingRaw('(count(missingchild_id) = ?)', array(count($ids)));
+            });
+
+            // dd(\DB::getQueryLog());
+        }
+
+        return $query;
+    }
+
     public function articles()
     {
         return $this->belongsToMany('Kitti\\Articles\\Article', 'article_missingchild');
     }
 
-     public function app_content()
+    public function app_content()
     {
-        // return $this->articles()
-        // ->whereHas('categories', function($q){
-        //     $q->where('name', '=', 'child_detail');
-        // });
-
-        return $this->hasOne('Kitti\\Articles\\Article', 'id', 'article_id');
+        return $this->belongsTo('Kitti\\Articles\\Article', 'article_id');
     }
+
 
     public function gallery()
     {
-        // return $this->hasOne('Kitti\\Galleries\\Gallery', 'content_id')->where('content_type', '=', 'child');
         return $this->morphOne('Kitti\\Galleries\\Gallery', 'galleryable', 'content_type', 'content_id');
     }
 
@@ -128,6 +155,10 @@ class Missingchild extends \BaseModel
 
     public function attachRelations($related, $categories)
     {
+        if (is_string($categories))
+            $categories = explode(',', $categories);
+
+        // $categories = Category::findMany($categories);
         foreach ($categories as $category) {
             $this->attachRelation($related, $category);
         }
@@ -145,6 +176,9 @@ class Missingchild extends \BaseModel
 
     public function detachRelations($related, $categories)
     {
+        if (is_string($categories))
+            $categories = explode(',', $categories);
+
         foreach ($categories as $category) {
             $this->detachRelation($related, $category);
         }
@@ -152,6 +186,9 @@ class Missingchild extends \BaseModel
 
     public function syncRelations($related, $categories)
     {
+        if (is_string($categories))
+            $categories = explode(',', $categories);
+
         $this->{$related}()->sync($categories);
     }
 
@@ -174,5 +211,10 @@ class Missingchild extends \BaseModel
     {
         $cat = $this->types()->whereCategoryId($id)->first();
         return $cat ? true : false;
+    }
+
+    public function newCollection(array $models = array())
+    {
+        return new Collection($models);
     }
 }

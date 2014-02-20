@@ -1,6 +1,8 @@
 <?php namespace Indianajone\Validators\Rules;
 	
-class ExistsLoop extends \Illuminate\Validation\Validator
+use Appl, Input, Schema;
+
+trait ExistsLoop 
 {	
 	public function validateExistsLoop($attribute, $value, $parameters)
     {
@@ -8,10 +10,10 @@ class ExistsLoop extends \Illuminate\Validation\Validator
     	$values = explode(',', $value);
 		foreach ($values as $i => $value) 
 		{
-			if(\Schema::hasColumn($parameters[0], 'app_id'))
+			if(Schema::hasColumn($parameters[0], 'app_id'))
 			{
 				$parameters[3] = 'app_id';
-				$parameters[4] = \Appl::getAppIDByKey(\Input::get('appkey')); 
+				$parameters[4] = Appl::getAppIDByKey(Input::get('appkey')); 
 			}
 			$results[] = $this->validateExists($i, $value, $parameters);
 			if(!$results[$i])

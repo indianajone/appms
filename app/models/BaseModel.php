@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use \Image, \Config;
 
 class BaseModel extends Eloquent 
 {
@@ -26,8 +27,7 @@ class BaseModel extends Eloquent
         'order_by' => null,
         'limit' => 10,
         'offset' => 0,
-        'search' => null,
-        'time' => null
+        'search' => null
     );
 
     /*
@@ -115,6 +115,38 @@ class BaseModel extends Eloquent
         return $query;
     }
 
+    public function createPicture($app_id)
+    {
+        $picture = Input::get('picture', null);
+        if($picture)
+        {
+            if(filter_var($picture, FILTER_VALIDATE_URL))
+            {
+                $this->update(array(
+                    'picture' => $picture
+                ));
+            }
+            else
+            {
+                $response = Image::upload($picture);
+                if(is_object($response)) 
+                    return $response;
+
+                $this->gallery->medias()->create(array(
+                     'app_id' => $app_id,
+                     'gallery_id' => $this->gallery->id,
+                     'name' => 'Image',
+                     'picture' => $response,
+                     'type' => 'image'
+                ));
+
+                $this->update(array(
+                    'picture' => $response
+                ));
+            }
+        }
+    }
+
     public function fields()
     {
         $field = Input::get('fields', null);
@@ -122,12 +154,8 @@ class BaseModel extends Eloquent
 
         $hidden = Input::get('hidden', null);
         $hiddens = $hidden ? explode(',', $hidden) : $hidden;
-
-
-        // dd($this->getHidden());
         
         if($fields) $this->setVisible($fields);
-        // else $this->setHidden(parent::getHidden());
         if($hiddens) $this->setHidden($hiddens);
     }
 
@@ -135,8 +163,11 @@ class BaseModel extends Eloquent
     {
         if($ids != '*')
         {
-           $query = $query->whereHas('categories', function($type) use($ids){
-                $type->whereIn('category_id', $ids);
+            $cats = Category::findMany($ids);
+            dd($cats);
+
+            $query->whereIn('id', function($type) use($ids) {
+                $type->select('article_id')->from('article_category')->whereIn('category_id', $ids)->groupBy('article_id')->havingRaw('(count(article_id) = ?)', array(count($ids)));
             });
         }
 
@@ -145,6 +176,8 @@ class BaseModel extends Eloquent
 
     public function scopeOrder_by($query, $order)
     {
+        if(!array_key_exists(1, $order)) $order[1] = 'asc';
+
         $field = $order[0];
         $dir = $order[1];
         
@@ -159,17 +192,19 @@ class BaseModel extends Eloquent
 
     public function scopeTime($query, $field, $value)
 	{
-		$format = \Input::get('date_format', null);
+        $format = \Input::get('date_format', null);
+
 	    if($format)
 	    {
 	    	try {
-	    		$time = Carbon::createFromFormat($format, $value, \Config::get('app.timezone'));
-	    		return $query->where($field, '>=', $time->timestamp);
-	    	}
-	    	catch(exception $e)
-	    	{
-	    		return $query->where($field, '>=', strtotime($value));
-	    	}
+                $time = Carbon::createFromFormat($format, $value, Config::get('app.timezone'));
+            }
+            catch(InvalidArgumentException $e)
+            {
+                throw new InvalidArgumentException('date format '. $format . ' and '. $value .' are not match');
+            }
+
+	    	if($time) return $query->where($field, '>=', $time->timestamp);
 	    }
 	    
 	    return $query->where($field, '>=', $value);

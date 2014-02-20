@@ -46,3 +46,11 @@ Route::get('migrate/{bench?}', function($bench=null){
 		echo 'done migrate';
 	}
 });
+
+Route::get('image', function(){
+	$picture = Input::get('picture', null);
+
+	if($picture) return '<img src="data:image/jpeg;base64,'.base64_encode(file_get_contents($picture)).'" />';
+
+	return 'error';
+});

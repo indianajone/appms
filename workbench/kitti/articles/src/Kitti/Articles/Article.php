@@ -75,11 +75,6 @@ class Article extends BaseModel
         )
     );
 
-    public function articleable()
-    {
-        return $this->morphToMany();
-    }
-
     public function categories()
     {
     	return $this->belongsToMany('Indianajone\\Categories\\Category', 'article_category');

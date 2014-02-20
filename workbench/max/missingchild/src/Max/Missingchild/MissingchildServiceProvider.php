@@ -18,18 +18,23 @@ class MissingchildServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('max/missingchild');
+
+        $this->package('max/missingchild');
+
+        // $this->app['validator']->resolver(function($translator, $data, $rules, $messages)
+        // {
+        // 	return new \Indianajone\Validators\CustomValidator($translator, $data, $rules, $messages);
+
+        // });
+
+        // var_dump($this->app['validator']->translator());
+        // exit;
+
+        // Validator::extend('existsinapp', 'Indianajone\\Validators\\Rules\\ExistsInApp@validateExistsInApp', $this->app['validator']->getTranslator());
+
+        
+
 		include __DIR__.'/../../routes.php';
-
-		$this->app->validator->resolver(function($translator, $data, $rules, $messages)
-        {
-            return new \Indianajone\Validators\Rules\ExistsInApp($translator, $data, $rules, $messages);
-        });
-
-        $this->app->validator->resolver(function($translator, $data, $rules, $messages)
-        {
-            return new \Indianajone\Validators\Rules\ExistsLoop($translator, $data, $rules, $messages);
-        });
 	}
 
 	/**
@@ -49,7 +54,7 @@ class MissingchildServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array('missingchild');
 	}
 
 }

@@ -81,7 +81,13 @@ App::down(function()
 require app_path().'/filters.php';
 
 
-App::missing(function($exception)
+App::error(function(InvalidArgumentException $e)
 {
-    return Response::message(400, Request::segment(3). ' module does not exists.');
+    return Response::message(400, $e->getMessage());
 });
+
+App::missing(function($e)
+{
+    return Response::message($e->getStatusCode(), Request::server('PATH_INFO') . ' does not exists.');
+});
+

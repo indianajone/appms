@@ -26,21 +26,6 @@ class ArticleController extends BaseController
 		if($validator->passes())
 		{
 			$articles = Article::app()->active()->ApiFilter()->offset($offset)->limit($limit)->get();
-
-			// $categories = Input::get('category_id', null);
-			// if($categories)
-			// 	$articles = $articles->whereHas('categories', function($q)
-			// 	{
-			// 	    $cat = Category::find(Input::get('category_id'))->getDescendantsAndSelf(array('id'));
-			// 	    $q->whereIn('category_id', array_flatten($cat->toArray()));
-
-			// 	});
-			
-			// $keyword = Input::get('q', null);
-			// if($keyword)
-			// 	$articles = $articles->where('title', 'like', '%'.$keyword.'%')->orWhere('content','like', '%'.$keyword.'%');
-
-			// $articles = $articles->offset($offset)->limit($limit)->get();
 			
 			$articles->each(function($article) {
 				$article->fields();
@@ -52,26 +37,23 @@ class ArticleController extends BaseController
 
 				$gallery = $article->gallery()->with('medias')->first();
 				if($gallery) $article->setRelation('gallery', $gallery);
-				
-	 	// 		if($field) $article->setVisible($fields);
-	 	// 		$categories = $article->getRelation('categories');
-	 	// 		$categories->filter(function($category){
-	 	// 			$category->setVisible(array('id','name'));
-	 	// 		});
-
-	 	// 		$gallery = $article->getRelation('gallery');
-	 	// 		if($gallery) $gallery->setVisible(array('id','name','picture','medias'));
+			
 	 		});
 
 	 		// dd(\DB::getQueryLog());
 
-	 		return Response::listing(
-		 		array(
-		 			'code' 		=> 200,
-		 			'message' 	=> 'success'
-		 		),
-		 		$articles, $offset, $limit
-		 	);
+		 	return Response::result(
+				array(
+					'header'=> array(
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	),
+					'offset' => (int) Input::get('offset', 0),
+					'limit' => (int) Input::get('limit', 10),
+					'total' => Article::count(),
+					'entries' => $articles->toArray()
+				)
+			); 
 		}
 
 		return Response::message(400, $validator->messages()->first()); 

@@ -56,6 +56,9 @@ class CreateMissingChildTables extends Migration {
             
             $table->integer('created_at');
             $table->integer('updated_at');
+            // Soft delete
+            $table->integer('deleted_at')->nullable();
+            
             $table->boolean('status')->default(1);    
         });
 

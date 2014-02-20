@@ -1,38 +1,26 @@
 <?php namespace Indianajone\Validators\Rules;
 
-use Max\User\Models\User;
-use Indianajone\Applications\Application as Appl;
-	
-class ExistsInApp extends \Illuminate\Validation\Validator
-{	
-	public function validateExistsInApp($attribute, $value, $parameters)
-    {
-    	$app_id = $parameters[2] ?: \Appl::getAppIDByKey(\Input::get('appkey'));
-		$id = $value;
+use Appl, Input, Validator;
 
+trait ExistsInApp
+{	
+    public function validateExistsInApp($attribute, $value, $parameters)
+    {
 		$table = $parameters[0];
 		$column = $parameters[1];
+		$model = array_key_exists(2, $parameters) ? $parameters[2] : 'Max\\User\\Models\\User';
+		$app_id = array_key_exists(3, $parameters) ? $parameters[3] : Appl::getAppIDByKey(Input::get('appkey'));
 
-		$verifier = $this->getPresenceVerifier();
+		$verifier =  $this->getPresenceVerifier();
 
-		if($verifier->getCount($table, $column, $id) >= 1)
+		if($verifier->getCount($table, $column, $value) >= 1)
 		{
-			$app = Appl::find($app_id)->owner()->whereId($id)->first();
-			if(is_null($app))
-			{
-				$user = User::find($id);
-				if($user->parent_id == 0 || is_null($user->parent_id))
-				{
-					return false;
-				}
-				
-				$parameters[2] = $app_id;
-				return $this->validateExistsInApp($attribute, $user->getKey(), $parameters);
-				
-			}	
+				$data = $model::find($value);
+				if($data) return $data->exists;
 
-			return $app->exists;	
+			return false;
 		}
+		
 		return false;
     }
 }

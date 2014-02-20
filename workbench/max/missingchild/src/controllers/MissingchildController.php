@@ -4,41 +4,90 @@ use Validator, Input, Response, Hash, Appl, Image;
 use Indianajone\Categories\Category;
 use Max\Missingchild\Models\Missingchild as Child;
 use Baum\Extensions\Eloquent\Collection;
+// use Max\Missingchild\Collection;
 use Kitti\Articles\Article;
 use Kitti\Galleries\Gallery;
 use Carbon\Carbon;
 
 
-class MissingchildController extends \BaseController {
-
+class MissingchildController extends \BaseController 
+{
 	public function index()
 	{
 		$validator = Validator::make(Input::all(), Child::$rules['show']);
 
         if($validator->passes())
         {
+        	$children = Child::app()->apiFilter()->get()->load('categories', 'gallery.medias', 'app_content.gallery.medias');
 
-            $children = Child::active()->app()->apiFilter()->with('gallery.medias', 'app_content.gallery.medias')->get(); 
+        	$children->each(function($child)
+        	{
+        		if($child->categories)
+        		{
+        			foreach($child->categories as $category)
+        			{
+        				if(!$category->isRoot())
+        				{
+        					$root = $category->getRoot();
+        					$relation = $category->getDescendantsAndSelf();
+        					if($relation->count() > 0)
+        						$child->setRelation($root->name, $relation->toHierarchy());
+        					else
+        						$child->setRelation($root->name, null);
+        				}
+        				else
+        				{
+        					$child->setRelation($category->name, $category->getDescendants()->toHierarchy());
+        				}
+        			}
+        		}
 
-            foreach ($children as $item => $child) {
-            	$child->fields();
-            	$types = $child->categories()->get(); //->remember(1)
-            	$obj = [];
-            	foreach ($types as $type) {
-            		if(!$type->isRoot())
-            		{
-            			$name = Category::whereId($type->getParentId())->first()->name; //->remember(1)
-            			if(!array_key_exists($name,$obj)) 
-            				$obj[$name] = [];
+        		if($child->gallery)
+        		{
+	        		$child->gallery->setVisible(array(
+	        			'id',
+	        			'name',
+	        			'description',
+	        			'picture',
+	        			'medias'
+	        		));
 
-            			array_push($obj[$name], $type->toArray());
-            		}
+	        		$child->gallery->medias->each(function($media) 
+	        		{
+	        			$media->setVisible(array(
+		        			'id',
+		        			'name',
+		        			'link',
+		        			'picture'
+		        		));
+	        		});
+	        	}
 
-            		foreach ($obj as $key => $type) {
-            			$child->setRelation($key, new Collection($type));
-            		}
-            	}
-            }
+	        	if($child->app_content)
+	        	{
+	        		if($child->app_content->gallery)
+	        		{
+	        			$child->app_content->gallery->setVisible(array(
+		        			'id',
+		        			'name',
+		        			'description',
+		        			'picture',
+		        			'medias'
+		        		));
+
+			        	$child->app_content->gallery->medias->each(function($media) 
+		        		{
+		        			$media->setVisible(array(
+			        			'id',
+			        			'name',
+			        			'link',
+			        			'picture'
+			        		));
+		        		});
+	        		}
+        			
+	        	}
+        	});
 
             // dd(\DB::getQueryLog());
 
@@ -64,37 +113,100 @@ class MissingchildController extends \BaseController {
 		return $this->store();
 	}
 
-	public function attachArticles($id)
-	{
-		$inputs = array_add(Input::all(), 'id', $id);
-		$validator = Validator::make($inputs, Child::$rules['create_clue']);
-		if($validator->passes())
-		{
-			$child = Child::active()->whereId($id)->first();
-			$ids = explode(',', Input::get('article_id')); 
-			$child->attachRelations('articles',$ids);
+	// public function articles($id)
+	// {
+	// 	$inputs = array_add(Input::all(), 'id', $id);
+	// 	$validator = Validator::make($inputs, Child::$rules['show_with_id']);
 
-			return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-		}
+	// 	if($validator->passes())
+	// 	{
+	// 		$child = Child::app()->whereId($id)->first();
+	// 		$articles = $child->articles()->with('categories', 'gallery.medias')->get();
 
-		return Response::message(400, $validator->messages()->first());
-	}
+	// 		dd(\DB::getQueryLog());
 
-	public function detachArticles($id)
-	{
-		$inputs = array_add(Input::all(), 'id', $id);
-		$validator = Validator::make($inputs, Child::$rules['create_clue']);
-		if($validator->passes())
-		{
-			$child = Child::active()->whereId($id)->first();
-			$ids = explode(',', Input::get('article_id')); 
-			$child->detachRelations('articles',$ids);
+	// 		foreach ($articles as $item => $article) {
+ //            	$article->fields();
+ //            	$article->setHidden(array_merge($article->getHidden() ,array('categories')));
+ //            	$types = $article->categories()->get(); //->remember(1)
+ //            	$obj = [];
+ //            	foreach ($types as $type) {
+ //            		if(!$type->isRoot())
+ //            		{
+ //            			$name = Category::whereId($type->getParentId())->first()->name; //->remember(1)
+ //            			if(!array_key_exists($name,$obj)) 
+ //            				$obj[$name] = [];
 
-			return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-		}
+ //            			array_push($obj[$name], $type->toArray());
+ //            		}
 
-		return Response::message(400, $validator->messages()->first());
-	}
+ //            		foreach ($obj as $key => $type) {
+ //            			$article->setRelation($key, new Collection($type));
+ //            		}
+ //            	}
+ //            }
+
+	// 		return Response::result(array(
+ //        		'header' => array(
+ //        			'code' => 200,
+ //        			'message' => 'success'
+ //        		),
+ //        		'entry' => !$articles->isEmpty() ? $articles->toArray() : null
+ //        	));
+
+	// 	}
+
+	// 	return Response::message(400, $validator->messages()->first());
+	// }
+
+	// public function createArticles($id)
+	// {
+	// 	$inputs = array_add(Input::all(), 'id', $id);
+	// 	$rules = array_merge(Child::$rules['show_with_id'], Article::$rules['create']);
+	// 	$validator = Validator::make($inputs, $rules);
+		
+	// 	if($validator->passes())
+	// 	{
+	// 		$child = Child::active()->whereId($id)->first();
+	// 		$child->articles()->create(array(
+
+	// 		));
+	// 	}
+
+	// 	return Response::message(400, $validator->messages()->first());
+	// }
+
+	// public function attachArticles($id)
+	// {
+	// 	$inputs = array_add(Input::all(), 'id', $id);
+	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
+	// 	if($validator->passes())
+	// 	{
+	// 		$child = Child::active()->whereId($id)->first();
+	// 		$ids = explode(',', Input::get('article_id')); 
+	// 		$child->attachRelations('articles',$ids);
+
+	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
+	// 	}
+
+	// 	return Response::message(400, $validator->messages()->first());
+	// }
+
+	// public function detachArticles($id)
+	// {
+	// 	$inputs = array_add(Input::all(), 'id', $id);
+	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
+	// 	if($validator->passes())
+	// 	{
+	// 		$child = Child::active()->whereId($id)->first();
+	// 		$ids = explode(',', Input::get('article_id')); 
+	// 		$child->detachRelations('articles',$ids);
+
+	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
+	// 	}
+
+	// 	return Response::message(400, $validator->messages()->first());
+	// }
 
 	public function store()
 	{
@@ -103,11 +215,10 @@ class MissingchildController extends \BaseController {
  		if($validator->passes())
  		{
  			$app_id = Appl::getAppIDByKey(Input::get('appkey'));
- 			// $child = Child::find(1);
 
  			$child = Child::create(array(
  				'app_id' => $app_id,
- 				'description' => Input::get('content'),
+ 				'description' => Input::get('description'),
  				'first_name' => Input::get('first_name'),
  				'last_name' => Input::get('last_name'),
  				'nickname' => Input::get('nickname'),
@@ -121,15 +232,13 @@ class MissingchildController extends \BaseController {
  				'order' => Input::get('order', 0),
  				'missing_at' => Input::get('missing_at'),
  				'reported_place' => 'สถานีห้วยขวาง',
- 				'reported_at' => Input::get('report_at')
+ 				'reported_at' => Input::get('reported_at')
  			));
 
-			$category_id = Input::get('category_id', null);
-			if($category_id) 
-			{
-				$ids = explode(',', $category_id); 
-				$child->attachRelations('categories',$ids);
-			}
+ 			/**
+ 			 	# TODO Check if given id is Root add all child's id.
+ 			**/
+			$child->attachRelations('categories',Input::get('category_id'));
 
 			$child->gallery()->create(
                 array(
@@ -140,36 +249,9 @@ class MissingchildController extends \BaseController {
                 )
             );
 
-            $picture = Input::get('picture', null);
-			if($picture)
-			{
-				if(filter_var($picture, FILTER_VALIDATE_URL))
-				{
-					$child->update(array(
-						'picture' => $picture
-					));
-				}
-				else
-				{
-					$response = Image::upload($picture);
-					if(is_object($response)) 
-						return $response;
+            $child->createPicture($app_id);
 
-					$child->gallery->medias()->create(array(
-						 'app_id' => $app_id,
-						 'gallery_id' => $child->gallery->id,
-						 'name' => $child->first_name,
-						 'picture' => $response,
-						 'type' => 'image'
-					));
-
-					$child->update(array(
-						'picture' => $response
-					));
-				}
-			}
-
-			$app_content = $child->app_content()->create(array(
+			$app_content = Article::create(array(
 				'app_id' => $app_id,
 				'title' => Input::get('title'),
 				'content' => $child->description,
@@ -211,7 +293,7 @@ class MissingchildController extends \BaseController {
 
 		if($validator->passes())
 		{
-			$child = Child::apiFilter()->with('categories', 'gallery.medias', 'articles.gallery.medias')->find($id);
+			$child = Child::apiFilter()->with('categories', 'gallery.medias', 'app_content.gallery.medias', 'articles')->find($id);
 			$child->fields();
 
 			$types = $child->getRelation('categories');
@@ -235,12 +317,7 @@ class MissingchildController extends \BaseController {
         	
         	foreach ($obj as $key => $type) {
         		$child->setRelation($key, new Collection($type));
-        	}
-
-        	$content = $child->app_content()->get();
-
-        	if($content->count() >= 1) 
-        		$child->setRelation('app_content', $content->load('gallery.medias')->first());
+        	}  	
 
 			return Response::result(array(
 	        		'header' => array(
@@ -261,11 +338,15 @@ class MissingchildController extends \BaseController {
 
 	public function update($id)
 	{
+
+		
+		
 		$inputs = array_add(Input::all(), 'id', $id);
         $validator = Validator::make($inputs, Child::$rules['update']);
 
         if($validator->passes())
         {
+        	$app_id = Appl::getAppIDByKey(Input::get('appkey'));
         	$child = Child::find($id);
 
             foreach ($inputs as $key => $val) {
@@ -290,20 +371,12 @@ class MissingchildController extends \BaseController {
 				unset($inputs['category_id']);
 			}
 
-            $picture = Input::get('picture', null);
-			if($picture)
-			{
-				if(filter_var($picture, FILTER_VALIDATE_URL))
-				{
-					$child->picture = $picture;
-				}
-				else
-				{
-					$response = Image::upload($picture);
-					if(is_object($response)) return $response;
-					$child->picture = $response;
-				}
-			}
+           
+            if(array_key_exists('picture', $inputs))
+            {
+            	$child->createPicture($app_id);
+             	unset($inputs['picture']);
+            }
 
             if($child->update($inputs))
                  return Response::message(200, 'Updated missingchild id: '.$id.' success!');
@@ -324,32 +397,10 @@ class MissingchildController extends \BaseController {
 
 		if($validator->passes())
 		{
-
-			/**
-				#TODO Delete related content too.
-			**/
 	        $child = Child::find($id);
-        	// Detach Types
-        	$ids = $child->types()->get()->lists('id');
-        	$child->detachRelations('categories', $ids);
-
-        	$ids = $child->articles->lists('id');
-        	var_dump($ids);
-        	// $articles = $child->articles;
-        	$child->detachRelations('articles', $ids);
         	
-
-        	// foreach ($articles as $article) {
-        		// $artic
-        	// }
-
-        	var_dump($child->gallery->id);
-        	// exit;
-			// Delete child.
 			if($child->delete())
 			{
-				// var_dump($child->gallery->id);
-
 				return Response::message(200, 'Deleted missingchild_'.$id.' success!'); 
 			}
 
