@@ -86,37 +86,6 @@ class Missingchild extends \BaseModel
         )
     );
 
-    public function scopeFilterCats($query, $ids)
-    {
-
-        /**
-            #TODO Check if Root include in serch.
-        **/
-        if($ids != '*')
-        {
-            $categories = Category::findMany($ids);
-            
-            // dd($categories);
-
-            foreach($categories as $category)
-            {
-                // var_dump($category);
-                if($category->isRoot()) 
-                    $ids = array_merge($ids, $category->getDescendants(array('id'))->lists('id'));
-            }
-
-            // var_dump($ids);
-
-            $query->whereIn('id', function($type) use($ids) {
-                $type->select('missingchild_id')->from('category_missingchild')->whereIn('category_id', $ids)->groupBy('missingchild_id')->havingRaw('(count(missingchild_id) = ?)', array(count($ids)));
-            });
-
-            // dd(\DB::getQueryLog());
-        }
-
-        return $query;
-    }
-
     public function articles()
     {
         return $this->belongsToMany('Kitti\\Articles\\Article', 'article_missingchild');
@@ -192,12 +161,12 @@ class Missingchild extends \BaseModel
         $this->{$related}()->sync($categories);
     }
 
-    public function getReportDateAttribute($value)
+    public function getReportedAtAttribute($value)
     {
         return $this->formatTime($value);
     }
 
-    public function getMissingDateAttribute($value)
+    public function getMissingAtAttribute($value)
     {
         return $this->formatTime($value);
     }

@@ -15,13 +15,13 @@ class Article extends BaseModel
      *  ->order_by will handle Input::get('order_by')
      */
     protected $map = array(
-        // 'order_by' => 'order_by',
-        // 'limit' => 'limit',
-        // 'offset' => 'offset',
-        // 'search' => 'q',
+        'order_by' => 'order_by',
+        'limit' => 'limit',
+        'offset' => 'offset',
+        'search' => 'q',
         'filterCats' => 'category_id',
-        // 'whereUpdated' => 'updated_at',
-        // 'whereCreated' => 'created_at'
+        'whereUpdated' => 'updated_at',
+        'whereCreated' => 'created_at'
     );
 
     /*
@@ -122,6 +122,14 @@ class Article extends BaseModel
         foreach ($categories as $category) {
             $this->detachCategory($category);
         }
+    }
+
+    public function syncRelations($related, $categories)
+    {
+        if (is_string($categories))
+            $categories = explode(',', $categories);
+
+        $this->{$related}()->sync($categories);
     }
 
     public function getCategoryIds()

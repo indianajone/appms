@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use \Image, \Config;
+use Indianajone\Categories\Category;
 
 class BaseModel extends Eloquent 
 {
@@ -107,7 +108,6 @@ class BaseModel extends Eloquent
 
             if (!is_null($input)) 
             {
-                // var_dump($field);
                 $query = $query->$filter($input);
             }
         }
@@ -129,16 +129,19 @@ class BaseModel extends Eloquent
             else
             {
                 $response = Image::upload($picture);
-                if(is_object($response)) 
-                    return $response;
 
-                $this->gallery->medias()->create(array(
-                     'app_id' => $app_id,
-                     'gallery_id' => $this->gallery->id,
-                     'name' => 'Image',
-                     'picture' => $response,
-                     'type' => 'image'
-                ));
+                if(is_object($response)) return $response;
+
+                if($this->gallery)
+                {
+                    $this->gallery->medias()->create(array(
+                         'app_id' => $app_id,
+                         'gallery_id' => $this->gallery->id,
+                         'name' => 'Image',
+                         'picture' => $response,
+                         'type' => 'image'
+                    ));
+                }
 
                 $this->update(array(
                     'picture' => $response
@@ -163,12 +166,20 @@ class BaseModel extends Eloquent
     {
         if($ids != '*')
         {
-            $cats = Category::findMany($ids);
-            dd($cats);
+            $categories = Category::findMany($ids);
+            
+            foreach($categories as $category)
+            {
+                $cids = $category->getDescendantsAndSelf(['id'])->lists('id'); 
+                $query = $query->whereIn('id', function($type) use($cids) {
 
-            $query->whereIn('id', function($type) use($ids) {
-                $type->select('article_id')->from('article_category')->whereIn('category_id', $ids)->groupBy('article_id')->havingRaw('(count(article_id) = ?)', array(count($ids)));
-            });
+                    $foreign_key = $this->getForeignKey();
+                    $other_key = $this->categories()->getOtherKey();
+                    $pivot = $this->categories()->getTable();
+
+                    $type->select($foreign_key)->from($pivot)->whereIn($other_key, $cids)->groupBy($foreign_key);
+                });
+            }
         }
 
         return $query;
@@ -180,9 +191,12 @@ class BaseModel extends Eloquent
 
         $field = $order[0];
         $dir = $order[1];
+
         
         if(\Schema::hasColumn($this->getTable(), $field))
-           return $query->orderBy($field, $dir);
+        {
+            return $query->orderBy($field, $dir);
+        }   
     }
 
     public function scopeSearch($query)

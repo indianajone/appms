@@ -19,6 +19,7 @@ class MissingchildController extends \BaseController
         if($validator->passes())
         {
         	$children = Child::app()->apiFilter()->get()->load('categories', 'gallery.medias', 'app_content.gallery.medias');
+        	// $children = Child::app()->apiFilter()->with('categories')->get();
 
         	$children->each(function($child)
         	{
@@ -52,15 +53,18 @@ class MissingchildController extends \BaseController
 	        			'medias'
 	        		));
 
-	        		$child->gallery->medias->each(function($media) 
+	        		if($child->gallery->medias)
 	        		{
-	        			$media->setVisible(array(
-		        			'id',
-		        			'name',
-		        			'link',
-		        			'picture'
-		        		));
-	        		});
+		        		$child->gallery->medias->each(function($media) 
+		        		{
+		        			$media->setVisible(array(
+			        			'id',
+			        			'name',
+			        			'link',
+			        			'picture'
+			        		));
+		        		});
+		        	}
 	        	}
 
 	        	if($child->app_content)
@@ -89,7 +93,7 @@ class MissingchildController extends \BaseController
 	        	}
         	});
 
-            // dd(\DB::getQueryLog());
+            // var_dump(\DB::getQueryLog());
 
             return Response::result(
 				array(
@@ -235,9 +239,6 @@ class MissingchildController extends \BaseController
  				'reported_at' => Input::get('reported_at')
  			));
 
- 			/**
- 			 	# TODO Check if given id is Root add all child's id.
- 			**/
 			$child->attachRelations('categories',Input::get('category_id'));
 
 			$child->gallery()->create(
@@ -249,7 +250,12 @@ class MissingchildController extends \BaseController
                 )
             );
 
-            $child->createPicture($app_id);
+           if(Input::get('picture', null))
+            {
+            	$response = $child->createPicture($app_id);
+            	if(is_object($response)) return $response;             	
+             	unset($inputs['picture']);
+            }
 
 			$app_content = Article::create(array(
 				'app_id' => $app_id,
@@ -338,15 +344,11 @@ class MissingchildController extends \BaseController
 
 	public function update($id)
 	{
-
-		
-		
 		$inputs = array_add(Input::all(), 'id', $id);
         $validator = Validator::make($inputs, Child::$rules['update']);
 
         if($validator->passes())
         {
-        	$app_id = Appl::getAppIDByKey(Input::get('appkey'));
         	$child = Child::find($id);
 
             foreach ($inputs as $key => $val) {
@@ -371,10 +373,11 @@ class MissingchildController extends \BaseController
 				unset($inputs['category_id']);
 			}
 
-           
+
             if(array_key_exists('picture', $inputs))
             {
-            	$child->createPicture($app_id);
+            	$response = $child->createPicture($child->app_id);
+            	if(is_object($response)) return $response;             	
              	unset($inputs['picture']);
             }
 

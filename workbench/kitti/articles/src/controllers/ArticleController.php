@@ -25,7 +25,7 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$articles = Article::app()->active()->ApiFilter()->offset($offset)->limit($limit)->get();
+			$articles = Article::app()->active()->ApiFilter()->get();
 			
 			$articles->each(function($article) {
 				$article->fields();
@@ -83,13 +83,12 @@ class ArticleController extends BaseController
 				'tags' => Input::get('tags')
 			));
 
-			$picture = Input::get('picture', null);
-			if($picture)
-			{
-				$response = Image::upload($picture);
-				if(is_object($response)) return $response;
-				$article->picture = $response;
-			}
+			if(array_key_exists('picture', $inputs))
+            {
+            	$response = $article->createPicture($article->app_id);
+            	if(is_object($response)) return $response;             	
+             	unset($inputs['picture']);
+            }
 
 			$category_id = Input::get('category_id', null);
 			if($category_id)
@@ -173,13 +172,20 @@ class ArticleController extends BaseController
             if(!count($inputs))
                 return Response::message(200, 'Nothing is update.');
 
-            $category_id = Input::get('category_id', null);
+			 $category_id = Input::get('category_id', null);
 			if($category_id)
 			{
 				$ids = explode(',', $category_id); 
-				$article->attachCategories($ids);
+				$article->syncRelations('categories', $ids);
 				unset($inputs['category_id']);
 			}
+
+			if(array_key_exists('picture', $inputs))
+            {
+            	$response = $article->createPicture($article->app_id);
+            	if(is_object($response)) return $response;             	
+             	unset($inputs['picture']);
+            }
 
 			$article->update($inputs);
 

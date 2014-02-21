@@ -17,7 +17,7 @@ Route::get('/', function()
 });
 
 Route::get('/artisan/{command}', function($command){
-	Artisan::call($command);
+	return Artisan::call($command);
 });
 
 Route::get('migrate/install', function(){
