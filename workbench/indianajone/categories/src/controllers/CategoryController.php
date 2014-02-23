@@ -28,7 +28,7 @@ class CategoryController extends BaseController
 		$validator = Validator::make(Input::all(), Category::$rules['show']);
 		if($validator->passes())
 		{
-			$cats = Category::with('children')->app();
+			$cats = Category::app();
 			if($updated_at || $created_at)
 			{
 				if($updated_at) $cats = $cats->time('updated_at');
@@ -36,12 +36,11 @@ class CategoryController extends BaseController
 			}
 			
 			$cats = $cats->offset($offset)->limit($limit)->get();
-		
-
-			if($field)
-		 		$cats->each(function($cat) use ($fields){
-		 			$cat->setVisible($fields);	
-		 		});
+	
+			foreach ($cats as $key => $cat) {
+				if($field) $cat->setVisible($fields);
+				if($cat->isRoot()) $cats[$key] = $cat->getDescendantsAndSelf()->toHierarchy();
+			}		
 		 	
 		 	return Response::listing(
 		 		array(
@@ -119,7 +118,9 @@ class CategoryController extends BaseController
 		if($cat)
 		{
 			if($field) $cat->setVisible($fields);  
-			$cat['children'] = $cat->getDescendants()->toHierarchy()->toArray();
+			// if(!$cat->isRoot())
+				// $cat['parent'] = $cat->getAncestors();
+			// $cat['children'] = $cat->getDescendants()->toArray();
 			return Response::result(
 				array(
 	        		'header' => array(
@@ -127,7 +128,7 @@ class CategoryController extends BaseController
 	        			'message' => 'success'
 	        		),
 	        		// #Fixed Collection with key in Baum\Extensions\Eloquent\Collection.
-	        		'entry' => $cat->toArray()
+	        		'entry' => $cat->getDescendantsAndSelf()->toHierarchy()->toArray()
 	        	)
 			);
 		}

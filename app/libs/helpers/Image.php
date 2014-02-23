@@ -1,14 +1,18 @@
 <?php namespace Libs\Helpers;
 
+use App, Config, File, Input, Response;
+use Kitti\Medias\Media;
+
 class Image 
 {
 	public function upload($base64)
 	{
-		$cdn = \Config::get('image.cdn');
-		$nas = \Config::get('image.nas');
-		$slug = \Config::get('image.slug').'/'.date('Y/m/d').'/';
-		$path = $cdn.$nas.$slug;
-		$format = \Config::get('image.format');
+		$local_env = App::environment('local');
+		$cdn = Config::get('image.cdn');
+		$nas = Config::get('image.nas');
+		$slug = Config::get('image.slug').'/'.date('Y/m/d').'/';
+		$path = ( $local_env ? $cdn : '').$nas.$slug;
+		$format = Config::get('image.format');
 
 		// #FIXED iDevice base64 encode.
 		$picture = base64_decode(str_replace('%2B','+', $base64));
@@ -18,7 +22,7 @@ class Image
 			$f = finfo_open();
 			$mime_type = finfo_buffer($f, $picture, FILEINFO_MIME_TYPE);
 			if(!starts_with($mime_type, 'image'))
-				return \Response::json(array(
+				return Response::json(array(
 					'header'=> [
 		        		'code'=> 400,
 		        		'message'=> 'The file is not an image. Please check you image data'
@@ -28,19 +32,20 @@ class Image
 			$format = $mime_type == 'image/jpeg' ? 'jpg' : 'png';
 		}
 		$filename = rand(0,1000).time().'.'.$format;
-		if(!\File::exists($path))
-			\File::makeDirectory($path, 0777, true, true);
-		if(!\File::exists($path))
-			return \Response::json(array(
+		
+		if(!File::exists($path))
+			File::makeDirectory($path, 0777, true, true);
+		if(!File::exists($path))
+			return Response::json(array(
 				'header'=> [
 	        		'code'=> 400,
 	        		'message'=> 'Can not create folder. Please check folder permission.'
 	        	]
 			), 200);
-		if(\File::put($path.$filename,$picture))
-			return asset($slug.$filename);
+		if(File::put($path.$filename,$picture))
+			return $local_env ? asset($slug.$filename) : $cdn.$slug.$filename;
 		else
-			return \Response::json(array(
+			return Response::json(array(
 				'header'=> [
 	        		'code'=> 400,
 	        		'message'=> 'Can not upload picture. Please check your file data.'

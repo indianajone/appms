@@ -1,6 +1,6 @@
 <?php namespace Indianajone\Validators\Rules;
-	
-class ExistsOrNull extends \Illuminate\Validation\Validator
+
+trait ExistsOrNull
 {	
 	public function validateExistsOrNull($attribute, $value, $parameters)
     {

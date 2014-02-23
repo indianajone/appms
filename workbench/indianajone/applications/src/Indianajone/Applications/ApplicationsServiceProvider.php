@@ -21,11 +21,6 @@ class ApplicationsServiceProvider extends ServiceProvider {
 	{
 		$this->package('indianajone/applications');
 		include __DIR__.'/../../routes.php';
-
-		$this->app->validator->resolver(function($translator, $data, $rules, $messages)
-		{
-		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
-		});
 	}
 
 	/**

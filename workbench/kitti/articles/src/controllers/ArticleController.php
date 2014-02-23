@@ -9,6 +9,7 @@ use Response;
 use Validator;
 use Kitti\Articles\Article;
 use Indianajone\Categories\Category;
+use Indianajone\Categories\Extensions\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ArticleController extends BaseController
@@ -24,35 +25,35 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$articles = Article::app()->active();
-
-			$categories = Input::get('category_id', null);
-			if($categories)
-				$articles = $articles->whereHas('categories', function($q)
-				{
-				    $cat = Category::find(Input::get('category_id'))->getDescendantsAndSelf(array('id'));
-				    $q->whereIn('category_id', array_flatten($cat->toArray()));
-
-				});
+			$articles = Article::app()->active()->ApiFilter()->get();
 			
-			$keyword = Input::get('q', null);
-			if($keyword)
-				$articles = $articles->where('title', 'like', '%'.$keyword.'%')->orWhere('content','like', '%'.$keyword.'%');
+			$articles->each(function($article) {
+				$article->fields();
 
-			$articles = $articles->offset($offset)->limit($limit)->get();
+				$cats = $article->categories()->get(); 
+				foreach ($cats as $key => $cat) {
+					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
+				}
+
+				$gallery = $article->gallery()->with('medias')->first();
+				if($gallery) $article->setRelation('gallery', $gallery);
 			
-			$articles->each(function($article) use ($fields, $field){
-	 			if($field) $article->setVisible($fields);
-	 			$article->setRelation('categories', $article->categories()->with('children')->get());
 	 		});
 
-	 		return Response::listing(
-		 		array(
-		 			'code' 		=> 200,
-		 			'message' 	=> 'success'
-		 		),
-		 		$articles, $offset, $limit
-		 	);
+	 		// dd(\DB::getQueryLog());
+
+		 	return Response::result(
+				array(
+					'header'=> array(
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	),
+					'offset' => (int) Input::get('offset', 0),
+					'limit' => (int) Input::get('limit', 10),
+					'total' => Article::count(),
+					'entries' => $articles->toArray()
+				)
+			); 
 		}
 
 		return Response::message(400, $validator->messages()->first()); 
@@ -82,13 +83,12 @@ class ArticleController extends BaseController
 				'tags' => Input::get('tags')
 			));
 
-			$picture = Input::get('picture', null);
-			if($picture)
-			{
-				$response = Image::upload($picture);
-				if(is_object($response)) return $response;
-				$article->picture = $response;
-			}
+			if(array_key_exists('picture', $inputs))
+            {
+            	$response = $article->createPicture($article->app_id);
+            	if(is_object($response)) return $response;             	
+             	unset($inputs['picture']);
+            }
 
 			$category_id = Input::get('category_id', null);
 			if($category_id)
@@ -114,19 +114,19 @@ class ArticleController extends BaseController
 		$inputs = array_add(Input::all(),'id',$id);
 		$validator = Validator::make($inputs, Article::$rules['show_with_id']);
 
-		$field = Input::get('fields', null);
-		$fields = explode(',', $field);
-
 		if($validator->passes())
 		{
-			$article = Article::app()->active()->find($id);
+			$article = Article::whereId($id)->app()->active()->ApiFilter()->first();
 			if($article)
 			{
+				$article->fields();
+				$cats = $article->categories()->get(); 
+				foreach ($cats as $key => $cat) {
+					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
+				}
 
-				$article->setRelation('categories', $article->categories()->with('children')->first()->getDescendantsAndSelf()->toHierarchy());
-				$article->setRelation('gallery', $article->gallery()->with('medias')->first());
-
-				if($field) $article->setVisible($fields);  
+				$gallery = $article->gallery()->with('medias')->first();
+				if($gallery) $article->setRelation('gallery', $gallery);
 
 				return Response::result(array(
 	        		'header' => array(
@@ -172,13 +172,20 @@ class ArticleController extends BaseController
             if(!count($inputs))
                 return Response::message(200, 'Nothing is update.');
 
-            $category_id = Input::get('category_id', null);
+			 $category_id = Input::get('category_id', null);
 			if($category_id)
 			{
 				$ids = explode(',', $category_id); 
-				$article->attachCategories($ids);
+				$article->syncRelations('categories', $ids);
 				unset($inputs['category_id']);
 			}
+
+			if(array_key_exists('picture', $inputs))
+            {
+            	$response = $article->createPicture($article->app_id);
+            	if(is_object($response)) return $response;             	
+             	unset($inputs['picture']);
+            }
 
 			$article->update($inputs);
 
@@ -206,6 +213,7 @@ class ArticleController extends BaseController
 	        $article = Article::where('id','=',$id)->app()->first();
 	        if($article)
 	        {
+	        	$article->gallery()->first()->delete();
 	        	$article->detachCategories(array_flatten($article->getCategoryIds()));	
 				$article->delete();
 
@@ -217,7 +225,4 @@ class ArticleController extends BaseController
 
 		return Response::message(400, $validator->messages()->first());
 	}
-
-
-
 }

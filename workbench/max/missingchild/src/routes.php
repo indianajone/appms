@@ -6,7 +6,5 @@
 			return Response::fields('missingchilds');
 		});
 
-		Route::post('missingchilds/{id}/delete', 'Max\\Missingchild\\Controllers\\MissingchildController@delete');
 		Route::resource('missingchilds', 'Max\\Missingchild\\Controllers\\MissingchildController');
-
 	});

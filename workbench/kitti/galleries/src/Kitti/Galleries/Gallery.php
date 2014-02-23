@@ -4,7 +4,7 @@ class Gallery extends \BaseModel
 {
     protected $table = 'galleries';
   	protected $guarded = array('id');
-    protected $hidden = array('app_id', 'status');
+    protected $hidden = array('app_id', 'status', 'content_type', 'content_id');
 
     public static $rules = array(
     	'show' => array(
@@ -16,13 +16,19 @@ class Gallery extends \BaseModel
         ),
     	'show_by_owner' => array(
             'appkey' => 'required|exists:applications,appkey',
-    		'type' => 'required|in:member,article',
+            /**
+            #TODO Move Type Somewhere
+            **/
+    		'type' => 'required|in:member,article,child',
     		'id' => 'required|exists:galleries'
     	),
     	'create' => array(
     		'appkey' => 'required|exists:applications,appkey',
     		'content_id' => 'required',
-    		'content_type' => 'required|in:member,article',
+             /**
+            #TODO Move Type Somewhere
+            **/
+    		'content_type' => 'required|in:member,article,child',
     		'name' => 'required'
     	),
         'update' => array(
@@ -37,7 +43,6 @@ class Gallery extends \BaseModel
 
     public function owner()
     {
-        // var_dump($this->attribute['content_type']);
     	switch($this->attribute['content_type'])
     	{
             case 'article':
@@ -49,17 +54,25 @@ class Gallery extends \BaseModel
     	}
 
     	return $this->belongsTo($model, 'id');
-
-        // dd(\DB::getQueryLog());
     }
 
     public function medias()
     {
-    	return $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
+        $media = $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
+        $media->app();
+        if($media->getResults()->isEmpty())
+            return $this->hasOne('Kitti\\Medias\\Media')->app();
+        else
+            return $media;
     }
 
     public function scopeOwner($query, $type, $id)
     {
     	return $query->whereContentType($type)->whereContentId($id);
+    }
+
+    public function galleryable()
+    {
+        return $this->morphTo();
     }
 }
