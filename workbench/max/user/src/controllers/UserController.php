@@ -37,6 +37,9 @@ class UserController extends \BaseController {
             $user->setVisible($fields);  
         });
 
+        if(!\Request::is('api/*')) 
+            return \View::make('users.index')->with('users', $users);
+
         return Response::listing(
             array(
                 'code'=>200,
@@ -133,7 +136,13 @@ class UserController extends \BaseController {
 	 */
 	public function edit($id)
 	{
-        return $this->update($id);
+        $user = User::find($id);
+        if($user)
+        {
+            return \View::make('users.edit')->with('user', $user);
+        }
+
+       return Response::message(400, 'Invalid selected user.');
 	}
 
 	/**

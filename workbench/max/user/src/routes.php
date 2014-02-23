@@ -10,6 +10,12 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
+Route::group(array('prefix' => 'v1'), function()
+{
+    Route::resource('users', 'Max\\User\\Controllers\\UserController');
+});
+
+
 
 Route::group(array('prefix' => 'api/v1'), function()
 {
