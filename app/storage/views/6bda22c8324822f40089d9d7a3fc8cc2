@@ -1,0 +1,73 @@
+
+<?php $__env->startSection('content'); ?>
+
+<h1>User Management</h1>
+
+<div class="table-responsive">
+	<table class="table table-striped table-hover table-data">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Username</th>
+				<th>Last Seen</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach ($users as $key => $user): ?>
+    		
+			<tr>
+				<td><?php echo ($key+1); ?>
+				<td><?php echo $user->username; ?></td>
+				<td><?php echo Carbon\Carbon::createFromTimeStamp($user->last_seen)->format('d-m-y G:i:s'); ?></td>
+				<td>
+					<a href="<?php echo URL::to('v1/users/'.$user->id.'/edit'); ?>">
+						<span class="fa-stack">
+							<i class="fa fa-circle fa-stack-2x"></i>
+							<i class="fa fa-edit fa-stack-1x fa-inverse"></i>
+						</span>
+					</a>
+					<a href="#">
+						<span class="fa-stack">
+							<i class="fa fa-circle fa-stack-2x"></i>
+							<i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</a>
+				</td>
+			</tr>
+
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+</div>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('js'); ?>
+
+<?php echo HTML::script('js/dataTables/jquery.dataTables.js'); ?>
+<?php echo HTML::script('js/dataTables/dataTables.bootstrap.js'); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('javascript'); ?>
+
+<script type="text/javascript">
+	$(function(){
+		$('.table-data').dataTable({
+			aoColumnDefs: [
+			  {
+			     bSortable: false,
+			     aTargets: [ -1 ]
+			  }
+			]
+		});
+
+		$('form').on('click', function(e){
+			e.preventDefault();
+		});
+	});
+</script>
+
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
