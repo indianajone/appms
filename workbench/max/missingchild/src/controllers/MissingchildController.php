@@ -19,10 +19,9 @@ class MissingchildController extends \BaseController
         if($validator->passes())
         {
         	$children = Child::app()->apiFilter()->get()->load('categories', 'gallery.medias', 'app_content.gallery.medias');
-        	// $children = Child::app()->apiFilter()->with('categories')->get();
-
         	$children->each(function($child)
         	{
+        		$child->fields();
         		if($child->categories)
         		{
         			foreach($child->categories as $category)
@@ -103,7 +102,7 @@ class MissingchildController extends \BaseController
 		        	),
 					'offset' => (int) Input::get('offset', 0),
 					'limit' => (int) Input::get('limit', 10),
-					'total' => Child::count(),
+					'total' => Child::app()->count(),
 					'entries' => $children->toArray()
 				)
 			); 
@@ -250,7 +249,7 @@ class MissingchildController extends \BaseController
                 )
             );
 
-           if(Input::get('picture', null))
+            if(Input::get('picture', null))
             {
             	$response = $child->createPicture($app_id);
             	if(is_object($response)) return $response;             	
@@ -283,7 +282,12 @@ class MissingchildController extends \BaseController
 			        		'code'=> 200,
 			        		'message'=> 'success'
 			        	),
-						'id'=> $child->id
+						'id'=> $child->id,
+						'gallery_id'=>  $child->gallery->id,
+						'app_content'=> array(
+							'id'=>$app_content->id,
+							'gallery_id'=> $app_content->gallery->id
+						)
 					)
 				); 
 
@@ -300,31 +304,29 @@ class MissingchildController extends \BaseController
 		if($validator->passes())
 		{
 			$child = Child::apiFilter()->with('categories', 'gallery.medias', 'app_content.gallery.medias', 'articles')->find($id);
+
 			$child->fields();
 
-			$types = $child->getRelation('categories');
-        	$obj = array();
-        	foreach ($types as $type) {
-        		$type->setVisible(array('id','name'));
-        		if(!$type->isRoot())
-        		{
-        			$name = $type->getRoot()->name;
-        			if(!array_key_exists($name,$obj)) 
-        				$obj[$name] = [];
-
-        			array_push($obj[$name], $type->toArray());
-        		}
-        		else
-        		{
-        			$name = $type->name;
-        			$obj[$name] = $type->toArray();
-        		}
-        	}
-        	
-        	foreach ($obj as $key => $type) {
-        		$child->setRelation($key, new Collection($type));
-        	}  	
-
+			if($child->categories)
+    		{
+    			foreach($child->categories as $category)
+    			{
+    				if(!$category->isRoot())
+    				{
+    					$root = $category->getRoot();
+    					$relation = $category->getDescendantsAndSelf();
+    					if($relation->count() > 0)
+    						$child->setRelation($root->name, $relation->toHierarchy());
+    					else
+    						$child->setRelation($root->name, null);
+    				}
+    				else
+    				{
+    					$child->setRelation($category->name, $category->getDescendants()->toHierarchy());
+    				}
+    			}
+    		}
+	
 			return Response::result(array(
 	        		'header' => array(
 	        			'code' => 200,

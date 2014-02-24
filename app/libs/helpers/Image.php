@@ -8,10 +8,11 @@ class Image
 	public function upload($base64)
 	{
 		$local_env = App::environment('local');
+
 		$cdn = Config::get('image.cdn');
 		$nas = Config::get('image.nas');
 		$slug = Config::get('image.slug').'/'.date('Y/m/d').'/';
-		$path = ( $local_env ? $cdn : '').$nas.$slug;
+		$path = $cdn.$nas.$slug;
 		$format = Config::get('image.format');
 
 		// #FIXED iDevice base64 encode.
@@ -43,7 +44,7 @@ class Image
 	        	]
 			), 200);
 		if(File::put($path.$filename,$picture))
-			return $local_env ? asset($slug.$filename) : $cdn.$slug.$filename;
+			return $cdn.$slug.$filename;
 		else
 			return Response::json(array(
 				'header'=> [
@@ -51,5 +52,18 @@ class Image
 	        		'message'=> 'Can not upload picture. Please check your file data.'
 	        	]
 			), 200);
+	}
+
+	public function delete($url)
+	{
+		$local_env = App::environment('local');
+		$cdn = $local_env ? Config::get('image.cdn') : '';
+		$nas = Config::get('image.nas');
+		$path = parse_url($url, PHP_URL_PATH);
+
+		if(File::exists($cdn.$nas.$path))
+		{
+			File::delete($cdn.$nas.$path);
+		}
 	}
 }

@@ -32,7 +32,28 @@
 			</div>
 		</div>
 	</div>
-	{{ Form::button('Save', array('class="btn btn-success"')) }}
+	{{ Form::button('Save', array('class'=>'btn btn-success', 'type'=>'submit')) }}
 {{ Form::close() }}
+
+@stop
+
+
+@section('javascript')
+
+<script type="text/javascript">
+
+		$('form').eq(0).on('submit', function(e){
+			var $this = $(this);
+			$.ajax({
+				url: $this.attr('action'),
+				success: function(result)
+				{
+					alert(result.header.code);
+				}
+			});
+
+			return false;	
+		});
+</script>
 
 @stop

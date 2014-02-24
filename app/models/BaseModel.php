@@ -159,7 +159,7 @@ class BaseModel extends Eloquent
         $hiddens = $hidden ? explode(',', $hidden) : $hidden;
         
         if($fields) $this->setVisible($fields);
-        if($hiddens) $this->setHidden($hiddens);
+        if($hiddens) $this->setHidden(array_merge($hiddens, $this->getHidden()));
     }
 
     public function scopeFilterCats($query, $ids)

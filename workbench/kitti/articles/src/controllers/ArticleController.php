@@ -18,14 +18,9 @@ class ArticleController extends BaseController
 	{
 		$validator = Validator::make(Input::all(), Article::$rules['show']);
 
-		$offset = Input::get('offset', 0);
-		$limit= Input::get('limit', 10);
-		$field = Input::get('fields', null);
-		$fields = explode(',', $field);
-
 		if($validator->passes())
 		{
-			$articles = Article::app()->active()->ApiFilter()->get();
+			$articles = Article::app()->ApiFilter()->get();
 			
 			$articles->each(function($article) {
 				$article->fields();

@@ -6,6 +6,14 @@ class Gallery extends \BaseModel
   	protected $guarded = array('id');
     protected $hidden = array('app_id', 'status', 'content_type', 'content_id');
 
+    protected $map = array(
+        'order_by' => 'order_by',
+        'limit' => 'limit',
+        'offset' => 'offset',
+        'whereUpdated' => 'updated_at',
+        'whereCreated' => 'created_at'
+    );
+
     public static $rules = array(
     	'show' => array(
     		'appkey' => 'required|exists:applications,appkey',
@@ -58,12 +66,7 @@ class Gallery extends \BaseModel
 
     public function medias()
     {
-        $media = $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
-        $media->app();
-        if($media->getResults()->isEmpty())
-            return $this->hasOne('Kitti\\Medias\\Media')->app();
-        else
-            return $media;
+        return $this->hasMany('Kitti\\Medias\\Media', 'gallery_id');
     }
 
     public function scopeOwner($query, $type, $id)

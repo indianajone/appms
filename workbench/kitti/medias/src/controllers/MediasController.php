@@ -13,27 +13,28 @@ class MediasController extends BaseController
 {
     public function index()
     {
-        $offset = Input::get('offset', 0);
-        $limit= Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = explode(',', $field);
         $validator = Validator::make(Input::all(), Media::$rules['show']);
 
         if($validator->passes())
         {
-            $medias = Media::app()->active()->offset($offset)->limit($limit)->get();
+            $medias = Media::app()->apiFilter()->get();
 
-            $medias->each(function($media) use ($fields, $field){
-                if($field) $media->setVisible($fields);   
+            $medias->each(function($media){
+                $media->fields();   
             });
 
-            return Response::listing(
+            return Response::result(
                 array(
-                    'code'      => 200,
-                    'message'   => 'success'
-                ),
-                $medias, $offset, $limit
-            );
+                    'header'=> array(
+                        'code'=> 200,
+                        'message'=> 'success'
+                    ),
+                    'offset' => (int) Input::get('offset', 0),
+                    'limit' => (int) Input::get('limit', 10),
+                    'total' => Media::app()->count(),
+                    'entries' => $medias->toArray()
+                )
+            ); 
         }
 
         return Response::message(204, $validator->messages()->first());
@@ -46,27 +47,27 @@ class MediasController extends BaseController
 
     public function store()
     {
-        $validator = Validator::make(Input::all(), Media::$rules['create']);
+        $inputs = Input::all();
+        $validator = Validator::make($inputs, Media::$rules['create']);
 
         if($validator->passes())
         {
-            $media = new Media;
-            $media->app_id = Appl::getAppIDByKey(Input::get('appkey'));
-            $media->gallery_id = Input::get('gallery_id');
-            $media->name = Input::get('name', 'Image-'.Carbon::now()->toDateString());
-            $media->description = Input::get('description');
-            $media->link = Input::get('link');
-            $media->type = Input::get('type');
-            $media->latitude = Input::get('latitude');
-            $media->longitude = Input::get('longitude');
+            $media = Media::create(array(
+                'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
+                'gallery_id' => Input::get('gallery_id'),
+                'name' => Input::get('name', 'Image-'.Carbon::now()->toDateString()),
+                'description' => Input::get('description'),
+                'link' => Input::get('link'),
+                'type' => Input::get('type'),
+                'latitude' => Input::get('latitude'),
+                'longitude' => Input::get('longitude')
+            ));
 
-            $picture = Input::get('picture', null);
-
-            if($picture)
+            if(Input::get('picture', null))
             {
-                $response = Image::upload($picture);
-                if(is_object($response)) return $response;
-                $media->picture = $response;
+                $response = $media->createPicture($media->app_id);
+                if(is_object($response)) return $response;              
+                unset($inputs['picture']);
             }
 
             if($media->save())
@@ -76,16 +77,98 @@ class MediasController extends BaseController
                             'code'=> 200,
                             'message'=> 'success'
                         ),
-                        'id'=> $media->id
+                        'id'=> $media->id,
+                        'picture'=> $media->picture
                     )
                 ); 
         }
 
-        return Response::message(204, $validator->messages()->first());
+        return Response::message(400, $validator->messages()->first());
     }
 
     public function show($id)
     {
-        # code...
+        $validator = Validator::make(Input::all(), Media::$rules['show']);
+
+        if($validator->passes())
+        {
+            $media = Media::app()->apiFilter()->find($id);
+
+            return Response::result(
+                array(
+                    'header'=> array(
+                        'code'=> 200,
+                        'message'=> 'success'
+                    ),
+                    'entry'=> $media->toArray()
+                )
+            ); 
+        }
+
+        return Response::message(400, $validator->messages()->first());
+    }
+
+    public function edit($id)
+    {
+        return $this->update($id);
+    }
+
+    public function update($id)
+    {   
+        $inputs = array_add(Input::all(), 'id', $id);
+        $validator = Validator::make($inputs, Media::$rules['update']);
+
+        if($validator->passes())
+        {
+            $media = Media::app()->apiFilter()->find($id);
+
+            foreach ($inputs as $key => $val) {
+                if( $val == null || 
+                    $val == '' || 
+                    $val == $media[$key] ||
+                    $key == 'appkey' ||
+                    $key == 'id') 
+                {
+                    unset($inputs[$key]);
+                }
+            }
+
+            if(!count($inputs))
+                return Response::message(200, 'Nothing is update.');
+
+            if(array_key_exists('picture', $inputs))
+            {
+                $response = $media->createPicture($media->app_id);
+                if(is_object($response)) return $response;              
+                unset($inputs['picture']);
+            }
+
+            if($media->update($inputs))
+                return Response::message(200, 'Updated media id: '.$id.' success!');
+        }
+
+        return Response::message(400, $validator->messages()->first());
+    }
+
+    public function destroy($id)
+    {
+        $inputs = array_add(Input::all(), 'id', $id);
+        $validator = Validator::make($inputs, Media::$rules['delete']);
+
+        if($validator->passes())
+        {
+            $media = Media::app()->find($id);
+
+            Image::delete($media->picture);
+            
+            if($media->delete())
+            {
+                return Response::message(200, 'Deleted media_id: '.$id.' success!'); 
+            }
+
+            return Response::message(204, 'media_id: '.$id.' does not exists!'); 
+        }
+
+        return Response::message(400, $validator->messages()->first());
     }
 }

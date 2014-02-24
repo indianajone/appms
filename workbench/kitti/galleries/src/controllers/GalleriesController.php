@@ -13,32 +13,36 @@ use \Kitti\Medias\Media;
 class GalleriesController extends BaseController 
 {
     public function index()
-    {
-        $offset = Input::get('offset', 0);
-        $limit= Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = explode(',', $field);
-        
+    {      
         $validator = Validator::make(Input::all(), Gallery::$rules['show']);
 
         if($validator->passes())
         {
-            $galleries = Gallery::active()->app()->with(array(
+            $galleries = Gallery::active()->app()->apiFilter()->with(array(
                 'medias' => function($query)
                 {
-                    $query->take(10);
+                    $query->take(10)->select(array('gallery_id','id', 'name','link', 'picture', 'like'));
                 })
-            )->offset($offset)->limit($limit)->get();
-            $galleries->each(function($gallery) use ($fields, $field){
-                if($field) $gallery->setVisible($fields);   
+            )->get();
+   
+            $galleries->each(function($gallery){
+                $gallery->fields();  
+
+                if($gallery->medias->count() == 0)
+                    $gallery->setRelation('medias', null);
             });
 
-            return Response::listing(
+            return Response::result(
                 array(
-                    'code'      => 200,
-                    'message'   => 'success'
-                ),
-                $galleries, $offset, $limit
+                    'header'=> array(
+                        'code'=> 200,
+                        'message'=> 'success'
+                    ),
+                    'offset' => (int) Input::get('offset', 0),
+                    'limit' => (int) Input::get('limit', 10),
+                    'total' => Gallery::app()->count(),
+                    'entries' => $galleries->toArray()
+                )
             );
         }
 
@@ -69,11 +73,11 @@ class GalleriesController extends BaseController
 
             $picture = Input::get('picture', null);
             
-            if($picture)
+            if(Input::get('picture', null))
             {
-                $response = Image::upload($picture);
-                if(is_object($response)) return $response;
-                $gallery->update(array('picture' => $response));
+                $response = $gallery->createPicture($app_id);
+                if(is_object($response)) return $response;              
+                unset($inputs['picture']);
             }
 
             if($gallery)
@@ -98,16 +102,13 @@ class GalleriesController extends BaseController
 
         if($validator->passes())
         {
-            $field = Input::get('fields', null);
-            $fields = explode(',', $field);
-
             $gallery = Gallery::with(array(
                 'medias' => function($query)
                 {
-                    $query->take(10);
-                }))->find($id);
-            
-            if($field) $gallery->setVisible($fields);  
+                    $query->take(10)->select(array('gallery_id','id', 'name','link', 'picture', 'like'));
+                }))->apiFilter()->find($id);
+
+            $gallery->fields();
 
             return Response::result(array(
                 'header' => array(
@@ -123,11 +124,6 @@ class GalleriesController extends BaseController
 
     public function showByOwner($type, $id)
     {
-        $offset = Input::get('offset', 0);
-        $limit= Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = explode(',', $field);
-
         $validator = Validator::make(array('id'=>$id, 'type'=>$type, 'appkey' => Input::get('appkey')), Gallery::$rules['show_by_owner']);
 
         if($validator->passes())
@@ -138,12 +134,10 @@ class GalleriesController extends BaseController
                 {
                     $query->take(10);
                 })
-            )->active()->owner($type, $id)->offset($offset)->limit($limit)->get();
+            )->active()->apiFilter()->owner($type, $id)->get();
 
-            $galleries->each(function($gallery) use ($fields, $field){
-                $gallery->setHidden(array('content_id','type','app_id','status'));
-                if($field) $gallery->setVisible($fields);   
-
+            $galleries->each(function($gallery) {
+                $gallery->fields();
             });
 
             return Response::listing(
@@ -160,25 +154,35 @@ class GalleriesController extends BaseController
 
     public function showMedias($id)
     {
-        $offset = Input::get('offset', 0);
-        $limit= Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = explode(',', $field);
-
         $gallery = Gallery::find($id);
-
         $inputs = array_merge(array('id'=>$id), Input::all());
         $validator = Validator::make($inputs, Gallery::$rules['show_with_id']);
 
         if($validator->passes())
         {
-            return Response::listing(
-                array(
-                    'code'      => 200,
-                    'message'   => 'success'
-                ),
-                $gallery->medias()->active()->offset($offset)->limit($limit)->get(), $offset, $limit
-            );
+            if($gallery)
+            {
+
+                $medias = $gallery->medias()->apiFilter()->get();
+
+                return Response::result(
+                    array(
+                        'header'=> array(
+                            'code'=> 200,
+                            'message'=> 'success'
+                        ),
+                        'offset' => (int) Input::get('offset', 0),
+                        'limit' => (int) Input::get('limit', 10),
+                        'total' => $gallery->medias->count(),
+                        'entries' => $medias->toArray()
+                    )
+                );
+            }
+
+            else 
+            {
+                return Response::message(204, 'Can not find any medias in this gallery');
+            }
         }
 
         return Response::message(400,$validator->messages()->first());
@@ -192,9 +196,8 @@ class GalleriesController extends BaseController
 
     public function update($id)
     {
-        $inputs = array_merge(
-            array('id'=>$id), 
-            Input::all()
+        $inputs = array_add(Input::all(),
+            'id', $id
         );
 
         $validator = Validator::make($inputs, Gallery::$rules['update']);
@@ -217,12 +220,11 @@ class GalleriesController extends BaseController
             if(!count($inputs))
                 return Response::message(200, 'Nothing is update.');
 
-            $picture = Input::get('picture', null);
-            if($picture)
+            if(Input::get('picture', null))
             {
-                $response = Image::upload($picture);
-                if(is_object($response)) return $response;
-                $inputs['picture'] = $response;
+                $response = $gallery->createPicture($gallery->app_id);
+                if(is_object($response)) return $response;              
+                unset($inputs['picture']);
             }
 
             if($gallery->update($inputs))
@@ -241,11 +243,16 @@ class GalleriesController extends BaseController
 
     public function destroy($id)
     {
-         $validator = Validator::make(array('id'=>$id), Gallery::$rules['delete']);
+        $inputs = array_add(Input::all(), 'id', $id);
+        $validator = Validator::make($inputs, Gallery::$rules['delete']);
 
-         if($validator->passes())
+        if($validator->passes())
         {
-            $gallery = Gallery::find($id)->delete();
+            
+            $gallery = Gallery::find($id);
+            $gallery->medias()->delete();
+            $gallery->delete();
+
             return Response::message(200, 'Deleted Gallery: '.$id.' success!');
         }
 

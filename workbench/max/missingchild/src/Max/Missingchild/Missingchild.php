@@ -85,9 +85,6 @@ class Missingchild extends \BaseModel
             'id'        => 'required|exists:missingchilds,id'
         )
     );
-<<<<<<< HEAD
-}
-=======
 
     public function articles()
     {
@@ -190,4 +187,3 @@ class Missingchild extends \BaseModel
         return new Collection($models);
     }
 }
->>>>>>> 1cd0da8a704e2a0ea8c2e76709bc697714c94b1e
