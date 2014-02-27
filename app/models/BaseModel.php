@@ -77,6 +77,20 @@ class BaseModel extends Eloquent
 		return $this->formatTime($value); 
 	}
 
+    public function getPictureAttribute($value)
+    {
+        if($value)
+        {
+            $path = parse_url($value, PHP_URL_PATH);
+            $file = str_replace(Config::get('image.slug').'/', '', $path);
+            $file = str_replace('/', '-', $file);
+
+            return asset(Config::get('timthumb::prefix').'/'.$file);
+        }
+
+        return $value;
+    }
+
 	public function scopeKeywords($query, $fields)
 	{
 		$keyword = \Input::get('q');
