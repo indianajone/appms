@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use \Image, \Config;
 use Indianajone\Categories\Category;
+use Kitti\Medias\Media;
 
 class BaseModel extends Eloquent 
 {
@@ -134,12 +135,33 @@ class BaseModel extends Eloquent
         $picture = Input::get('picture', null);
         if($picture)
         {
-            if(filter_var($picture, FILTER_VALIDATE_URL))
+            if (is_numeric($picture))
             {
-                $this->update(array(
-                    'picture' => $picture
-                ));
+                $id = (int) $picture;
+                $media = Media::find($id);
+
+                if($media)
+                {
+                    $this->update(array(
+                        'picture' => $media->picture
+                    ));
+                }
+                else
+                {
+                    return Response::json(array(
+                        'header'=> [
+                            'code'=> 400,
+                            'message'=> 'Selected id is invalid.'
+                        ]
+                    ), 200);
+                }
             }
+            // elseif(filter_var($picture, FILTER_VALIDATE_URL))
+            // {
+            //     $this->update(array(
+            //         'picture' => $picture
+            //     ));
+            // }
             else
             {
                 $response = Image::upload($picture);

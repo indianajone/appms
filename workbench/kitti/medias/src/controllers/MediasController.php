@@ -78,7 +78,7 @@ class MediasController extends BaseController
                             'message'=> 'success'
                         ),
                         'id'=> $media->id,
-                        'picture'=> $media->picture
+                        'picture'=> $response ?: Input::get('picture')
                     )
                 ); 
         }
@@ -88,7 +88,8 @@ class MediasController extends BaseController
 
     public function show($id)
     {
-        $validator = Validator::make(Input::all(), Media::$rules['show']);
+        $inputs = array_add(Input::all(), 'id', $id);
+        $validator = Validator::make($inputs, Media::$rules['show_with_id']);
 
         if($validator->passes())
         {
