@@ -155,14 +155,6 @@ class CategoryController extends BaseController
 	 */
 	public function update($id)
 	{
-		/**
-			#TODO: Find a better place for resolver.
-		**/
-		Validator::resolver(function($translator, $data, $rules, $messages)
-		{
-		    return new \Indianajone\Validators\Rules\ExistsOrNull($translator, $data, $rules, $messages);
-		});
-
 		$validator = Validator::make(Input::all(), Category::$rules['update']);
 
 		if ($validator->passes()) 
