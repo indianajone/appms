@@ -15,6 +15,7 @@
 			</tr>
 		</thead>
 		<tbody>
+			<?php var_dump($users); ?>
 			@foreach ($users as $key => $user)
     		
 			<tr>

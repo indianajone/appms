@@ -14,6 +14,7 @@
 			</tr>
 		</thead>
 		<tbody>
+			<?php var_dump($users); ?>
 			<?php foreach ($users as $key => $user): ?>
     		
 			<tr>
@@ -61,10 +62,6 @@
 			     aTargets: [ -1 ]
 			  }
 			]
-		});
-
-		$('form').on('click', function(e){
-			e.preventDefault();
 		});
 	});
 </script>

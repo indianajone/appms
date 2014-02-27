@@ -1,6 +1,13 @@
 
 <?php $__env->startSection('content'); ?>
 
+
+<?php if(isset($message)): ?>
+
+<h3><?php echo e($message); ?></h3>
+
+<?php else: ?>
+
 <h1>Edit <?php echo $user->username; ?></h1>
 <?php echo Form::open(array('url' => URL::to('api/v1/users/'.$user->id), 'method' => 'put', 'role'=>'form')); ?>
 	<div class="row">
@@ -27,12 +34,15 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('gender', 'Gender'); ?>
-				<?php echo Form::text('gender', $user->gender, array('class'=>'form-control', 'placeholder'=>'Gender')); ?>
+				<!-- <?php echo Form::text('gender', $user->birthday, array('class'=>'form-control', 'placeholder'=>'Gender')); ?> -->
+				<input type="date" name="birthday" id="birthday" value="" placeholder="">
 			</div>
 		</div>
 	</div>
 	<?php echo Form::button('Save', array('class'=>'btn btn-success', 'type'=>'submit')); ?>
 <?php echo Form::close(); ?>
+
+<?php endif; ?>
 
 <?php $__env->stopSection(); ?>
 
@@ -43,13 +53,15 @@
 
 		$('form').eq(0).on('submit', function(e){
 			var $this = $(this);
-			$.ajax({
-				url: $this.attr('action'),
-				success: function(result)
-				{
-					alert(result.header.code);
-				}
-			});
+			// $.ajax({
+			// 	url: $this.attr('action'),
+			// 	success: function(result)
+			// 	{
+			// 		alert(result.header.code);
+			// 	}
+			// });
+
+			console.log( Date.parse($('#birthday').val()) / 1000);
 
 			return false;	
 		});

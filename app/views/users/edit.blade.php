@@ -2,6 +2,13 @@
 
 @section('content')
 
+
+@if(isset($message))
+
+<h3>{{{ $message }}}</h3>
+
+@else
+
 <h1>Edit {{ $user->username }}</h1>
 {{ Form::open(array('url' => URL::to('api/v1/users/'.$user->id), 'method' => 'put', 'role'=>'form')) }}
 	<div class="row">
@@ -28,12 +35,14 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('gender', 'Gender') }}
-				{{ Form::text('gender', $user->gender, array('class'=>'form-control', 'placeholder'=>'Gender')) }}
+				{{ Form::text('gender', $user->birthday, array('class'=>'form-control', 'placeholder'=>'Gender')) }}
 			</div>
 		</div>
 	</div>
 	{{ Form::button('Save', array('class'=>'btn btn-success', 'type'=>'submit')) }}
 {{ Form::close() }}
+
+@endif
 
 @stop
 
@@ -44,13 +53,15 @@
 
 		$('form').eq(0).on('submit', function(e){
 			var $this = $(this);
-			$.ajax({
-				url: $this.attr('action'),
-				success: function(result)
-				{
-					alert(result.header.code);
-				}
-			});
+			// $.ajax({
+			// 	url: $this.attr('action'),
+			// 	success: function(result)
+			// 	{
+			// 		alert(result.header.code);
+			// 	}
+			// });
+
+			console.log( Date.parse($('#birthday').val()) / 1000);
 
 			return false;	
 		});
