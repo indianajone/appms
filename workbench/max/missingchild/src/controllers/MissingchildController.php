@@ -30,6 +30,10 @@ class MissingchildController extends \BaseController
         				{
         					$root = $category->getRoot();
         					$relation = $category->getDescendantsAndSelf();
+        					$relation->each(function($relate)
+        					{ 
+        						$relate->setVisible(array('id','name'));
+        					});
         					if($relation->count() > 0)
         						$child->setRelation($root->name, $relation->toHierarchy());
         					else
