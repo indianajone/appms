@@ -10,7 +10,7 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
-Route::group(array('prefix' => 'v1'), function()
+Route::group(array('prefix' => 'v1', 'before'=>'auth'), function()
 {
     Route::resource('users', 'Max\\User\\Controllers\\UserController');
 });
