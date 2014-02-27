@@ -1,12 +1,14 @@
 <?php
 namespace Max\User\Controllers;
 
-use Validator, Input, Response, Hash;
+use Validator, Input, Response, Hash, View, Request, Auth;
+use Carbon\Carbon;
 use Max\User\Models\User;
 use Indianajone\RolesAndPermissions\Role;
+use Indianajone\RolesAndPermissions\Permission;
 
-class UserController extends \BaseController {
-
+class UserController extends \BaseController 
+{
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -14,35 +16,29 @@ class UserController extends \BaseController {
 	 */
 	public function index()
 	{
-        $offset = Input::get('offset', 0);
-        $limit = Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = $field ? explode(',', $field) : $field;
-        
-        $updated_at = Input::get('updated_at', null);
-        $created_at = Input::get('created_at', null);
-
-        $users = User::with('apps', 'roles');
-        if($updated_at || $created_at)
-        {
-            if($updated_at) $users = $users->time('updated_at');
-            else $users = $users->time('created_at');
-        }
-        
-        $users = $users->offset($offset)->limit($limit)->get();
-
-        if($field)
-        $users->each(function($user) use ($fields){
-            $user->setVisible($fields);  
+        $user = Auth::user();
+        $users = User::whereId($user->id)->apiFilter()->with('children','roles')->get();
+       
+        $users->each(function($user){
+            $user->fields();
         });
 
-        return Response::listing(
-            array(
-                'code'=>200,
-                'message'=> 'success'
-            ),
-            $users, $offset, $limit
-        );
+        // dd(\DB::getQueryLog());
+
+        return \View::make('users.index')->with('users', $users);
+
+        // return Response::result(
+        //     array(
+        //         'header'=> array(
+        //             'code'=> 200,
+        //             'message'=> 'success'
+        //         ),
+        //         'offset' => (int) Input::get('offset', 0),
+        //         'limit' => (int) Input::get('limit', 10),
+        //         'total' => (int) User::tree()->count(),
+        //         'entries' => $users->toArray()
+        //     )
+        // ); 
            
 	}
 
@@ -76,7 +72,8 @@ class UserController extends \BaseController {
                     'last_name'     => Input::get('last_name'),
                     'email'         => Input::get('email'),
                     'gender'        => Input::get('gender'),
-                    'birthday'      => Input::get('birthday')
+                    'birthday'      => Input::get('birthday'),
+                    'last_seen'     => Carbon::now()->timestamp
                 )
             );
 
@@ -103,9 +100,8 @@ class UserController extends \BaseController {
 	 */
 	public function show($id)
 	{
-        $field = Input::get('fields', null);
-        $fields = explode(',', $field);
-        $user = User::with('apps', 'roles')->find($id);
+       
+        $user = User::apiFilter()->tree()->with('apps', 'roles')->whereId($id)->first();
         
         if($user)
         {
@@ -131,7 +127,16 @@ class UserController extends \BaseController {
 	 */
 	public function edit($id)
 	{
-        return $this->update($id);
+        $user = User::find($id);
+        if($user)
+        {
+            if($user->can('create_user'))
+                return View::make('users.edit')->with('user', $user);
+
+            return View::make('users.edit')->with('message', 'Permission denied');
+        }
+
+       return Response::message(400, 'Invalid selected user.');
 	}
 
 	/**
@@ -219,8 +224,8 @@ class UserController extends \BaseController {
        
     public function doLogout()
     {
-        \Auth::logout();
-        return Response::message(200, 'success');
+        if(\Auth::logout())
+            return Response::message(200, 'success');
     }
         
     public function resetPassword($id)
@@ -249,12 +254,6 @@ class UserController extends \BaseController {
     public function manageRole($id, $action)
     {
         $inputs = array_merge(array('id'=> $id, 'action' => $action), Input::only('role_id'));
-
-        Validator::resolver(function($translator, $data, $rules, $messages)
-        {
-            return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
-        });
-
         $validator = Validator::make($inputs, User::$rules['manage_role']);
 
         if($validator->passes())

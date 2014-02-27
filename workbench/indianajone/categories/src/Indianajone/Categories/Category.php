@@ -1,9 +1,10 @@
 <?php namespace Indianajone\Categories;
 
-
+use Appl;
 use Baum\Node;
 use Carbon\Carbon;
-use Indianajone\Categories\Collection;
+use Indianajone\Categories\Extensions\Eloquent\Collection;
+use Input;
 
 /**
 * MODEL
@@ -18,8 +19,11 @@ class Category extends Node {
   protected $table = 'categories';
 
   public static $rules = array(
+    'show' => array(
+      'appkey' => 'required|exists:applications,appkey',
+    ),
     'save' => array(
-      // 'appkey' => 'required|exists:applications,appkey',
+      'appkey' => 'required|exists:applications,appkey',
       'name' => 'required',
       'parent_id' => 'exists:categories,id'
     ),
@@ -35,7 +39,7 @@ class Category extends Node {
     'exists' => 'The given :attribute is invalid.'    
   );
 
-  protected $hidden = array('lft', 'rgt');
+  protected $hidden = array('pivot', 'app_id', 'parent_id', 'lft', 'rgt', 'depth');
 
   /** 
    * Override getDateFormat to unixtime stamp.
@@ -58,6 +62,15 @@ class Category extends Node {
     return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
   }
 
+  public function scopeApp($query)
+  {
+      return $query->whereAppId(Appl::getAppIdByKey(Input::get('appkey')));
+  }
+
+  public function scopeActive($query)
+  {
+      return $query->whereStatus(1);
+  }
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -161,14 +174,6 @@ class Category extends Node {
   //   });
   // }
 
-   public function children() {
-
-    $children = $this->hasMany(get_class($this), $this->getParentColumnName())
-                ->orderBy($this->getLeftColumnName());
-
-    return $children;
-  }
-
   public function updateParent($id)
   {
     if($id >= 1)
@@ -182,6 +187,11 @@ class Category extends Node {
       $updated_at = \Input::get($field);
       $time = Carbon::createFromFormat(\Input::get('date_format'), $updated_at, \Config::get('app.timezone'));
       return $query->where($field, '>=', $time->timestamp);
+  }
+
+  public function newCollection(array $models = array())
+  {
+    return new Collection($models);
   }
 
 }

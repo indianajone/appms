@@ -10,35 +10,42 @@ class MemberController extends \BaseController {
 
  	public function index()
     {
-    	$offset = Input::get('offset', 0);
-        $limit = Input::get('limit', 10);
-        $field = Input::get('fields', null);
-        $fields = $field ? explode(',', $field) : $field;
-        
-        $updated_at = Input::get('updated_at', null);
-        $created_at = Input::get('created_at', null);
+        $validator = Validator::make(Input::all(), Member::$rules['show']);
 
-        $members = Member::query();
-        if($updated_at || $created_at)
+        if($validator->passes())
         {
-            if($updated_at) $members = $members->time('updated_at');
-            else $members = $members->time('created_at');
+        	$offset = Input::get('offset', 0);
+            $limit = Input::get('limit', 10);
+            $field = Input::get('fields', null);
+            $fields = $field ? explode(',', $field) : $field;
+            
+            $updated_at = Input::get('updated_at', null);
+            $created_at = Input::get('created_at', null);
+
+            $members = Member::app();
+            if($updated_at || $created_at)
+            {
+                if($updated_at) $members = $members->time('updated_at');
+                else $members = $members->time('created_at');
+            }
+            
+            $members = $members->active()->offset($offset)->limit($limit)->get();
+
+            if($field)
+            $members->each(function($member) use ($fields){
+                $member->setVisible($fields);  
+            });
+
+            return Response::listing(
+                array(
+                    'code'=>200,
+                    'message'=> 'success'
+                ),
+                $members, $offset, $limit
+            );
         }
-        
-        $members = $members->active()->offset($offset)->limit($limit)->get();
 
-        if($field)
-        $members->each(function($user) use ($fields){
-            $user->setVisible($fields);  
-        });
-
-        return Response::listing(
-            array(
-                'code'=>200,
-                'message'=> 'success'
-            ),
-            $members, $offset, $limit
-        );
+        return Response::message(204, $validator->messages()->first());
     }
 
     public function create()
@@ -52,11 +59,10 @@ class MemberController extends \BaseController {
 
  		if($validator->passes())
  		{
-
  			$member = Member::create(
                 array(
-                    'app_id'        => Appl::getAppIDByKey(Input::get('appkey'))->id,
-                    'parent_id'     => Input::get('parent_id', 0),
+                    'app_id'        => Appl::getAppIDByKey(Input::get('appkey')),
+                    'parent_id'     => Input::get('parent_id'),
                     'fbid'          => Input::get('fbid'),
                     'fbtoken'       => Input::get('fbtoken'),
                     'username'      => Input::get('username'),
@@ -97,10 +103,14 @@ class MemberController extends \BaseController {
 	{
         $field = Input::get('fields', null);
         $fields = explode(',', $field);	
-        $member = Member::find($id);
-
-        if($member)
+        
+        $validator = Validator::make(Input::all(), Member::$rules['show']);
+        if($validator->passes()) 
         {
+            $member = Member::app()->find($id);
+
+            if($field) $member->setVisible($fields);  
+            
             return Response::result(
                 array(
                     'header' => array(
@@ -112,7 +122,7 @@ class MemberController extends \BaseController {
             );
         }
 
-        return Response::message(204, 'Member id: '. $id .' does not exists.');
+        return Response::message(204, $validator->messages()->first());
     }
 
 	public function edit($id)
@@ -122,7 +132,7 @@ class MemberController extends \BaseController {
 
     public function update($id)
     {
-        $inputs = array_merge(array('id' => $id), Input::only('parent_id', 'fbid', 'fbtoken', 'username', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
+        $inputs = array_merge(array('id' => $id), Input::only('appkey', 'parent_id', 'fbid', 'fbtoken', 'username', 'title', 'first_name', 'last_name', 'other_name', 'phone', 'mobile', 'email', 'address', 'gender', 'birthday', 'description', 'status'));
         $validator = Validator::make($inputs, Member::$rules['update']);
 
         if($validator->passes())
@@ -131,7 +141,9 @@ class MemberController extends \BaseController {
             foreach ($inputs as $key => $val) {
                 if( $val == null || 
                     $val == '' || 
-                    $val == $member[$key]) 
+                    $val == $member[$key] ||
+                    $key == 'appkey' ||
+                    $key == 'id') 
                 {
                     unset($inputs[$key]);
                 }

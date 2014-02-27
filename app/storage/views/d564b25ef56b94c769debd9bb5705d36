@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>
+            <?php $__env->startSection('title'); ?>
+            App Management
+            <?php echo $__env->yieldSection(); ?>
+        </title>
+        
+        <?php echo HTML::style('css/bootstrap/bootstrap.min.css'); ?>
+        <?php echo HTML::style('css/font-awesome/font-awesome.min.css'); ?>
+        <?php /* HTML::style('css/admin.css') */ ?>
+        <!-- Extra CSS -->
+        <?php echo $__env->yieldContent('css'); ?>
+
+        <?php echo HTML::style('css/style.css'); ?>
+
+        <!-- Just for debugging purposes. Don't actually copy this line! -->
+        <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+
+    <body>
+        <div class="container">
+            <?php echo Form::open(array('id'=>'frm-login' ,'url' => URL::to('api/v1/users/login'), 'method' => 'POST', 'role'=>'form')); ?>
+                <h2 class="form-signin-heading">Please sign in</h2>
+                <div class="form-group">
+                    <?php echo Form::label('username', 'Username'); ?>
+                    <?php echo Form::text('username', '', array('class'=>'form-control', 'placeholder'=>'Username', 'required', 'autoFocus'=>1)); ?>
+                </div>
+                <div class="form-group">
+                    <?php echo Form::label('password', 'Password'); ?>
+                    <?php echo Form::password('password', array('class'=>'form-control', 'placeholder'=>'Password', 'required')); ?>
+                </div>
+                <div class="alert alert-danger hide"></div>
+                <?php echo Form::button('Login', array('class'=>'btn btn-success btn-block', 'type'=>'submit')); ?>
+            <?php echo Form::close(); ?>
+
+        </div>
+        
+        <?php echo HTML::script('js/jquery/jquery-1.11.0.min.js'); ?>
+        <?php echo HTML::script('js/bootstrap/bootstrap.min.js'); ?>
+
+        <script type="text/javascript">
+            $(function(){
+                $('#frm-login').on('submit', function(e){
+                    e.preventDefault();
+                    $this = $(this);
+                    $.ajax({
+                        url: $this.attr('action'),
+                        type: $this.attr('method'),
+                        data: $this.serialize(),
+                        success: function(result)
+                        {
+                            if(result.header.code == 200)
+                            {
+                                $('.alert').removeClass('hide');
+                                window.location.href = "<?php echo URL::to('v1/users'); ?>";
+                            }
+                            else
+                            {
+                                $('.alert').removeClass('hide').text(result.header.message);
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+
+    </body>
+</html>

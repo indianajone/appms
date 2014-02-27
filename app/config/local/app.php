@@ -114,7 +114,14 @@ return array(
 		'Indianajone\Categories\CategoriesServiceProvider',
 
 		'Max\User\UserServiceProvider',
-		'Max\Member\MemberServiceProvider'
+		'Max\Member\MemberServiceProvider',
+		'Max\Missingchild\MissingchildServiceProvider',
+
+		'Kitti\Galleries\GalleriesServiceProvider',
+		'Kitti\Medias\MediasServiceProvider',
+		'Kitti\Articles\ArticlesServiceProvider',
+
+		'Spescina\Timthumb\TimthumbServiceProvider'
 	),
 
 	/*
@@ -182,9 +189,10 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
-		'Appl'			  => 'Indianajone\Applications\Facades\ApplicationFacade',
+		'Appl'			  => 'Indianajone\Applications\Facades\Application',
 		'Image'			  => 'Libs\Helpers\Facades\Image',
-		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
+		'Entrust' 		  => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions',
+		'Timthumb'        => 'Spescina\Timthumb\Facades\Timthumb'
 	),
 
 );

@@ -1,0 +1,120 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 50px;
+  background-color: #f5f5f5;
+}
+
+/*==========  Sidebar navigation  ==========*/
+
+.nav-sidebar {
+  margin-bottom: 20px;
+  margin-left: -15px;
+}
+
+.nav-sidebar li {
+  border-bottom: 1px solid #eee; 
+}
+
+.nav-sidebar li:last-child {
+  border: none;
+}
+
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.nav-sidebar > li > a .fa.arrow:before {
+    content: "\f053";
+}
+
+.nav-sidebar > .active > a > .fa.arrow:before {
+    content: "\f078";
+}
+
+.nav-sidebar > .active >a:hover, 
+.nav-sidebar > .active >a:focus,
+.nav-sidebar > .active > a {
+  color: #fff;
+  background-color: #428bca;
+}
+
+.nav-sidebar li > .nav > li > a {
+  padding-left: 37px;
+}
+
+/*==========  Theme  ==========*/
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.428571429;
+}
+
+.footer .text-muted {
+  margin: 16px 0;
+}
+
+.navbar {
+  border-radius: 0;
+}
+
+.navbar>.container-fluid .navbar-brand {
+  margin-left: 0;
+}
+
+@media(min-width:768px) {    
+  .navbar-sidebar {
+    z-index: 1;
+    position: absolute;
+  }
+}
+
+/*==========  DataTable  ==========*/
+
+/* DataTables Overrides */
+
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled {
+    background: transparent;
+}
+
+table.dataTable thead .sorting_asc:after {
+    content: "\f0de";
+    float: right;
+    font-family: fontawesome;
+}
+
+table.dataTable thead .sorting_desc:after {
+    content: "\f0dd";
+    float: right;
+    font-family: fontawesome;
+}
+
+table.dataTable thead .sorting:after {
+    content: "\f0dc";
+    float: right;
+    font-family: fontawesome;
+    color: rgba(50,50,50,.5);
+}
+

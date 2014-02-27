@@ -14,10 +14,10 @@ class CreateMemberTable extends Migration {
     {
         Schema::create('members', function(Blueprint $table)
         {
-            $table->increments('id')->unique();
+            $table->increments('id');
             $table->integer('app_id')->unsigned();
             $table->foreign('app_id')->references('id')->on('applications');
-            $table->integer('parent_id')->default(0);
+            $table->integer('parent_id')->nullable();
             $table->string('fbid', 40)->nullable();
             $table->text('fbtoken')->nullable();
             $table->string('username', 40)->unique();
@@ -29,7 +29,7 @@ class CreateMemberTable extends Migration {
             $table->string('phone', 40)->nullable();
             $table->string('mobile', 10)->nullable();
             $table->boolean('verified')->nullable()->default(0);
-            $table->string('email', 40)->unique();
+            $table->string('email', 40);
             $table->string('address', 255)->nullable();
             $table->string('gender', 10)->nullable();
             $table->integer('birthday')->nullable();
@@ -38,7 +38,7 @@ class CreateMemberTable extends Migration {
             $table->integer('created_at');
             $table->integer('updated_at');
             $table->integer('last_seen');
-            $table->boolean('status')->default(0);
+            $table->boolean('status')->default(1);
         });
     }
 

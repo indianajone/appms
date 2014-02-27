@@ -1,0 +1,39 @@
+
+<?php $__env->startSection('content'); ?>
+
+<h1>Edit <?php echo $user->username; ?></h1>
+<?php echo Form::open(array('url' => URL::to('api/v1/users/'.$user->id), 'method' => 'put', 'role'=>'form')); ?>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('first_name', 'First name'); ?>
+				<?php echo Form::text('first_name', $user->first_name, array('class'=>'form-control', 'placeholder'=>'First name')); ?>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('last_name', 'Last name'); ?>
+				<?php echo Form::text('last_name', $user->last_name, array('class'=>'form-control', 'placeholder'=>'Last name')); ?>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('email', 'Email'); ?>
+				<?php echo Form::email('email', $user->email, array('class'=>'form-control', 'placeholder'=>'Email')); ?>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('gender', 'Gender'); ?>
+				<?php echo Form::text('gender', $user->gender, array('class'=>'form-control', 'placeholder'=>'Gender')); ?>
+			</div>
+		</div>
+	</div>
+	<?php echo Form::button('Save', array('class="btn btn-success"')); ?>
+<?php echo Form::close(); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

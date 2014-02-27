@@ -1,6 +1,6 @@
 <?php namespace Indianajone\Applications\Facades;
 
-class ApplicationFacade extends \Illuminate\Support\Facades\Facade {
+class Application extends \Illuminate\Support\Facades\Facade {
 
     /**
      * Get the registered name of the component.

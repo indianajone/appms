@@ -1,6 +1,7 @@
 <?php namespace Core\Response;
 
 use Illuminate\Support\ServiceProvider;
+use App;
 
 class ResponseServiceProvider extends ServiceProvider {
 
@@ -28,10 +29,14 @@ class ResponseServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-            $this->app['response'] = $this->app->share(function($app)
-            {
-                    return new Response($app['config']);
-            });
+		App::bind('response', function($app)
+		{	
+			return new Response($app['config']);
+		});
+            // $this->app['response'] = $this->app->share(function($app)
+            // {
+                // return new Response($app['config']);
+            // });
 	}
 
 	/**

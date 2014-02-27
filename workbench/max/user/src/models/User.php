@@ -107,6 +107,17 @@ class User extends BaseModel implements UserInterface, RemindableInterface
     {
         return $this->belongsToMany('Indianajone\RolesAndPermissions\Role', 'user_roles');
     }
+
+    public function children()
+    {
+        return $this->hasMany('Max\User\Models\User', 'parent_id');
+    }
+
+    public function scopeTree($query)
+    {
+        return $query->with(implode('.', array_fill(0, 4, 'children')))->where('parent_id', '=', NULL);
+
+    }
     
     public function missingchild(){
         return $this->belongsTo('Max\Missingchild\Models\Missingchild');
