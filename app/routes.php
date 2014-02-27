@@ -54,3 +54,8 @@ Route::get('image', function(){
 
 	return 'error';
 });
+
+
+Route::any('v1/login', function(){
+	return View::make('layouts.login');
+});
