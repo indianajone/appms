@@ -22,7 +22,16 @@ class Role extends EntrustRole {
      */
     public function permits()
     {
-        return $this->belongsToMany('Indianajone\RolesAndPermissions\Permission');
+        return $this->perms();
+    }
+
+    public function perms()
+    {
+        // To maintain backwards compatibility we'll catch the exception if the Permission table doesn't exist.
+        // TODO remove in a future version
+        try {
+            return $this->belongsToMany('Indianajone\RolesAndPermissions\Permission');
+        } catch(Execption $e) {}
     }
     
 	/**
