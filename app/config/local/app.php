@@ -119,7 +119,9 @@ return array(
 
 		'Kitti\Galleries\GalleriesServiceProvider',
 		'Kitti\Medias\MediasServiceProvider',
-		'Kitti\Articles\ArticlesServiceProvider'
+		'Kitti\Articles\ArticlesServiceProvider',
+
+		'Spescina\Timthumb\TimthumbServiceProvider'
 	),
 
 	/*
@@ -189,7 +191,8 @@ return array(
 
 		'Appl'			  => 'Indianajone\Applications\Facades\Application',
 		'Image'			  => 'Libs\Helpers\Facades\Image',
-		'RolesAndPermissions' => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions'
+		'Entrust' 		  => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions',
+		'Timthumb'        => 'Spescina\Timthumb\Facades\Timthumb'
 	),
 
 );
