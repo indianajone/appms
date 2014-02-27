@@ -208,14 +208,14 @@ class ArticleController extends BaseController
 	        $article = Article::where('id','=',$id)->app()->first();
 	        if($article)
 	        {
-	        	$article->gallery()->first()->delete();
+	        	if($article->gallery) $artcle->gallery()->delete();
 	        	$article->detachCategories(array_flatten($article->getCategoryIds()));	
 				$article->delete();
 
-				return Response::message(200, 'Deleted article_'.$id.' success!'); 
+				return Response::message(200, 'Deleted article_id: '.$id.' success!'); 
 	        }
 			
-			return Response::message(204, 'article_'.$id.' does not exists!'); 
+			return Response::message(204, 'article_id: '.$id.' does not exists!'); 
 		}
 
 		return Response::message(400, $validator->messages()->first());
