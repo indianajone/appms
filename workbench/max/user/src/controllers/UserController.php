@@ -17,7 +17,7 @@ class UserController extends \BaseController
 	public function index()
 	{
         $user = Auth::user();
-        $users = User::whereId($user->id)->apiFilter()->with('children','roles')->get();
+        $users = User::whereParentId($user->id)->apiFilter()->with('children','roles')->get();
        
         $users->each(function($user){
             $user->fields();
@@ -127,10 +127,11 @@ class UserController extends \BaseController
 	 */
 	public function edit($id)
 	{
+        $me = Auth::user();
         $user = User::find($id);
         if($user)
         {
-            if($user->can('create_user'))
+            if($me->can('create_user'))
                 return View::make('users.edit')->with('user', $user);
 
             return View::make('users.edit')->with('message', 'Permission denied');

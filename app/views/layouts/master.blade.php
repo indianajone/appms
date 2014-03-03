@@ -12,7 +12,6 @@
         
         {{ HTML::style('css/bootstrap/bootstrap.min.css') }}
         {{ HTML::style('css/font-awesome/font-awesome.min.css') }}
-        {{-- HTML::style('css/admin.css') --}}
         <!-- Extra CSS -->
         @yield('css')
 

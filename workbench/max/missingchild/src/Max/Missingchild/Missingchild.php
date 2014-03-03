@@ -182,8 +182,8 @@ class Missingchild extends \BaseModel
         return $cat ? true : false;
     }
 
-    public function newCollection(array $models = array())
-    {
-        return new Collection($models);
-    }
+    // public function newCollection(array $models = array())
+    // {
+    //     return new Collection($models);
+    // }
 }

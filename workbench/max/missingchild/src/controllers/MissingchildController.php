@@ -4,7 +4,6 @@ use Validator, Input, Response, Hash, Appl, Image;
 use Indianajone\Categories\Category;
 use Max\Missingchild\Models\Missingchild as Child;
 use Baum\Extensions\Eloquent\Collection;
-// use Max\Missingchild\Collection;
 use Kitti\Articles\Article;
 use Kitti\Galleries\Gallery;
 use Carbon\Carbon;
@@ -120,101 +119,6 @@ class MissingchildController extends \BaseController
 		return $this->store();
 	}
 
-	// public function articles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['show_with_id']);
-
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::app()->whereId($id)->first();
-	// 		$articles = $child->articles()->with('categories', 'gallery.medias')->get();
-
-	// 		dd(\DB::getQueryLog());
-
-	// 		foreach ($articles as $item => $article) {
- //            	$article->fields();
- //            	$article->setHidden(array_merge($article->getHidden() ,array('categories')));
- //            	$types = $article->categories()->get(); //->remember(1)
- //            	$obj = [];
- //            	foreach ($types as $type) {
- //            		if(!$type->isRoot())
- //            		{
- //            			$name = Category::whereId($type->getParentId())->first()->name; //->remember(1)
- //            			if(!array_key_exists($name,$obj)) 
- //            				$obj[$name] = [];
-
- //            			array_push($obj[$name], $type->toArray());
- //            		}
-
- //            		foreach ($obj as $key => $type) {
- //            			$article->setRelation($key, new Collection($type));
- //            		}
- //            	}
- //            }
-
-	// 		return Response::result(array(
- //        		'header' => array(
- //        			'code' => 200,
- //        			'message' => 'success'
- //        		),
- //        		'entry' => !$articles->isEmpty() ? $articles->toArray() : null
- //        	));
-
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function createArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$rules = array_merge(Child::$rules['show_with_id'], Article::$rules['create']);
-	// 	$validator = Validator::make($inputs, $rules);
-		
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$child->articles()->create(array(
-
-	// 		));
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function attachArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$ids = explode(',', Input::get('article_id')); 
-	// 		$child->attachRelations('articles',$ids);
-
-	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function detachArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$ids = explode(',', Input::get('article_id')); 
-	// 		$child->detachRelations('articles',$ids);
-
-	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
 	public function store()
 	{
 		$validator = Validator::make(Input::all(), Child::$rules['create']);
@@ -239,7 +143,10 @@ class MissingchildController extends \BaseController
  				'order' => Input::get('order', 0),
  				'missing_at' => Input::get('missing_at'),
  				'reported_place' => 'สถานีห้วยขวาง',
- 				'reported_at' => Input::get('reported_at')
+ 				'reported_at' => Input::get('reported_at'),
+ 				'notify' => Input::get('notify', 0),
+ 				'notify_text' => Input::get('notify_text', null),
+ 				'tags' => Input::get('tags', null)
  			));
 
 			$child->attachRelations('categories',Input::get('category_id'));
@@ -262,10 +169,13 @@ class MissingchildController extends \BaseController
 
 			$app_content = Article::create(array(
 				'app_id' => $app_id,
+				'pre_title' => Input::get('pre_title'),
 				'title' => Input::get('title'),
+				'teaser' => Input::get('teaser'),
 				'content' => $child->description,
 				'wrote_by' => Input::get('wrote_by', 'Admin'),
 				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+				'tags' => Input::get('tags')
 			));
 
 			$child->update(array(

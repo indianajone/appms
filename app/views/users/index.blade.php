@@ -1,26 +1,31 @@
 @extends('layouts.master')
 
+@section('css')
+
+{{ HTML::style('css/plugins/dataTables/dataTables.bootstrap.css') }}
+
+@stop
+
 @section('content')
 
 <h1>User Management</h1>
-
 <div class="table-responsive">
 	<table class="table table-striped table-hover table-data">
 		<thead>
 			<tr>
 				<th>#</th>
 				<th>Username</th>
+				<th>Children</th>
 				<th>Last Seen</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
-			<?php var_dump($users); ?>
-			@foreach ($users as $key => $user)
-    		
+			@foreach ($users as $key => $user)		
 			<tr>
 				<td>{{ ($key+1) }}
 				<td>{{ $user->username }}</td>
+				<td>{{ $user->children->count() }}</td>
 				<td>{{ Carbon\Carbon::createFromTimeStamp($user->last_seen)->format('d-m-y G:i:s') }}</td>
 				<td>
 					<a href="{{ URL::to('v1/users/'.$user->id.'/edit') }}">
@@ -37,7 +42,6 @@
 					</a>
 				</td>
 			</tr>
-
 			@endforeach
 		</tbody>
 	</table>

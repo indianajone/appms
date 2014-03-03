@@ -8,8 +8,14 @@ class Application extends \BaseModel
 	* @var string
 	**/
 	protected $table = 'applications';
-
 	protected $guarded = array('id', 'appkey');
+
+	/**
+	* The attributes excluded from the model's JSON form.
+	*
+	* @var array
+	**/
+	protected $hidden = array('appkey');
 
 
 	public static $rules = array(
@@ -27,13 +33,6 @@ class Application extends \BaseModel
 			'id' => 'required|exists:applications'
 		)
 	);
-
-	/**
-	* The attributes excluded from the model's JSON form.
-	*
-	* @var array
-	**/
-	protected $hidden = array('appkey');
 
 	/**
 	*
