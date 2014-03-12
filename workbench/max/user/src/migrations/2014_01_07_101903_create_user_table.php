@@ -14,7 +14,8 @@ class CreateUserTable extends Migration {
 	{
 		Schema::create('users', function(Blueprint $table) {
 			$table->increments('id');
-			$table->integer('parent_id')->unsigned()->default(null);
+			$table->integer('parent_id')->unsigned()->nullable();
+			$table->foreign('parent_id')->references('id')->on('users');
 			$table->string('first_name', 100);
 			$table->string('last_name', 100);
 			$table->string('gender', 10)->nullable();
@@ -22,9 +23,9 @@ class CreateUserTable extends Migration {
 			$table->string('username', 40)->unique();
 			$table->string('password', 100);
 			$table->integer('birthday')->nullable();
+			$table->integer('last_seen');
 			$table->integer('created_at');
 			$table->integer('updated_at');
-			$table->integer('last_seen');
 		});
 	}
 
@@ -35,7 +36,6 @@ class CreateUserTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('password_reminders');
 		Schema::drop('user');
 	}
 

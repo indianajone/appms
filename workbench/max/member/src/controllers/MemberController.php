@@ -29,7 +29,7 @@ class MemberController extends \BaseController {
                 else $members = $members->time('created_at');
             }
             
-            $members = $members->active()->offset($offset)->limit($limit)->get();
+            $members = $members->offset($offset)->limit($limit)->get();
 
             if($field)
             $members->each(function($member) use ($fields){

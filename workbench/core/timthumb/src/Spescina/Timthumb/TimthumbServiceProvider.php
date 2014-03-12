@@ -32,7 +32,7 @@ class TimthumbServiceProvider extends ServiceProvider {
 	{
         $this->app->bindShared('timthumb', function($app)
 		{
-			return new Timthumb;
+			return new Timthumb(array());
 		});
 	}
 

@@ -17,11 +17,12 @@ class UserController extends \BaseController
 	public function index()
 	{
         $user = Auth::user();
-        $users = User::whereId($user->id)->apiFilter()->with('children','roles')->get();
+        $users = User::findMany($user->getChildrenId());
+        // $users = User::whereId($user->id)->apiFilter()->with('children','roles')->get();
        
-        $users->each(function($user){
-            $user->fields();
-        });
+        // $users->each(function($user){
+        //     $user->fields();
+        // });
 
         // dd(\DB::getQueryLog());
 
@@ -65,7 +66,7 @@ class UserController extends \BaseController
         {
             $user = User::create(
                 array(
-                    'parent_id'     => Input::get('parent_id', 0),
+                    'parent_id'     => Input::get('parent_id'),
                     'username'      => Input::get('username'),
                     'password'      => Hash::make(Input::get('password')),
                     'first_name'    => Input::get('first_name'),
@@ -101,7 +102,7 @@ class UserController extends \BaseController
 	public function show($id)
 	{
        
-        $user = User::apiFilter()->tree()->with('apps', 'roles')->whereId($id)->first();
+        $user = User::apiFilter()->with('apps', 'roles')->whereId($id)->first();
         
         if($user)
         {
@@ -130,10 +131,18 @@ class UserController extends \BaseController
         $user = User::find($id);
         if($user)
         {
-            if($user->can('create_user'))
-                return View::make('users.edit')->with('user', $user);
+            // if($user->can('create_user'))
+                $root = User::find($user->getRootId());
+                $parent = User::findMany($root->getChildrenId(), array('id', 'username'));
+                $roles = Role::all();
 
-            return View::make('users.edit')->with('message', 'Permission denied');
+                return View::make('users.edit')->with(array(
+                    'user'=> $user, 
+                    'parents'=> $parent,
+                    'roles' => $roles
+                ));
+
+            // return View::make('users.edit')->with('message', 'Permission denied');
         }
 
        return Response::message(400, 'Invalid selected user.');
@@ -154,8 +163,7 @@ class UserController extends \BaseController
             $user = User::find($id);
             if($user)
             {
-                $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday'
-                );
+                $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
 
                 foreach ($inputs as $key => $val) {
                     if( $val == null || 
@@ -167,7 +175,7 @@ class UserController extends \BaseController
                 }
 
                 if(!count($inputs))
-                    return Response::message(200, 'Nothing is update.');
+                    return Response::message(204, 'Nothing is update.');
 
                 if($user->update($inputs))
                     return Response::message(200, 'Updated user id: '.$id.' success!'); 
@@ -224,8 +232,10 @@ class UserController extends \BaseController
        
     public function doLogout()
     {
-        if(\Auth::logout())
-            return Response::message(200, 'success');
+        Auth::logout();
+        
+            // return Response::message(200, 'success');
+        return \Redirect::to('v1/users');
     }
         
     public function resetPassword($id)

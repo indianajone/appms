@@ -28,9 +28,13 @@ class Media extends \BaseModel
             'type' => 'required|in:image,video,audio',
             'gallery_id' => 'required|exists:galleries,id'
         ),
-        'update' => array(),
+        'update' => array(
+            'appkey' => 'required|exists:applications',
+            'id' => 'required|existsinapp:medias,id,Kitti\\Medias\\Media'
+        ),
         'delete' => array(
-            'id' => 'required|existsinapp:medias,id'
+            'appkey' => 'required|exists:applications',
+            'id' => 'required|existsinapp:medias,id,Kitti\\Medias\\Media'
         )
     );
 

@@ -4,6 +4,7 @@ use \BaseController;
 use \Input;
 use \Response;
 use \Validator;
+use \Max\User\Models\User;
 use \Indianajone\Applications\Application as Appl;
 use \Image;
 
@@ -16,28 +17,37 @@ class ApplicationController extends BaseController
 	 */
 	public function index()
 	{
-		$offset = Input::get('offset', 0);
-		$limit= Input::get('limit', 10);
-		$field = Input::get('fields', null);
-		$fields = explode(',', $field);
-
 		$validator = Validator::make(Input::all(), Appl::$rules['show']);
 		if($validator->passes())
-		{
-			$apps = Appl::with('owner')->offset($offset)->limit($limit)->get();
-			
-			if($field)
-		 		$apps->each(function($app) use ($fields){
-		 			$app->setVisible($fields);
-		 		});
+		{		
+			$id = Input::get('user_id');
+			$user = User::find($id);
+			$owner_id = $user->getChildrenId();
 
-		 	return Response::listing(
-		 		array(
-		 			'code' 		=> 200,
-		 			'message' 	=> 'success'
-		 		),
-		 		$apps, $offset, $limit
-		 	);
+			$apps = Appl::apiFilter()->with('owner')->findMany($owner_id);
+	 		$apps->each(function($app) {
+	 			$app->fields()->owner->setVisible(array(
+	 				'id',
+	 				'first_name',
+	 				'last_name',
+	 				'username'
+	 			));
+	 		});
+
+	 		$total = Appl::whereIn('user_id', $owner_id)->remember(10)->count();
+
+		 	return Response::result(
+				array(
+					'header'=> array(
+		        		'code'=> 200,
+		        		'message'=> 'success'
+		        	),
+					'offset' => (int) Input::get('offset', 0),
+					'limit' => (int) Input::get('limit', 10),
+					'total' => (int) $total,
+					'entries' => $apps->toArray()
+				)
+			); 
 		}
 
 		return Response::message(400, $validator->messages()->first());
@@ -60,14 +70,10 @@ class ApplicationController extends BaseController
 	 */
 	public function store()
 	{
-		$messages = array(
-			'exists' => 'The given :attribute does not exists'
-		);
-
-		$validator = Validator::make(Input::all(), Appl::$rules['create'], $messages);
+		$validator = Validator::make(Input::all(), Appl::$rules['create']);
 		if ($validator->passes()) {
 
-			$app = new Appl();
+			$app = new Appl;
 			$app->name = Input::get('name');
 			$app->user_id = Input::get('user_id');
 			$app->description = Input::get('description', '');

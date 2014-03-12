@@ -18,7 +18,7 @@ class GalleriesController extends BaseController
 
         if($validator->passes())
         {
-            $galleries = Gallery::active()->app()->apiFilter()->with(array(
+            $galleries = Gallery::app()->apiFilter()->with(array(
                 'medias' => function($query)
                 {
                     $query->take(10)->select(array('gallery_id','id', 'name','link', 'picture', 'like'));
@@ -67,7 +67,7 @@ class GalleriesController extends BaseController
                     'content_type' => Input::get('content_type'),
                     'name' => Input::get('name'),
                     'description' => Input::get('description'),
-                    'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+                    'published_at' => Input::get('published_at', Carbon::now()->timestamp),
                 )
             );
 
@@ -134,7 +134,7 @@ class GalleriesController extends BaseController
                 {
                     $query->take(10);
                 })
-            )->active()->apiFilter()->owner($type, $id)->get();
+            )->apiFilter()->owner($type, $id)->get();
 
             $galleries->each(function($gallery) {
                 $gallery->fields();

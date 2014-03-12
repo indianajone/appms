@@ -63,7 +63,6 @@
                         {
                             if(result.header.code == 200)
                             {
-                                $('.alert').removeClass('hide');
                                 window.location.href = "{{ URL::to('v1/users') }}";
                             }
                             else

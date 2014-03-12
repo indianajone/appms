@@ -8,13 +8,12 @@ class Application extends \BaseModel
 	* @var string
 	**/
 	protected $table = 'applications';
-
 	protected $guarded = array('id', 'appkey');
-
 
 	public static $rules = array(
 		'show' => array(
-			// 'appkey' => 'required|exists:applications,appkey'
+			// 'appkey' => 'required',
+			'user_id' 	=> 'required|exists:users,id',
 		),
 		'create' => array(
 			'user_id' 	=> 'required|exists:users,id',
@@ -33,7 +32,7 @@ class Application extends \BaseModel
 	*
 	* @var array
 	**/
-	protected $hidden = array('appkey');
+	protected $hidden = array('appkey', 'user_id');
 
 	/**
 	*

@@ -1,6 +1,5 @@
-<?php
+<?php 
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 class CreateApplicationsTable extends Migration {
@@ -12,7 +11,7 @@ class CreateApplicationsTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('applications', function(Blueprint $table){
+		Schema::create('applications', function($table){
 			$table->increments('id');
 			$table->integer('user_id', false)->unsigned();
 			$table->foreign('user_id')->references('id')->on('users');

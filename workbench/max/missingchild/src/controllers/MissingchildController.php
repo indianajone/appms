@@ -1,6 +1,6 @@
 <?php namespace Max\Missingchild\Controllers;
 
-use Validator, Input, Response, Hash, Appl, Image;
+use Validator, Input, Response, Hash, Appl, Image, Cache;
 use Indianajone\Categories\Category;
 use Max\Missingchild\Models\Missingchild as Child;
 use Baum\Extensions\Eloquent\Collection;
@@ -18,7 +18,7 @@ class MissingchildController extends \BaseController
 
         if($validator->passes())
         {
-        	$children = Child::app()->apiFilter()->get()->load('categories', 'gallery.medias', 'app_content.gallery.medias');
+        	$children = Child::app()->apiFilter()->with('gallery.medias', 'categories', 'app_content.gallery.medias')->get();
         	$children->each(function($child)
         	{
         		$child->fields();
@@ -28,8 +28,8 @@ class MissingchildController extends \BaseController
         			{
         				if(!$category->isRoot())
         				{
-        					$root = $category->getRoot();
-        					$relation = $category->getDescendantsAndSelf();
+        					$root = $category->getroot();
+        					$relation = $category->descendantsAndSelf()->get();
         					$relation->each(function($relate)
         					{ 
         						$relate->setVisible(array('id','name'));
@@ -41,7 +41,7 @@ class MissingchildController extends \BaseController
         				}
         				else
         				{
-        					$child->setRelation($category->name, $category->getDescendants()->toHierarchy());
+        					$child->setRelation($category->name, $category->descendants()->toHierarchy());
         				}
         			}
         		}
@@ -96,7 +96,7 @@ class MissingchildController extends \BaseController
 	        	}
         	});
 
-            // var_dump(\DB::getQueryLog());
+            // dd(\DB::getQueryLog());
 
             return Response::result(
 				array(
@@ -119,101 +119,6 @@ class MissingchildController extends \BaseController
 	{
 		return $this->store();
 	}
-
-	// public function articles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['show_with_id']);
-
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::app()->whereId($id)->first();
-	// 		$articles = $child->articles()->with('categories', 'gallery.medias')->get();
-
-	// 		dd(\DB::getQueryLog());
-
-	// 		foreach ($articles as $item => $article) {
- //            	$article->fields();
- //            	$article->setHidden(array_merge($article->getHidden() ,array('categories')));
- //            	$types = $article->categories()->get(); //->remember(1)
- //            	$obj = [];
- //            	foreach ($types as $type) {
- //            		if(!$type->isRoot())
- //            		{
- //            			$name = Category::whereId($type->getParentId())->first()->name; //->remember(1)
- //            			if(!array_key_exists($name,$obj)) 
- //            				$obj[$name] = [];
-
- //            			array_push($obj[$name], $type->toArray());
- //            		}
-
- //            		foreach ($obj as $key => $type) {
- //            			$article->setRelation($key, new Collection($type));
- //            		}
- //            	}
- //            }
-
-	// 		return Response::result(array(
- //        		'header' => array(
- //        			'code' => 200,
- //        			'message' => 'success'
- //        		),
- //        		'entry' => !$articles->isEmpty() ? $articles->toArray() : null
- //        	));
-
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function createArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$rules = array_merge(Child::$rules['show_with_id'], Article::$rules['create']);
-	// 	$validator = Validator::make($inputs, $rules);
-		
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$child->articles()->create(array(
-
-	// 		));
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function attachArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$ids = explode(',', Input::get('article_id')); 
-	// 		$child->attachRelations('articles',$ids);
-
-	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
-
-	// public function detachArticles($id)
-	// {
-	// 	$inputs = array_add(Input::all(), 'id', $id);
-	// 	$validator = Validator::make($inputs, Child::$rules['create_clue']);
-	// 	if($validator->passes())
-	// 	{
-	// 		$child = Child::active()->whereId($id)->first();
-	// 		$ids = explode(',', Input::get('article_id')); 
-	// 		$child->detachRelations('articles',$ids);
-
-	// 		return Response::message(200, 'Added Clue to missingchild_id: ' . $id . ' Success!');
-	// 	}
-
-	// 	return Response::message(400, $validator->messages()->first());
-	// }
 
 	public function store()
 	{
@@ -249,7 +154,7 @@ class MissingchildController extends \BaseController
                     'app_id' => $app_id,
                     'content_id' => $child->id,
                     'name' => $child->first_name .'\'s gallery',             
-                    'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+                    'published_at' => Input::get('published_at', Carbon::now()->timestamp),
                 )
             );
 
@@ -265,7 +170,7 @@ class MissingchildController extends \BaseController
 				'title' => Input::get('title'),
 				'content' => $child->description,
 				'wrote_by' => Input::get('wrote_by', 'Admin'),
-				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+				'published_at' => Input::get('published_at', Carbon::now()->timestamp),
 			));
 
 			$child->update(array(
@@ -276,7 +181,7 @@ class MissingchildController extends \BaseController
 				'app_id' => $app_id,
 				'content_id' => $app_content->id,
 				'name' => $app_content->id,
-				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp)
+				'published_at' => Input::get('published_at', Carbon::now()->timestamp)
 			));
             
 			if($child->save())

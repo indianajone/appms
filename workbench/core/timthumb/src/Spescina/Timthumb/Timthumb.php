@@ -11,11 +11,11 @@ define ('NOT_FOUND_IMAGE', Config::get('timthumb::not_found_image'));
 define ('ERROR_IMAGE',  Config::get('timthumb::error_image'));
 define ('PNG_IS_TRANSPARENT', Config::get('timthumb::png_is_transparent'));
 
-class Timthumb {
+class Timthumb extends TimthumbExt {
     public function get($src, $w = 0,$h = 0,$zc = 3) 
     {        
         $params = array(
-            'src' => str_replace('-', '/', $src),
+            'src' => Config::get('image.cdn').Config::get('image.slug').'/'.(str_replace('-', '/', $src)),
             'w' => $w,
             'h' => $h,
             'zc' => $zc

@@ -7,7 +7,7 @@ use Kitti\Medias\Media;
 
 class BaseModel extends Eloquent 
 {
-    protected $hidden = array();
+    // protected $hidden = array();
 	/*
      * The following $map array maps the url query string to
      * the corresponding model filter e.g.
@@ -73,7 +73,7 @@ class BaseModel extends Eloquent
 		return $this->formatTime($value);    
 	}
 
-	public function getPublishAtAttribute($value)
+	public function getPublishedAtAttribute($value)
 	{
 		return $this->formatTime($value); 
 	}
@@ -83,10 +83,10 @@ class BaseModel extends Eloquent
         if($value)
         {
             $path = parse_url($value, PHP_URL_PATH);
-            $file = str_replace(Config::get('image.slug').'/', '', $path);
-            $file = str_replace('/', '-', $file);
+            $created_at = $this->getOriginal('created_at');
+            $folder = Carbon::createFromTimeStamp($created_at, \Config::get('app.timezone'))->format('Y-m-d');
 
-            return asset(Config::get('timthumb::prefix').'/'.$file);
+            return asset(Config::get('timthumb::prefix').'/'.$folder.'-'.basename($path));
         }
 
         return $value;
@@ -143,7 +143,7 @@ class BaseModel extends Eloquent
                 if($media)
                 {
                     $this->update(array(
-                        'picture' => $media->picture
+                        'picture' => $media->getOriginal('picture')
                     ));
                 }
                 else
@@ -182,6 +182,8 @@ class BaseModel extends Eloquent
                 $this->update(array(
                     'picture' => $response
                 ));
+
+                return $response;
             }
         }
     }
@@ -196,6 +198,8 @@ class BaseModel extends Eloquent
         
         if($fields) $this->setVisible($fields);
         if($hiddens) $this->setHidden(array_merge($hiddens, $this->getHidden()));
+
+        return $this;
     }
 
     public function scopeFilterCats($query, $ids)
@@ -275,8 +279,28 @@ class BaseModel extends Eloquent
         return $query->whereAppId(Appl::getAppIdByKey(Input::get('appkey')));
     }
 
-    public function scopeActive($query)
-    {
-        return $query->whereStatus(1);
-    }
+    // public function scopeActive($query)
+    // {
+    //     return $query->whereStatus(1);
+    // }
+
+
+    // public function __call($method, $parameters)
+    // {
+    //     if (in_array($method, array('increment', 'decrement')))
+    //     {
+    //         return call_user_func_array(array($this, $method), $parameters);
+    //     }
+
+
+
+    //     if($method == 'getTestAttribute')
+    //     {
+    //         dd(studly_case($method));
+    //     }
+
+    //     $query = $this->newQuery();
+
+    //     return call_user_func_array(array($query, $method), $parameters);
+    // }
 }

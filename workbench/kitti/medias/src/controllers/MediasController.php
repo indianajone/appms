@@ -31,7 +31,7 @@ class MediasController extends BaseController
                     ),
                     'offset' => (int) Input::get('offset', 0),
                     'limit' => (int) Input::get('limit', 10),
-                    'total' => Media::app()->count(),
+                    'total' => (int) Media::app()->count(),
                     'entries' => $medias->toArray()
                 )
             ); 
@@ -160,7 +160,7 @@ class MediasController extends BaseController
         {
             $media = Media::app()->find($id);
 
-            Image::delete($media->picture);
+            Image::delete($media->getOriginal('picture'));
             
             if($media->delete())
             {

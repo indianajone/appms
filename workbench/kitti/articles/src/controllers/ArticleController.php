@@ -74,7 +74,7 @@ class ArticleController extends BaseController
 				'teaser' => Input::get('teaser'),
 				'content' => Input::get('content'),
 				'wrote_by' => Input::get('wrote_by'),
-				'publish_at' => Input::get('publish_at', Carbon::now()->timestamp),
+				'published_at' => Input::get('published_at', Carbon::now()->timestamp),
 				'tags' => Input::get('tags')
 			));
 
@@ -111,7 +111,7 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$article = Article::whereId($id)->app()->active()->ApiFilter()->first();
+			$article = Article::whereId($id)->app()->ApiFilter()->first();
 			if($article)
 			{
 				$article->fields();

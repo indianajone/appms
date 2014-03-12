@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 
 class CreateMissingChildTables extends Migration {
 
@@ -12,7 +11,7 @@ class CreateMissingChildTables extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('missingchilds', function(Blueprint $table)
+		Schema::create('missingchilds', function($table)
         {
         	$table->increments('id');
             $table->integer('app_id', false)->unsigned();
@@ -57,9 +56,7 @@ class CreateMissingChildTables extends Migration {
             $table->integer('created_at');
             $table->integer('updated_at');
             // Soft delete
-            $table->integer('deleted_at')->nullable();
-            
-            $table->boolean('status')->default(1);    
+            $table->integer('deleted_at')->nullable();  
         });
 
         Schema::create('category_missingchild', function(Blueprint $table)

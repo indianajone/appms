@@ -43,8 +43,6 @@ class User extends BaseModel implements UserInterface, RemindableInterface
         )
     );
 
-    use HasRole; // Add this trait to your user model
-
     /**
      * The database table used by the model.
      *
@@ -57,9 +55,14 @@ class User extends BaseModel implements UserInterface, RemindableInterface
      *
      * @var array
      */
-    protected $hidden = array('password');
+    protected $hidden = array('password', 'parent_id');
 
     protected $guarded = array('id');
+
+    // protected $appends = array('test');
+
+    use HasRole; // Add this trait to your user model
+
 
     /**
      * Get the unique identifier for the user.
@@ -108,19 +111,53 @@ class User extends BaseModel implements UserInterface, RemindableInterface
         return $this->belongsToMany('Indianajone\RolesAndPermissions\Role', 'user_roles');
     }
 
+    public function parent()
+    {
+        return $this->belongsTo('Max\User\Models\User', 'parent_id');
+    }
+
     public function children()
     {
         return $this->hasMany('Max\User\Models\User', 'parent_id');
     }
 
-    public function scopeTree($query)
+    public function getChildrenId($ids=array())
     {
-        return $query->with(implode('.', array_fill(0, 4, 'children')))->where('parent_id', '=', NULL);
+        $ids[] = $this->id;
+        
+        if($this->children)
+        {
+            foreach ($this->children as $child)
+            {
+                $ids[] = $child->id;
+                if($child->children->count() >= 1)
+                {
+                    $ids = array_merge($ids, $child->getChildrenId());  
+                }
+            }   
+        }
 
+        return array_unique($ids);
     }
-    
+
     public function missingchild(){
         return $this->belongsTo('Max\Missingchild\Models\Missingchild');
     }
 
+    public function isRoot()
+    {
+        return $this->parent_id == null;
+    }
+
+    public function getRootId()
+    {
+        $parentId = $this->parent_id;
+
+        if(!is_null($parentId) && $currentParent = static::find($parentId) )
+        {
+            return $currentParent->getRootId();
+        }
+
+        return $this->id;
+    }
 }

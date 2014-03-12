@@ -1,10 +1,9 @@
 <?php namespace Indianajone\Categories;
 
-use Appl;
+use Appl, Cache, Input;
 use Baum\Node;
 use Carbon\Carbon;
 use Indianajone\Categories\Extensions\Eloquent\Collection;
-use Input;
 
 /**
 * MODEL

@@ -23,8 +23,8 @@ class CreateGalleries extends Migration {
                 $table->integer('like', false)->unsigned()->default(0);
                 $table->integer('created_at', false);
                 $table->integer('updated_at', false);
-                $table->integer('publish_at', false);
-                $table->boolean('status')->default(1);
+                $table->integer('published_at', false);
+                $table->integer('deleted_at', false);
             });
         }
 
