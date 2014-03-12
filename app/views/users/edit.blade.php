@@ -88,26 +88,27 @@
 				data: $this.serialize(),
 				success: function(result)
 				{
-					$alert = $('.alert').fadeIn('fast');
 					console.log(result);
-					switch(result.header.code)
-					{
-						case 204:
-							$alert.addClass('alert-warning')
-								.delay(3000).fadeOut('slow', function() {
-									$(this).removeClass('alert-warning');
-								});
+					
+					// $alert = $('<div/>').addClass('alert').fadeIn('fast');
+					// switch(result.header.code)
+					// {
+					// 	case 204:
+					// 		$alert.addClass('alert-warning')
+					// 			.delay(3000).fadeOut('slow', function() {
+					// 				$(this).removeClass('alert-warning');
+					// 			});
+					// 	break;
 
-						break;
+					// 	default:
+					// 		$alert.addClass('alert-success')
+					// 			.delay(3000).fadeOut('slow', function() {
+					// 				$(this).removeClass('alert-success');
+					// 			});
+					// }
 
-						default:
-							$alert.addClass('alert-success')
-								.delay(3000).fadeOut('slow', function() {
-									$(this).removeClass('alert-success');
-								});
-					}
-
-					$alert.text(result.header.message);
+					
+					// $alert.text(result.header.message);
 				},
 				error: function(e)
 				{

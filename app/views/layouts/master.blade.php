@@ -58,9 +58,9 @@
             
         <!-- Begin page content -->
         <div class="container-fluid">
-        
-            <div class="alert"></div>
-        
+        @if(Session::has('message'))
+            <div class="alert">{{ Session::get('message') }}</div>
+        @endif
             <div class="row">
                 <!-- Menu -->
                 <div class="col-sm-4 col-md-3 navbar-sidebar" role="navigation">
