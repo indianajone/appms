@@ -19,8 +19,8 @@ class UserServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-            $this->package('max/user');
-            include __DIR__.'/../../routes.php';
+        $this->package('max/user');
+        include __DIR__.'/../../routes.php';
 	}
 
 	/**

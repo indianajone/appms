@@ -8,7 +8,7 @@ use Indianajone\RolesAndPermissions\Role;
 use Indianajone\RolesAndPermissions\Permission;
 use Max\User\Repository\UserRepositoryInterface;
 
-class UserController extends \BaseController 
+class ApiUserController extends \BaseController 
 {
     public function __construct(UserRepositoryInterface $users)
     {
@@ -22,11 +22,28 @@ class UserController extends \BaseController
 	 */
 	public function index()
 	{
-        $user = Auth::user();
-        
-        $users = $this->users->findMany($user->getChildrenId());
+        // API
+        $users = $this->users->findUserAndChildren(Input::get('user_id'));
 
-        return \View::make('users.index')->with('users', $users);           
+        // dd(\DB::getQueryLog());
+        
+        if($users)
+        {
+            return Response::result(
+                array(
+                    'header'=> array(
+                        'code'=> 200,
+                        'message'=> 'success'
+                    ),
+                    'offset' => (int) Input::get('offset', 0),
+                    'limit' => (int) Input::get('limit', 10),
+                    'total' => (int) $users->count(),
+                    'entries' => $users->toArray()
+                )
+            ); 
+        }
+
+        return Response::message(204, 'Can not find any users');   
 	}
 
     /**
