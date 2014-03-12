@@ -22,10 +22,7 @@ class ApiUserController extends \BaseController
 	 */
 	public function index()
 	{
-        // API
         $users = $this->users->findUserAndChildren(Input::get('user_id'));
-
-        // dd(\DB::getQueryLog());
         
         if($users)
         {

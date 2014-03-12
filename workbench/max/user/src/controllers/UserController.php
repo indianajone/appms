@@ -50,7 +50,7 @@ class UserController extends \BaseController
 
         if ($validator->passes())
         {
-            $user = User::create(
+            $user = $this->users->create(
                 array(
                     'parent_id'     => Input::get('parent_id'),
                     'username'      => Input::get('username'),

@@ -14,6 +14,21 @@ class DBUserRepository implements UserRepositoryInterface
 		return User::findOrFail($id);
 	}
 
+	public function create($input)
+	{
+
+	}
+
+	public function update($input)
+	{
+
+	}
+
+	public function delete($id)
+	{
+
+	}
+
 	public function findMany($ids)
 	{
 		return User::findMany($ids);
