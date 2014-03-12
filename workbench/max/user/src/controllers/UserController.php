@@ -6,9 +6,15 @@ use Carbon\Carbon;
 use Max\User\Models\User;
 use Indianajone\RolesAndPermissions\Role;
 use Indianajone\RolesAndPermissions\Permission;
+use Max\User\Repository\UserRepositoryInterface;
 
 class UserController extends \BaseController 
 {
+    public function __construct(UserRepositoryInterface $users)
+    {
+        $this->users = $users;
+    }
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -17,7 +23,13 @@ class UserController extends \BaseController
 	public function index()
 	{
         $user = Auth::user();
-        $users = User::findMany($user->getChildrenId());
+        
+        $users = $this->users->findMany($user->getChildrenId());
+
+        return \View::make('users.index')->with('users', $users);
+
+
+        // API
         // $users = User::whereId($user->id)->apiFilter()->with('children','roles')->get();
        
         // $users->each(function($user){
@@ -25,9 +37,7 @@ class UserController extends \BaseController
         // });
 
         // dd(\DB::getQueryLog());
-
-        return \View::make('users.index')->with('users', $users);
-
+      
         // return Response::result(
         //     array(
         //         'header'=> array(
@@ -43,7 +53,7 @@ class UserController extends \BaseController
            
 	}
 
-	/**
+    /**
 	 * Show the form for creating a new resource.
 	 *
 	 * @return Response

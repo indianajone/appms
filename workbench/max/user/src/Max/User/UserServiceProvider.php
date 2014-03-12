@@ -1,6 +1,7 @@
 <?php namespace Max\User;
 
 use Illuminate\Support\ServiceProvider;
+use \Max\User\Repository\DbUserRepository;
 
 class UserServiceProvider extends ServiceProvider {
 
@@ -29,7 +30,10 @@ class UserServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app->bind('Max\User\Repository\UserRepositoryInterface', function()
+        {
+            return new DbUserRepository;
+        });
 	}
 
 	/**
