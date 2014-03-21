@@ -13,7 +13,7 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+	return View::make('layouts.login');
 });
 
 Route::get('/artisan/{command}', function($command){
@@ -47,6 +47,11 @@ Route::get('migrate/{bench?}', function($bench=null){
 	}
 });
 
+Route::get('test', function(){
+
+	return action('Max\User\Controllers\ApiUserController@index');
+});
+
 Route::get('image', function(){
 	$picture = Input::get('picture', null);
 
@@ -55,7 +60,7 @@ Route::get('image', function(){
 	return 'error';
 });
 
-
-Route::any('v1/login', function(){
+Route::any('v1/login', function()
+{	
 	return View::make('layouts.login');
 });

@@ -30,10 +30,19 @@ class RolesAndPermissionsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$this->registerRoleRepository();
 		$this->app->bind('RolesAndPermissions', function($app)
         {
             return new RolesAndPermissions($app);
-        });	}
+        });	
+	}
+
+	public function registerRoleRepository()
+	{
+		$this->app->bind('Indianajone\RolesAndPermissions\RoleRepositoryInterface', function(){
+			return new DBRoleRepository;
+		});
+	}
 
 	/**
 	 * Get the services provided by the provider.

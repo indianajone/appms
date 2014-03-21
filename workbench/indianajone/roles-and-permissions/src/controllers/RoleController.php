@@ -5,8 +5,14 @@ use \Input;
 use \Response;
 use \Validator;
 use \Indianajone\RolesAndPermissions\Role;
+use \Indianajone\RolesAndPermissions\RoleRepositoryInterface;
 
 class RoleController extends BaseController {
+
+	public function __construct(RoleRepositoryInterface $roles)
+	{
+		$this->roles = $roles;
+	}
 
 	/**
 	 * Display a listing of the resource.
@@ -15,17 +21,19 @@ class RoleController extends BaseController {
 	 */
 	public function index()
 	{
+		$roles = $this->roles->all();
+
 		// Wait for respone helper.
-		$offset = Input::get('offset', 0);
-		$limit= Input::get('limit', 10);
-		$field = Input::get('fields', null);
-		$fields = explode(',', $field);
- 		$roles =  Role::with('permits')->offset($offset)->limit($limit)->get();
+		// $offset = Input::get('offset', 0);
+		// $limit= Input::get('limit', 10);
+		// $field = Input::get('fields', null);
+		// $fields = explode(',', $field);
+ 	// 	$roles =  Role::with('permits')->offset($offset)->limit($limit)->get();
  		
- 		if($field)
-	 		$roles->each(function($role) use ($fields){
-	 			$role->setVisible($fields);
-	 		});
+ 	// 	if($field)
+	 // 		$roles->each(function($role) use ($fields){
+	 // 			$role->setVisible($fields);
+	 // 		});
         
         return Response::json(
         	array(
@@ -33,8 +41,8 @@ class RoleController extends BaseController {
         			'code' => 200,
         			'message' => 'success'
         		),
-        		'offset' => (int) $offset,
-        		'limit' => (int) $limit,
+        		'offset' => (int) Input::get('offset'),
+        		'limit' => (int) Input::get('limit'),
         		'total' => $roles->count(),
         		'entries' => $roles->toArray()
         	)

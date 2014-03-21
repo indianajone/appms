@@ -3,16 +3,17 @@ namespace Max\User\Controllers;
 
 use Validator, Input, Response, Hash, View, Request, Auth;
 use Carbon\Carbon;
-use Max\User\Models\User;
-use Indianajone\RolesAndPermissions\Role;
-use Indianajone\RolesAndPermissions\Permission;
 use Max\User\Repository\UserRepositoryInterface;
+use Indianajone\RolesAndPermissions\RoleRepositoryInterface;
 
 class ApiUserController extends \BaseController 
 {
-    public function __construct(UserRepositoryInterface $users)
+    public function __construct(
+        UserRepositoryInterface $users,
+        RoleRepositoryInterface $roles)
     {
         $this->users = $users;
+        $this->roles = $roles;
     }
 
 	/**
@@ -22,8 +23,12 @@ class ApiUserController extends \BaseController
 	 */
 	public function index()
 	{
-        $users = $this->users->findUserAndChildren(Input::get('user_id'));
-        
+        $id = Input::get('user_id');
+
+        $users = !is_null($id) ? 
+                    $this->users->findUserAndChildren($id) :
+                    $this->users->all();
+
         if($users)
         {
             return Response::result(
@@ -34,8 +39,8 @@ class ApiUserController extends \BaseController
                     ),
                     'offset' => (int) Input::get('offset', 0),
                     'limit' => (int) Input::get('limit', 10),
-                    'total' => (int) $users->count(),
-                    'entries' => $users->toArray()
+                    'total' => (int) $this->users->countChildren($id) ?: count($users),
+                    'entries' => $users
                 )
             ); 
         }
@@ -60,11 +65,11 @@ class ApiUserController extends \BaseController
 	 */
 	public function store()
 	{
-        $validator = Validator::make(Input::all(), User::$rules['create']);
+        $validator = $this->users->validate('create');
 
-        if ($validator->passes())
+        if ($validator)
         {
-            $user = User::create(
+            $user = $this->users->create(
                 array(
                     'parent_id'     => Input::get('parent_id'),
                     'username'      => Input::get('username'),
@@ -90,7 +95,7 @@ class ApiUserController extends \BaseController
             return Response::message(500, 'Something wrong when trying to save user.');
         }
         
-        return Response::message(204, $validator->messages()->first());
+        return Response::message(204, $this->users->errors);
 	}
 
 	/**
@@ -101,23 +106,17 @@ class ApiUserController extends \BaseController
 	 */
 	public function show($id)
 	{
-       
-        $user = User::apiFilter()->with('apps', 'roles')->whereId($id)->first();
-        
-        if($user)
-        {
-            return Response::result(
-                array(
-                    'header' => array(
-                        'code' => 200,
-                        'message' => 'success'
-                    ),
-                    'entry' => $user->toArray()
-                )
-            );
-        }
+        $user = $this->users->findWith($id, array('apps', 'roles'));
 
-        return Response::message(204, 'User id: '. $id .' does not exists.'); 
+        return Response::result(
+            array(
+                'header' => array(
+                    'code' => 200,
+                    'message' => 'success'
+                ),
+                'entry' => $user
+            )
+        );
 	}
 
 	/**
@@ -128,24 +127,7 @@ class ApiUserController extends \BaseController
 	 */
 	public function edit($id)
 	{
-        $user = User::find($id);
-        if($user)
-        {
-            // if($user->can('create_user'))
-                $root = User::find($user->getRootId());
-                $parent = User::findMany($root->getChildrenId(), array('id', 'username'));
-                $roles = Role::all();
-
-                return View::make('users.edit')->with(array(
-                    'user'=> $user, 
-                    'parents'=> $parent,
-                    'roles' => $roles
-                ));
-
-            // return View::make('users.edit')->with('message', 'Permission denied');
-        }
-
-       return Response::message(400, 'Invalid selected user.');
+        return $this->update($id);
 	}
 
 	/**
@@ -156,36 +138,33 @@ class ApiUserController extends \BaseController
 	 */
 	public function update($id)
 	{
-		$validator = Validator::make(Input::all(), User::$rules['update']);
+		$validator = $this->users->validate('update', array('id'=>$id));
 
-        if($validator->passes())
+        if($validator)
         {
-            $user = User::find($id);
-            if($user)
-            {
-                $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
+            $user = $this->users->find($id);
+            $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
 
-                foreach ($inputs as $key => $val) {
-                    if( $val == null || 
-                        $val == '' || 
-                        $val == $user[$key]) 
-                    {
-                        unset($inputs[$key]);
-                    }
+            foreach ($inputs as $key => $val) {
+                if( $val == null || 
+                    $val == '' || 
+                    $val == $user[$key]) 
+                {
+                    unset($inputs[$key]);
                 }
-
-                if(!count($inputs))
-                    return Response::message(204, 'Nothing is update.');
-
-                if($user->update($inputs))
-                    return Response::message(200, 'Updated user id: '.$id.' success!'); 
-
-                return Response::message(500, 'Something wrong when trying to update user.');;
             }
-            return Response::message(204, 'User id: '. $id .' does not exists.'); 
+
+            if(!count($inputs))
+                return Response::message(204, 'Nothing is update.');
+
+            if($user->update($inputs))
+                return Response::message(200, 'Updated user id: '.$id.' success!'); 
+
+            return Response::message(500, 'Something wrong when trying to update user.');
+           
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->users->errors); 
 	}
 
     public function delete($id)
@@ -202,53 +181,73 @@ class ApiUserController extends \BaseController
 	public function destroy($id)
 	{
 
-        $validator = Validator::make(array('id'=>$id), User::$rules['delete']);
+        $validator = $validator = $this->users->validate('delete');
 
-        if($validator->passes())
+        if($validator)
         {
-            $user = User::find($id)->delete();
+            $user = $this->users->delete($id);
             return Response::message(200, 'Deleted User: '.$id.' success!');
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->users->errors); 
 	}
-        
+
+    /**
+     * Login user via API.
+     * 
+     * @return Response
+     */    
     public function doLogin()
     {
-        $validator = Validator::make(Input::all(), User::$rules['login']);
+        $validator = $this->users->validate('login');
 
-        if($validator->passes())
+        if($validator)
         {
             $userdata = Input::only('username', 'password');
 
-            if(\Auth::attempt($userdata))
+            if(Auth::attempt($userdata))
+            {
+                $user = Auth::user();
+                $user->timestamps = false;
+                $user->update(array(
+                    'last_seen' => Carbon::now()->timestamp
+                ));
+                
                 return Response::message(200, 'success');
-
+            }   
             return Response::message(204, 'Username or Password is incorrect');
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->users->errors); 
     }
-       
+    
+    /**
+     * Logout user via API.
+     * 
+     * @return Response
+     */  
     public function doLogout()
     {
         Auth::logout();
-        
-            // return Response::message(200, 'success');
-        return \Redirect::to('v1/users');
+        return Response::message(200, 'success');
     }
-        
+
+    /**
+     * Reset password to new one.
+     * 
+     * @return Response
+     */      
     public function resetPassword($id)
     {
-        $validator = Validator::make(Input::only('username', 'password', 'new_password'), User::$rules['resetPwd']);
+        $validator = $this->users->validate('resetPwd');
 
-        if($validator->passes())
+        if($validator)
         {
-            $user = User::find($id);
+            $user = $this->users->find($id);
 
             if($user->checkPassword(Input::get('password')))
             {
-                $user->update(array(
+                $this->users->update(array(
                     'password' => Hash::make(Input::get('new_password'))
                 ));
 
@@ -258,24 +257,31 @@ class ApiUserController extends \BaseController
             return Response::message(204, 'Username or Password is incorrect');
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->users->errors); 
     }
 
+    /**
+     * Attach or Detach roles.
+     * 
+     * @param   int $id 
+     * @param   string $action 
+     * @return  Response
+     */
     public function manageRole($id, $action)
     {
         $inputs = array_merge(array('id'=> $id, 'action' => $action), Input::only('role_id'));
-        $validator = Validator::make($inputs, User::$rules['manage_role']);
+        $validator = $this->users->validate('manage_role', $inputs);
 
-        if($validator->passes())
+        if($validator)
         {
             $role = Input::get('role_id');
             $ids = array_flatten(explode(',', $role));
-            $user = User::find($id);
+            $user = $this->users->find($id);
             $names = array();
 
             foreach($ids as $role_id)
             {
-                $role = Role::find($role_id);
+                $role = $this->roles->find($role_id);
 
                 if(!$role) 
                     return Response::message(204, 'Role id: '. $id .' does not exists.');
@@ -300,6 +306,6 @@ class ApiUserController extends \BaseController
             return Response::message(200, $user->username.' is now has roles '. implode(', ', $names).' '.$action. 'ed.');
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->users->errors); 
     }
 }

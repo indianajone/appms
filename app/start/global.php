@@ -86,8 +86,20 @@ App::error(function(InvalidArgumentException $e)
     return Response::message(400, $e->getMessage());
 });
 
+App::error(function(\Illuminate\Database\Eloquent\ModelNotFoundException $e)
+{
+	return Response::message(400, 'Can not find selected id');
+});
+
+App::error(function(\Illuminate\Database\QueryException $e){
+	return Response::message(400, $e->getMessage());
+});
+
 App::missing(function($e)
 {
-    return Response::message($e->getStatusCode(), Request::server('PATH_INFO') . ' does not exists.');
+	if (Request::is('api/*'))
+    	return Response::message($e->getStatusCode(), Request::server('PATH_INFO') . ' does not exists.');
+    else 
+    	return View::make('errors.404');
 });
 

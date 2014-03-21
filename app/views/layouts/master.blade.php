@@ -12,7 +12,7 @@
         
         {{ HTML::style('css/bootstrap/bootstrap.min.css') }}
         {{ HTML::style('css/font-awesome/font-awesome.min.css') }}
-        {{-- HTML::style('css/admin.css') --}}
+      
         <!-- Extra CSS -->
         @yield('css')
 
@@ -46,7 +46,7 @@
                     <li class="dropdown" >
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user fa-fw"></i> hello {{ Auth::user()->username }} <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#"><i class="fa fa-user fa-fw"></i> Profile</a></li>
+                            <li><a href="{{ URL::to('v1/users/'.Auth::user()->id).'/edit' }}"><i class="fa fa-user fa-fw"></i> Profile</a></li>
                             <li><a href="#"><i class="fa fa-cog fa-fw"></i> Setting</a></li>
                             <li class="divider"></li>
                             <li><a href="{{ URL::to('v1/users/logout') }}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
@@ -58,16 +58,13 @@
             
         <!-- Begin page content -->
         <div class="container-fluid">
-        @if(Session::has('message'))
-            <div class="alert">{{ Session::get('message') }}</div>
-        @endif
             <div class="row">
                 <!-- Menu -->
-                <div class="col-sm-4 col-md-3 navbar-sidebar" role="navigation">
+                <div class="col-sm-3 col-md-2 navbar-sidebar" role="navigation">
                     @include('layouts.sidebar')
                 </div>
                 <!-- Content -->
-                <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3">
+                <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
                     @yield('content')
                 </div>
             </div>
@@ -82,9 +79,11 @@
         {{ HTML::script('js/jquery/jquery-1.11.0.min.js') }}
         {{ HTML::script('js/bootstrap/bootstrap.min.js') }}
         {{ HTML::script('js/metisMenu/jquery.metisMenu.js') }}
-        {{ HTML::script('js/admin.js') }}
+       
         <!-- Extra Javascript -->
         @yield('js', '')
+
+        {{ HTML::script('js/admin.js') }}
 
         @yield('javascript', '')
 

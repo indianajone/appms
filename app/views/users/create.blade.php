@@ -12,22 +12,42 @@
 
 @else
 
-<h1>Edit {{ $user->username }}</h1>
-<small class="text-muted">last updated: {{ \Carbon\Carbon::createFromTimestamp($user->updated_at) }}</small>
-<hr>
-{{ Form::open(array('url' => route('api.v1.users.update', $user->id), 'method' => 'PUT', 'role'=>'form', 'id'=>'frm')) }}
-	<div class="error"></div>
+<h1>New User</h1>
+{{ Form::open(array('url' => route('api.v1.users.store'), 'method' => 'POST', 'role'=>'form')) }}
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				{{ Form::label('username', 'Username') }}
+				{{ Form::text('username', null, array('class'=>'form-control', 'placeholder'=>'Username')) }}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				{{ Form::label('password', 'Password') }}
+				{{ Form::password('password', array('class'=>'form-control', 'placeholder'=>'Password')) }}
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				{{ Form::label('confirm_password', 'Confirm Password') }}
+				{{ Form::password('confirm_password', array('class'=>'form-control', 'placeholder'=>'Confirm Password')) }}
+			</div>
+		</div>
+	</div>
+	<hr>
 	<div class="row">
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('first_name', 'First name') }}
-				{{ Form::text('first_name', $user->first_name, array('class'=>'form-control', 'placeholder'=>'First name', 'required')) }}
+				{{ Form::text('first_name', null, array('class'=>'form-control', 'placeholder'=>'First name')) }}
 			</div>
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('last_name', 'Last name') }}
-				{{ Form::text('last_name', $user->last_name, array('class'=>'form-control', 'placeholder'=>'Last name')) }}
+				{{ Form::text('last_name', null, array('class'=>'form-control', 'placeholder'=>'Last name')) }}
 			</div>
 		</div>
 	</div>
@@ -35,13 +55,13 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('email', 'Email') }}
-				{{ Form::email('email', $user->email, array('class'=>'form-control', 'placeholder'=>'Email')) }}
+				{{ Form::email('email', null, array('class'=>'form-control', 'placeholder'=>'Email')) }}
 			</div>
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('gender', 'Gender') }}
-				{{ Form::text('gender', $user->gender, array('class'=>'form-control', 'placeholder'=>'Gender')) }}
+				{{ Form::text('gender', null, array('class'=>'form-control', 'placeholder'=>'Gender')) }}
 			</div>
 		</div>
 	</div>
@@ -49,19 +69,22 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('birthday', 'Birthday') }}
-				{{ Form::text('birthday', Carbon\Carbon::createFromTimestamp($user->birthday)->format('d/m/Y'), array('class'=>'form-control datepicker', 'placeholder'=>'dd/mm/yyyy', 'data-timestamp'=>$user->birthday)) }}
+				{{ Form::text('birthday', null, array('class'=>'form-control datepicker', 'placeholder'=>'dd/mm/yyyy')) }}
 			</div>
 		</div>
 	</div>
+	<hr>
 	<div class="row">
 		<div class="col-sm-4">
 			<div class="form-group">
 				{{ Form::label('parent', 'Parent') }}
 				<select name="parent_id" class="form-control">
 					<option value="">Please select parent</option>
-					<option value="" {{ is_null($user->parent_id) ? 'selected' : '' }}>no parent</option>
+				@if($user->hasRole('super_admin'))
+					<option value="">no parent</option>
+				@endif
 				@foreach($parents as $parent)
-					<option value="{{ $parent->id }}" {{ $user->parent_id == $parent->id ? 'selected' : '' }}>{{ $parent->username }}</option>
+					<option value="{{ $parent->id }}">{{ $parent->username }}</option>
 				@endforeach
 				</select>
 			</div>
@@ -72,7 +95,7 @@
 				<select name="role_id" class="form-control">
 					<option value="">Please select role</option>
 				@foreach($roles as $role)
-					<option value="{{ $role->id }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>{{ $role->name }}</option>
+					<option value="{{ $role->id }}">{{ $role->name }}</option>
 				@endforeach
 				</select>
 			</div>
@@ -86,28 +109,26 @@
 @stop
 
 @section('js')
-
-{{ HTML::script('js/moment/moment.min.js') }}
-{{ HTML::script('js/jquery/jquery.validate.js') }}
-{{ HTML::script('js/datepicker/datepicker.js') }}
-
+	{{ HTML::script('js/jquery/jquery.validate.js') }}
+	{{ HTML::script('js/datepicker/datepicker.js') }}
 @stop
 
 @section('javascript')
 
 <script type="text/javascript">
-
+		
 	var date_format = 'dd/mm/yyyy';
 	var $datepicker = $('.datepicker');
+
 	$datepicker.datepicker({
 		autoclose: true,
 		todayHighlight: true,
 	    format: date_format
 	}).on('changeDate', function(e){
-		$(this).data('timestamp', moment(e.date).unix());
+		$(this).data('timestamp', Math.floor(e.timeStamp/1e3));
 	});
 
-	$('#frm').on('submit', function()
+	$('form').on('submit', function()
 	{
 		return false;
 	}).validate({
@@ -117,7 +138,7 @@
 			
 			$.ajax({
 				url: $this.attr('action'),
-				type: 'put',
+				type: 'post',
 				dataType: 'json',
 				data: $this.serialize(),
 				success: function(result)
@@ -138,6 +159,7 @@
 							$alert.addClass('alert-success')
 								.delay(3000).fadeOut('slow', function() {
 									$(this).remove();
+									window.location.href = "{{ route('v1.users.index') }}";
 								});
 					}
 
@@ -151,6 +173,16 @@
 			});
 		},
 		rules: {
+			username: {
+				required: true
+			},
+			password: {
+				required: true
+			},
+			confirm_password: {
+				required: true,
+				equalTo: '#password'
+			},
 		    first_name: {
 		      required: true,
 		      minlength: 3

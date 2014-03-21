@@ -5,9 +5,8 @@ use \Image, \Config;
 use Indianajone\Categories\Category;
 use Kitti\Medias\Media;
 
-class BaseModel extends Eloquent 
+Trait BaseModel
 {
-    // protected $hidden = array();
 	/*
      * The following $map array maps the url query string to
      * the corresponding model filter e.g.
@@ -59,7 +58,7 @@ class BaseModel extends Eloquent
 
     public function formatTime($value)
     {
-    	$format = \Input::get('date_format', null);
+    	$format = Input::get('date_format', null);
 		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;    
     }
 
@@ -72,6 +71,11 @@ class BaseModel extends Eloquent
 	{
 		return $this->formatTime($value);    
 	}
+
+    public function getLastSeenAttribute($value)
+    {
+        return $this->formatTime($value); 
+    }
 
 	public function getPublishedAtAttribute($value)
 	{
@@ -94,7 +98,7 @@ class BaseModel extends Eloquent
 
 	public function scopeKeywords($query, $fields)
 	{
-		$keyword = \Input::get('q');
+		$keyword = Input::get('q', '');
 		$builder =  $query->where($fields[0],'like', '%'.$keyword.'%');
 
 		foreach ($fields as $key => $field) {
@@ -123,7 +127,7 @@ class BaseModel extends Eloquent
 
             if (!is_null($input)) 
             {
-                $query = $query->$filter($input);
+                $query = $query->{$filter}($input);
             }
         }
 
@@ -246,7 +250,7 @@ class BaseModel extends Eloquent
 
     public function scopeTime($query, $field, $value)
 	{
-        $format = \Input::get('date_format', null);
+        $format = Input::get('date_format', null);
 
 	    if($format)
 	    {
@@ -278,29 +282,4 @@ class BaseModel extends Eloquent
     {
         return $query->whereAppId(Appl::getAppIdByKey(Input::get('appkey')));
     }
-
-    // public function scopeActive($query)
-    // {
-    //     return $query->whereStatus(1);
-    // }
-
-
-    // public function __call($method, $parameters)
-    // {
-    //     if (in_array($method, array('increment', 'decrement')))
-    //     {
-    //         return call_user_func_array(array($this, $method), $parameters);
-    //     }
-
-
-
-    //     if($method == 'getTestAttribute')
-    //     {
-    //         dd(studly_case($method));
-    //     }
-
-    //     $query = $this->newQuery();
-
-    //     return call_user_func_array(array($query, $method), $parameters);
-    // }
 }

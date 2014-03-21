@@ -3,10 +3,12 @@
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
 use Zizaco\Entrust\HasRole;
-use \BaseModel;
 
-class User extends BaseModel implements UserInterface, RemindableInterface 
+
+class User extends \Eloquent implements UserInterface, RemindableInterface 
 {
+    use \BaseModel;
+
     public static $rules = array(
         'chk_id' => array(
             'id' => 'required|exists:users'
@@ -19,7 +21,8 @@ class User extends BaseModel implements UserInterface, RemindableInterface
             'email' => 'required|email|unique:users,email',
         ),
         'update' => array(
-            'email' => 'required|email|exists:users'
+            // 'email' => 'required|email|unique:users'
+            'id' => 'required|exists:users'
         ),
         'delete' => array(
             'id' => 'required|exists:users'
@@ -57,12 +60,16 @@ class User extends BaseModel implements UserInterface, RemindableInterface
      */
     protected $hidden = array('password', 'parent_id');
 
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     protected $guarded = array('id');
 
-    // protected $appends = array('test');
-
-    use HasRole; // Add this trait to your user model
-
+    
+    // Roles and Permissions Helper.
+    use HasRole; 
 
     /**
      * Get the unique identifier for the user.
@@ -94,33 +101,72 @@ class User extends BaseModel implements UserInterface, RemindableInterface
         return $this->email;
     }
 
+    /**
+     * Validate password.
+     *
+     * @return boolean
+     */
     public function checkPassword($password)
     {
         return \Hash::check($password, $this->getAuthPassword());
     }
 
+    /**
+     * Define a one-to-many with Application.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function apps(){
         return $this->hasMany('Indianajone\\Applications\\Application', 'user_id');
     }
 
     /**
-     * Many-to-Many relations with Role
+     * Define a many-to-many Role.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function roles()
     {
-        return $this->belongsToMany('Indianajone\RolesAndPermissions\Role', 'user_roles')->groupBy('user_id');
+        return $this->belongsToMany('Indianajone\RolesAndPermissions\Role', 'user_roles');
     }
 
+    /**
+     * Define an inverse one-to-one or many User.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function parent()
     {
         return $this->belongsTo('Max\User\Models\User', 'parent_id');
     }
 
+    /**
+     * Define an inverse one-to-one or many with MissingChild.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function missingchild(){
+        return $this->belongsTo('Max\Missingchild\Models\Missingchild');
+    }
+
+    /**
+     * Define a one-to-many with User.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function children()
     {
         return $this->hasMany('Max\User\Models\User', 'parent_id');
     }
 
+
+
+    /**
+     * List all children ids.
+     *
+     * @param   array   $ids
+     * @return  array 
+     */
     public function getChildrenId($ids=array())
     {
         $ids[] = $this->id;
@@ -140,15 +186,21 @@ class User extends BaseModel implements UserInterface, RemindableInterface
         return array_unique($ids);
     }
 
-    public function missingchild(){
-        return $this->belongsTo('Max\Missingchild\Models\Missingchild');
-    }
-
+     /**
+     * Check if current user is in top level.
+     *
+     * @return  boolean 
+     */
     public function isRoot()
     {
         return $this->parent_id == null;
     }
 
+    /**
+     * Get top level user id.
+     *
+     * @return  int 
+     */
     public function getRootId()
     {
         $parentId = $this->parent_id;

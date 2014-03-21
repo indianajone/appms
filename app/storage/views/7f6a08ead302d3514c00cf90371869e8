@@ -11,22 +11,42 @@
 
 <?php else: ?>
 
-<h1>Edit <?php echo $user->username; ?></h1>
-<small class="text-muted">last updated: <?php echo \Carbon\Carbon::createFromTimestamp($user->updated_at); ?></small>
-<hr>
-<?php echo Form::open(array('url' => route('api.v1.users.update', $user->id), 'method' => 'PUT', 'role'=>'form', 'id'=>'frm')); ?>
-	<div class="error"></div>
+<h1>New User</h1>
+<?php echo Form::open(array('url' => route('api.v1.users.store'), 'method' => 'POST', 'role'=>'form')); ?>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('username', 'Username'); ?>
+				<?php echo Form::text('username', null, array('class'=>'form-control', 'placeholder'=>'Username')); ?>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('password', 'Password'); ?>
+				<?php echo Form::password('password', array('class'=>'form-control', 'placeholder'=>'Password')); ?>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<?php echo Form::label('confirm_password', 'Confirm Password'); ?>
+				<?php echo Form::password('confirm_password', array('class'=>'form-control', 'placeholder'=>'Confirm Password')); ?>
+			</div>
+		</div>
+	</div>
+	<hr>
 	<div class="row">
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('first_name', 'First name'); ?>
-				<?php echo Form::text('first_name', $user->first_name, array('class'=>'form-control', 'placeholder'=>'First name', 'required')); ?>
+				<?php echo Form::text('first_name', null, array('class'=>'form-control', 'placeholder'=>'First name')); ?>
 			</div>
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('last_name', 'Last name'); ?>
-				<?php echo Form::text('last_name', $user->last_name, array('class'=>'form-control', 'placeholder'=>'Last name')); ?>
+				<?php echo Form::text('last_name', null, array('class'=>'form-control', 'placeholder'=>'Last name')); ?>
 			</div>
 		</div>
 	</div>
@@ -34,13 +54,13 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('email', 'Email'); ?>
-				<?php echo Form::email('email', $user->email, array('class'=>'form-control', 'placeholder'=>'Email')); ?>
+				<?php echo Form::email('email', null, array('class'=>'form-control', 'placeholder'=>'Email')); ?>
 			</div>
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('gender', 'Gender'); ?>
-				<?php echo Form::text('gender', $user->gender, array('class'=>'form-control', 'placeholder'=>'Gender')); ?>
+				<?php echo Form::text('gender', null, array('class'=>'form-control', 'placeholder'=>'Gender')); ?>
 			</div>
 		</div>
 	</div>
@@ -48,19 +68,22 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('birthday', 'Birthday'); ?>
-				<?php echo Form::text('birthday', Carbon\Carbon::createFromTimestamp($user->birthday)->format('d/m/Y'), array('class'=>'form-control datepicker', 'placeholder'=>'dd/mm/yyyy', 'data-timestamp'=>$user->birthday)); ?>
+				<?php echo Form::text('birthday', null, array('class'=>'form-control datepicker', 'placeholder'=>'dd/mm/yyyy')); ?>
 			</div>
 		</div>
 	</div>
+	<hr>
 	<div class="row">
 		<div class="col-sm-4">
 			<div class="form-group">
 				<?php echo Form::label('parent', 'Parent'); ?>
 				<select name="parent_id" class="form-control">
 					<option value="">Please select parent</option>
-					<option value="" <?php echo is_null($user->parent_id) ? 'selected' : ''; ?>>no parent</option>
+				<?php if($user->hasRole('super_admin')): ?>
+					<option value="">no parent</option>
+				<?php endif; ?>
 				<?php foreach($parents as $parent): ?>
-					<option value="<?php echo $parent->id; ?>" <?php echo $user->parent_id == $parent->id ? 'selected' : ''; ?>><?php echo $parent->username; ?></option>
+					<option value="<?php echo $parent->id; ?>"><?php echo $parent->username; ?></option>
 				<?php endforeach; ?>
 				</select>
 			</div>
@@ -71,7 +94,7 @@
 				<select name="role_id" class="form-control">
 					<option value="">Please select role</option>
 				<?php foreach($roles as $role): ?>
-					<option value="<?php echo $role->id; ?>" <?php echo $user->hasRole($role->name) ? 'selected' : ''; ?>><?php echo $role->name; ?></option>
+					<option value="<?php echo $role->id; ?>"><?php echo $role->name; ?></option>
 				<?php endforeach; ?>
 				</select>
 			</div>
@@ -85,28 +108,26 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('js'); ?>
-
-<?php echo HTML::script('js/moment/moment.min.js'); ?>
-<?php echo HTML::script('js/jquery/jquery.validate.js'); ?>
-<?php echo HTML::script('js/datepicker/datepicker.js'); ?>
-
+	<?php echo HTML::script('js/jquery/jquery.validate.js'); ?>
+	<?php echo HTML::script('js/datepicker/datepicker.js'); ?>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('javascript'); ?>
 
 <script type="text/javascript">
-
+		
 	var date_format = 'dd/mm/yyyy';
 	var $datepicker = $('.datepicker');
+
 	$datepicker.datepicker({
 		autoclose: true,
 		todayHighlight: true,
 	    format: date_format
 	}).on('changeDate', function(e){
-		$(this).data('timestamp', moment(e.date).unix());
+		$(this).data('timestamp', Math.floor(e.timeStamp/1e3));
 	});
 
-	$('#frm').on('submit', function()
+	$('form').on('submit', function()
 	{
 		return false;
 	}).validate({
@@ -116,7 +137,7 @@
 			
 			$.ajax({
 				url: $this.attr('action'),
-				type: 'put',
+				type: 'post',
 				dataType: 'json',
 				data: $this.serialize(),
 				success: function(result)
@@ -137,6 +158,7 @@
 							$alert.addClass('alert-success')
 								.delay(3000).fadeOut('slow', function() {
 									$(this).remove();
+									window.location.href = "<?php echo route('v1.users.index'); ?>";
 								});
 					}
 
@@ -150,6 +172,16 @@
 			});
 		},
 		rules: {
+			username: {
+				required: true
+			},
+			password: {
+				required: true
+			},
+			confirm_password: {
+				required: true,
+				equalTo: '#password'
+			},
 		    first_name: {
 		      required: true,
 		      minlength: 3

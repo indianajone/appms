@@ -14,7 +14,9 @@ Route::group(array('prefix' => 'v1', 'before'=>'auth'), function()
 {
     Route::any('users/login', 'Max\\User\\Controllers\\UserController@doLogin');
     Route::any('users/logout', 'Max\\User\\Controllers\\UserController@doLogout');
-    Route::resource('users', 'Max\\User\\Controllers\\UserController');
+    Route::resource('users', 'Max\\User\\Controllers\\UserController',
+        array('only' => array('index', 'create', 'edit'))
+    );
 });
 
 

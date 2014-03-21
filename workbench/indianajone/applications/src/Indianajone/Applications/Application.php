@@ -1,7 +1,8 @@
 <?php namespace Indianajone\Applications;
 
-class Application extends \BaseModel
+class Application extends \Eloquent
 {
+	use \BaseModel;
 	/**
 	* The database table used by the model.
 	*
