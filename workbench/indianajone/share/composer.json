@@ -1,0 +1,26 @@
+{
+    "name": "indianajone/share",
+    "description": "",
+    "authors": [
+        {
+            "name": "Ravi Vaisayawan",
+            "email": "mmer555@hotmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*",
+        "facebook/php-sdk": "dev-master"
+    },
+    "autoload": {
+        "classmap": [
+            "src/config",
+            "src/controllers",
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Indianajone\\Share": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
