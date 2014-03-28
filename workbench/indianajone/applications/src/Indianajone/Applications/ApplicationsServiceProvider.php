@@ -2,6 +2,8 @@
 namespace Indianajone\Applications;
 
 use Illuminate\Support\ServiceProvider;
+use Indianajone\Applications\Application;
+use Max\User\Repository\DBUserRepository;
 
 class ApplicationsServiceProvider extends ServiceProvider {
 
@@ -33,6 +35,14 @@ class ApplicationsServiceProvider extends ServiceProvider {
 		$this->app->bind('appl', function($app)
         {
             return new Appl();
+        });
+
+        $this->app->bind('Indianajone\Applications\AppRepositoryInterface', function()
+        {
+            return new DBAppRepository(
+            	new Application, 
+            	$this->app['Max\User\Repository\DBUserRepository']
+            );
         });
 	}
 

@@ -5,7 +5,6 @@ use Max\User\Models\User;
 
 class Appl
 {
-
 	public function genKey()
 	{
 		return str_random(32);

@@ -13,7 +13,7 @@
 			return Response::fields('roles');
 		});
 		Route::post('roles/{id}/attach', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController@attachPermissions');
-		Route::post('roles/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController@delete');
+		Route::get('roles/{id}/delete', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController@delete');
 		Route::resource('roles', 'Indianajone\\RolesAndsPermissions\\Controllers\\RoleController');
 		// Permissions
 		Route::get('permissions/fields', function(){

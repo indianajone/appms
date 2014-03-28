@@ -2,16 +2,22 @@
 
 class Application extends \Eloquent
 {
-	use \BaseModel;
 	/**
 	* The database table used by the model.
 	*
 	* @var string
 	**/
 	protected $table = 'applications';
-	protected $guarded = array('id', 'appkey');
+	protected $guarded = array('id');
+	protected $perPage = 10;
+	/**
+	* The attributes excluded from the model's JSON form.
+	*
+	* @var array
+	**/
+	protected $hidden = array('appkey', 'user_id', 'meta');
 
-	public static $rules = array(
+	protected $rules = array(
 		'show' => array(
 			// 'appkey' => 'required',
 			'user_id' 	=> 'required|exists:users,id',
@@ -21,19 +27,14 @@ class Application extends \Eloquent
 			'name'		=> 'required'
 		),
 		'update' => array(
-			'user_id' => 'required'
+			'user_id' => 'required|exists:users,id'
 		),
 		'delete' => array(
 			'id' => 'required|exists:applications'
 		)
 	);
 
-	/**
-	* The attributes excluded from the model's JSON form.
-	*
-	* @var array
-	**/
-	protected $hidden = array('appkey', 'user_id');
+	use \BaseModel;
 
 	/**
 	*
@@ -46,6 +47,16 @@ class Application extends \Eloquent
 		return $this->belongsTo('Max\\User\\Models\\User', 'user_id');
 	}
 
+	public function meta()
+	{
+		return $this->hasMany('Indianajone\\Applications\\ApplicationMeta', 'app_id');
+	}
+
+	public function rules($action)
+	{
+		return $this->rules[$action];
+	}
+
 	public function genKey()
 	{
 		return str_random(32);
@@ -55,13 +66,4 @@ class Application extends \Eloquent
 	{
 		return $this->whereAppkey($key)->first();
 	}
-
-	/*==========  Example on how to convent back to unixtime  ==========*/
-	
-	// public function getUnixtimeAttribute()
-	// {
-	// 	$format = \Input::get('date_format', null);
-	// 	$time = Carbon::createFromTimeStamp($this->attributes['created_at'])->format($format);
-	// 	return Carbon::createFromFormat($format, $time, \Config::get('app.timezone'))->timestamp;
-	// }
 }

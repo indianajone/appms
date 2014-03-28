@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateArticles extends Migration {
+class CreateArticlesTables extends Migration {
 
         /**
          * Run the migrations.
@@ -34,7 +34,7 @@ class CreateArticles extends Migration {
             $table->string('wrote_by', 40);
             $table->integer('created_at');
             $table->integer('updated_at');
-            $table->integer('publish_at');
+            $table->integer('published_at');
             $table->integer('views', false)->unsigned()->default(0);
             $table->string('tags', 100)->nullable();
             $table->boolean('status')->default(1);

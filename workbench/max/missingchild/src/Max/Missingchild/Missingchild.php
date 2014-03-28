@@ -4,52 +4,14 @@ use Input, Response;
 use Max\Missingchild\Collection;
 use Indianajone\Categories\Category;
 
-class Missingchild extends \BaseModel 
+class Missingchild extends \Eloquent
 {
 	protected $table = 'missingchilds';
     protected $softDelete = true;
     protected $guarded = array('id');
     protected $hidden = array('status', 'app_id', 'gallery_id', 'article_id', 'user_id', 'title', 'categories', 'deleted_at');
 
-    /*
-     * The following $map array maps the url query string to
-     * the corresponding model filter e.g.
-     *  ->order_by will handle Input::get('order_by')
-     */
-    protected $map = array(
-        'order_by' => 'order_by',
-        'limit' => 'limit',
-        'offset' => 'offset',
-        'search' => 'q',
-        'filterCats' => 'category_id',
-        'whereUpdated' => 'updated_at',
-        'whereCreated' => 'created_at'
-    );
-
-    /*
-     *  Default values for the url parameters
-     */
-    protected $defaults = array(
-        'order_by' => null,
-        'limit' => 10,
-        'offset' => 0,
-        'search' => null,
-        'filterCats' => '*',
-        'time' => null
-    );
-
-    /*
-     * The following filters are defined by
-     *  url parameters can have multiple
-     *  values separated by a delimiter
-     *  e.g. order_by, sort
-     */
-    protected $multiple = array(
-        'filterCats',
-        'order_by'
-    );
-
-	public static $rules = array(
+    public static $rules = array(
         'show' => array(
             'appkey'    => 'required|exists:applications,appkey'
         ),
@@ -58,18 +20,18 @@ class Missingchild extends \BaseModel
             'id'        => 'required|existsinapp:missingchilds,id,Max\\Missingchild\\Models\\Missingchild'
         ),
         'create' => array(
-        	'appkey'			=> 'required|exists:applications,appkey',
+            'appkey'            => 'required|exists:applications,appkey',
             'category_id'       => 'required|existsloop:categories,id',
             'title'             => 'required',
             'description'           => 'required',
-        	'first_name'		=> 'required',
-        	'last_name'			=> 'required',
-        	'lost_age'			=> 'required|integer',
-        	'place_of_missing' 	=> 'required',
-        	'missing_at'		=> 'required',
-        	'reported_at'		=> 'required',
-        	'user_id'			=> 'exists:users,id',
-        	'order'				=> 'integer'
+            'first_name'        => 'required',
+            'last_name'         => 'required',
+            'lost_age'          => 'required|integer',
+            'place_of_missing'  => 'required',
+            'missing_at'        => 'required',
+            'reported_at'       => 'required',
+            'user_id'           => 'exists:users,id',
+            'order'             => 'integer'
         ),
         'create_clue' => array(
             'appkey'         => 'required|exists:applications,appkey',
@@ -85,6 +47,26 @@ class Missingchild extends \BaseModel
             'id'        => 'required|exists:missingchilds,id'
         )
     );
+
+    use \BaseModel;
+
+    function __construct()
+    {
+        $this->map = array(
+            'order_by' => 'order_by',
+            'limit' => 'limit',
+            'offset' => 'offset',
+            'search' => 'q',
+            'filterCats' => 'category_id',
+            'whereUpdated' => 'updated_at',
+            'whereCreated' => 'created_at'
+        );
+
+        $this->multiple = array(
+            'filterCats',
+            'order_by'
+        );
+    }
 
     public function articles()
     {

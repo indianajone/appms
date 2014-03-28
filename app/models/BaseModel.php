@@ -24,11 +24,11 @@ Trait BaseModel
     /*
      *  Default values for the url parameters
      */
-    protected  $defaults = array(
+    protected $defaults = array(
         'order_by' => null,
         'limit' => 10,
         'offset' => 0,
-        'search' => null
+        // 'search' => null
     );
 
     /*
@@ -62,6 +62,11 @@ Trait BaseModel
 		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;    
     }
 
+    public function getBirthdayAttribute($value)
+    {
+        return $this->formatTime($value);
+    }
+
     public function getCreatedAtAttribute($value)
 	{
 		return $this->formatTime($value);
@@ -87,10 +92,13 @@ Trait BaseModel
         if($value)
         {
             $path = parse_url($value, PHP_URL_PATH);
-            $created_at = $this->getOriginal('created_at');
-            $folder = Carbon::createFromTimeStamp($created_at, \Config::get('app.timezone'))->format('Y-m-d');
+            if(preg_match('/[0-9]{4}[- \/.](0[1-9]|1[0-2])[- \/.](0[1-9]|[1-2][0-9]|3[0-1])/', $path, $match))
+            {
+                $folder = str_replace('/', '-', $match[0]); 
+                return asset(Config::get('timthumb::prefix').'/'.$folder.'-'.basename($path));
+            }
 
-            return asset(Config::get('timthumb::prefix').'/'.$folder.'-'.basename($path));
+            return $value;
         }
 
         return $value;
@@ -137,6 +145,7 @@ Trait BaseModel
     public function createPicture($app_id)
     {
         $picture = Input::get('picture', null);
+
         if($picture)
         {
             if (is_numeric($picture))
@@ -168,6 +177,10 @@ Trait BaseModel
             // }
             else
             {
+                // #FIXED iDevice base64 encode.
+                $picture = str_replace('%2B','+', $picture);
+                $picture = str_replace('-','+', $picture);
+                
                 $response = Image::upload($picture);
 
                 if(is_object($response)) return $response;

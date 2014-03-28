@@ -22,20 +22,8 @@ class RoleController extends BaseController {
 	public function index()
 	{
 		$roles = $this->roles->all();
-
-		// Wait for respone helper.
-		// $offset = Input::get('offset', 0);
-		// $limit= Input::get('limit', 10);
-		// $field = Input::get('fields', null);
-		// $fields = explode(',', $field);
- 	// 	$roles =  Role::with('permits')->offset($offset)->limit($limit)->get();
- 		
- 	// 	if($field)
-	 // 		$roles->each(function($role) use ($fields){
-	 // 			$role->setVisible($fields);
-	 // 		});
         
-        return Response::json(
+        return Response::result(
         	array(
         		'header' => array(
         			'code' => 200,
@@ -66,31 +54,26 @@ class RoleController extends BaseController {
 	 */
 	public function store()
 	{
-		$rules = array(
-			'name' => 'required|unique:roles'
-		);
+		$validator = $this->roles->validate('create');
 
-		$validator = Validator::make(Input::all(), $rules);
+		if ($validator) {
+			$role = $this->roles->create(array(
+				'name' => Input::get('name')
+			));
 
-		if ($validator->passes()) {
-			$role = new Role();
-			$role->name = Input::get('name');
-			if($role->save())
-				return Response::json(array(
-					'header'=> [
-		        		'code'=> 200,
-		        		'message'=> 'success'
-		        	],
-					'id'=> $role->id
-				), 200); 
+			if($role)
+				return Response::result(array(
+	                    'header' => array(
+	                        'code'      => 200,
+	                        'message'   => 'success'
+	                    ),
+	                    'id' => $role->id
+	                ));
+
+			return Response::message(500, 'Something wrong when trying to create role.');
 		} 
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 400,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $this->roles->errors);
 	}
 
 	/**
@@ -101,34 +84,22 @@ class RoleController extends BaseController {
 	 */
 	public function show($id)
 	{
-      	$field = Input::get('fields', null);
-		$fields = explode(',', $field);
- 		$role =  Role::find($id);
+		$validator = $this->roles->validate('show', array('id'=>$id));
 
- 		if($role)
+		if($validator)
 		{
-			if($fields[0] == '' || in_array('permits', $fields)) $role->permits;
-	 		if($field) $role->setVisible($fields);
+			$role = $this->roles->find($id);
 
-		 	return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'success'
-	        		),
-	        		'entry' => $role->toArray()
-	        	), 200
-	        );
+			return Response::result(array(
+				'header' => array(
+        			'code' => 200,
+        			'message' => 'success'
+        		),
+        		'entry' => $role->toArray()
+			));
 		}
-		
-		return Response::json(
-        	array(
-        		'header' => array(
-        			'code' => 204,
-        			'message' => 'No user were found.'
-        		)
-        	), 200
-        );	
+
+		return Response::message(400, $this->roles->errors);
 	}
 
 	/**
@@ -150,46 +121,32 @@ class RoleController extends BaseController {
 	 */
 	public function update($id)
 	{
-		$role =  Role::find($id);
+		// $validator = $this->roles->validate('show', array('id'=>$id));
 
-		if($role)
-		{
-			$result = $role->update(array(
-				'name'=> Input::get('name', $role->name)
-			));
+		// if($validator)
+		// {
+			$inputs = Input::only('name');
+			$role = $this->roles->find($id);
 
-			if($result)
-			{
-				return Response::json(
-		        	array(
-		        		'header' => array(
-		        			'code' => 200,
-		        			'message' => 'Updated role_id: '.$id.' success!'
-		        		)
-		        	), 200
-		        );
-			}
-			
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 500,
-	        			'message' => 'Internal Server Error.'
-	        		)
-	        	), 200
-	        );
-		}
-		else
-		{
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 204,
-	        			'message' => 'No user were found.'
-	        		)
-	        	), 200
-	        );
-		}
+            foreach ($inputs as $key => $val) {
+                if( $val == null || 
+                    $val == '' || 
+                    $val == $role[$key]) 
+                {
+                    unset($inputs[$key]);
+                }
+            }
+
+            if(!count($inputs))
+                return Response::message(204, 'Nothing is update.');
+
+            if($role->update($inputs))
+                return Response::message(200, 'Updated role id: '.$id.' success!'); 
+
+            return Response::message(500, 'Something wrong when trying to update role.');
+		// }
+
+		// return Response::message(400, $this->roles->errors);
 	}
 
 	/**

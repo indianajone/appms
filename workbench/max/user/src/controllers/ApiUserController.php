@@ -65,9 +65,7 @@ class ApiUserController extends \BaseController
 	 */
 	public function store()
 	{
-        $validator = $this->users->validate('create');
-
-        if ($validator)
+        if ($this->users->validate('create'))
         {
             $user = $this->users->create(
                 array(

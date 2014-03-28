@@ -1,51 +1,12 @@
 <?php namespace Kitti\Articles;
 
-use BaseModel;
 use Indianajone\Categories\Category;
 
-class Article extends BaseModel
+class Article extends \Eloquent
 {
     protected $table = 'articles';
     protected $guarded = array('id');
-    protected $hidden = array('app_id', 'status', 'pivot', 'gallery_id');
-
-    /*
-     * The following $map array maps the url query string to
-     * the corresponding model filter e.g.
-     *  ->order_by will handle Input::get('order_by')
-     */
-    protected $map = array(
-        'order_by' => 'order_by',
-        'limit' => 'limit',
-        'offset' => 'offset',
-        'search' => 'q',
-        'filterCats' => 'category_id',
-        'whereUpdated' => 'updated_at',
-        'whereCreated' => 'created_at'
-    );
-
-    /*
-     *  Default values for the url parameters
-     */
-    protected $defaults = array(
-        'order_by' => null,
-        'limit' => 10,
-        'offset' => 0,
-        'search' => null,
-        'filterCats' => '*',
-        'time' => null
-    );
-
-    /*
-     * The following filters are defined by
-     *  url parameters can have multiple
-     *  values separated by a delimiter
-     *  e.g. order_by, sort
-     */
-    protected $multiple = array(
-        'filterCats',
-        'order_by'
-    );
+    protected $hidden = array('app_id', 'status', 'pivot', 'gallery_id', 'deleted_at');
 
     public static $rules = array(
     	'show' => array(
@@ -75,6 +36,28 @@ class Article extends BaseModel
         )
     );
 
+    use \BaseModel;
+
+    function __construct()
+    {
+        parent::__construct();
+        
+        $this->map = array(
+            'order_by' => 'order_by',
+            'limit' => 'limit',
+            'offset' => 'offset',
+            'search' => 'q',
+            'filterCats' => 'category_id',
+            'whereUpdated' => 'updated_at',
+            'whereCreated' => 'created_at'
+        );
+
+        $this->multiple = array(
+            'filterCats',
+            'order_by'
+        );
+    }
+
     public function categories()
     {
     	return $this->belongsToMany('Indianajone\\Categories\\Category', 'article_category');
@@ -82,8 +65,6 @@ class Article extends BaseModel
 
     public function gallery()
     {
-        // return $this->hasOne('Kitti\\Galleries\\Gallery', 'content_id')->where('content_type', '=', 'article');
-
         return $this->morphOne('Kitti\\Galleries\\Gallery', 'galleryable', 'content_type', 'content_id');
     }
 
@@ -130,6 +111,7 @@ class Article extends BaseModel
             $categories = explode(',', $categories);
 
         $this->{$related}()->sync($categories);
+        $this->touch();
     }
 
     public function getCategoryIds()

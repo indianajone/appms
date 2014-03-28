@@ -4,32 +4,11 @@ use Input, Validator;
 use Max\User\Models\User;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
-class DBUserRepository implements UserRepositoryInterface
+class DBUserRepository extends \AbstractRepository implements UserRepositoryInterface
 {
-	/**
-	 * The message bag instance.
-	 *
-	 * @var \Illuminate\Support\MessageBag
-	 */
-	public $errors;
-
-	/**
-	 * Validate as defined rules in Model.
-	 *
-	 * @param 	string 	$action
-	 * @param  	array 	$input
-	 * @return 	string|boolean
-	 *
-	 */
-	public function validate($action, $input=null)
+	public function __construct(User $user)
 	{
-		$validator = Validator::make($input ?: Input::all(), User::$rules[$action]);
-
-		if($validator->passes()) return true;
-
-		$this->errors = $validator->messages()->first();
-		
-		return false;
+		$this->model = $user;
 	}
 
 	public function all()
@@ -44,11 +23,6 @@ class DBUserRepository implements UserRepositoryInterface
         	return $users->toArray();
 
         return $users;
-	}
-
-	public function find($id)
-	{
-        return  User::apiFilter()->findOrFail($id);
 	}
 
 	public function findMany($ids, $columns=array('*'))
@@ -97,22 +71,6 @@ class DBUserRepository implements UserRepositoryInterface
 		return false;
 	}
 
-	public function create($input)
-	{
-		return User::create($input);
-	}
-
-	public function update($id, $input)
-	{
-		$user = $this->find($id);
-		return $user->update($input);
-	}
-
-	public function delete($id)
-	{
-		return User::findOrFail($id)->delete();
-	}
-
 	/**
 	*
 	# TODO: Need to Revise too many queries.
@@ -121,11 +79,11 @@ class DBUserRepository implements UserRepositoryInterface
 
 	public function children($id)
 	{
-		$user = User::find($id);
+		$user = User::findOrFail($id);
 
 		if($user)
 		{
-			return User::whereIn('id', $user->getChildrenId())->apiFilter();
+			return User::whereIn('id', $user->getChildrenId());
 		}
 
 		return null;

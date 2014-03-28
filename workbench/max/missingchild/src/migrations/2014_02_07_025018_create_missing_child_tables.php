@@ -59,7 +59,7 @@ class CreateMissingChildTables extends Migration {
             $table->integer('deleted_at')->nullable();  
         });
 
-        Schema::create('category_missingchild', function(Blueprint $table)
+        Schema::create('category_missingchild', function($table)
         {   
             $table->increments('id');
             $table->integer('missingchild_id', false)->unsigned();
@@ -68,7 +68,7 @@ class CreateMissingChildTables extends Migration {
             $table->foreign('category_id')->references('id')->on('categories');
         });
 
-        Schema::create('article_missingchild', function(Blueprint $table)
+        Schema::create('article_missingchild', function($table)
         {
         	$table->increments('id');
         	$table->integer('article_id')->unsigned();

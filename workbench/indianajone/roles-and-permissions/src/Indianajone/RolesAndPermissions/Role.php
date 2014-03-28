@@ -2,9 +2,21 @@
 
 use Carbon\Carbon;
 
-class Role extends \Zizaco\Entrust\EntrustRole {
+class Role extends \Zizaco\Entrust\EntrustRole 
+{
+    use \BaseModel;
 
+    protected $guarded = array('id');
     protected $hidden = array('pivot');
+
+    public static $rules = array(
+        'show'      => array(
+            'id'    => 'required|exists:roles'
+        ),
+        'create'    => array(
+            'name'  => 'required|unique:roles' 
+        )
+    );
 
     /**
      * Override Many-to-Many relations with Permission
@@ -17,11 +29,7 @@ class Role extends \Zizaco\Entrust\EntrustRole {
 
     public function perms()
     {
-        // To maintain backwards compatibility we'll catch the exception if the Permission table doesn't exist.
-        // TODO remove in a future version
-        try {
-            return $this->belongsToMany('Indianajone\RolesAndPermissions\Permission');
-        } catch(Execption $e) {}
+       return $this->belongsToMany('Indianajone\RolesAndPermissions\Permission');
     }
     
 	/**
@@ -30,5 +38,32 @@ class Role extends \Zizaco\Entrust\EntrustRole {
     public function users()
     {
         return $this->belongsToMany('Max\User\Models\User', 'user_roles');
+    }
+
+    /**
+     * Search useing keyword.
+     *
+     * @param $fields
+     * @return Illuminate\Database\Query\Builder
+     */
+    public function scopeSearch($query)
+    {
+        return $this->keywords(array('name'));
+    }
+
+    /**
+     * Before delete all constrained foreign relations
+     *
+     * @param bool $forced
+     * @return bool
+     */
+    public function beforeDelete( $forced = false )
+    {
+        try {
+            \DB::table('user_roles')->where('role_id', $this->id)->delete();
+            \DB::table('permission_role')->where('role_id', $this->id)->delete();
+        } catch(Execption $e) {}
+
+        return true;
     }
 }

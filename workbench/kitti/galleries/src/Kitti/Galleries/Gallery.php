@@ -1,18 +1,10 @@
 <?php namespace Kitti\Galleries;
 
-class Gallery extends \BaseModel
+class Gallery extends \Eloquent
 {
     protected $table = 'galleries';
   	protected $guarded = array('id');
     protected $hidden = array('app_id', 'status', 'content_type', 'content_id');
-
-    protected $map = array(
-        'order_by' => 'order_by',
-        'limit' => 'limit',
-        'offset' => 'offset',
-        'whereUpdated' => 'updated_at',
-        'whereCreated' => 'created_at'
-    );
 
     public static $rules = array(
     	'show' => array(
@@ -48,6 +40,8 @@ class Gallery extends \BaseModel
             'id' => 'required|exists:galleries'
         )
     );
+
+    use \BaseModel;
 
     public function owner()
     {

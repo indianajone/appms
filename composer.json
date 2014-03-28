@@ -5,8 +5,15 @@
 	"license": "MIT",
 	"require": {
 		"laravel/framework": "4.1.*",
-		"way/generators": "dev-master"
+		"way/generators": "dev-master",
+		"indianajone/share": "dev-master"
 	},
+	"repositories": [
+		{
+		"type": "vcs",
+		"url": "https://github.com/indianajone/share.git"
+		}
+	],
 	"autoload": {
 		"classmap": [
 			"app/commands",

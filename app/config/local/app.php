@@ -112,6 +112,7 @@ return array(
 		'Indianajone\Applications\ApplicationsServiceProvider',
 		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
 		'Indianajone\Categories\CategoriesServiceProvider',
+		'Indianajone\Share\ShareServiceProvider',
 
 		'Max\User\UserServiceProvider',
 		'Max\Member\MemberServiceProvider',

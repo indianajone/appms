@@ -31,7 +31,8 @@ ClassLoader::addDirectories(array(
 |
 */
 
-Log::useFiles(storage_path().'/logs/laravel.log');
+// Log::useFiles(storage_path().'/logs/laravel.log');
+Log::useDailyFiles(storage_path().'/logs/laravel.log', 0, 'debug');
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,7 @@ App::down(function()
 */
 
 require app_path().'/filters.php';
+require app_path().'/macros.php';
 
 
 App::error(function(InvalidArgumentException $e)

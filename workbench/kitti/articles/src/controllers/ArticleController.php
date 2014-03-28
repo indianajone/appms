@@ -20,7 +20,7 @@ class ArticleController extends BaseController
 
 		if($validator->passes())
 		{
-			$articles = Article::app()->ApiFilter()->get();
+			$articles = Article::apiFilter()->get();
 			
 			$articles->each(function($article) {
 				$article->fields();
@@ -30,8 +30,8 @@ class ArticleController extends BaseController
 					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
 				}
 
-				$gallery = $article->gallery()->with('medias')->first();
-				if($gallery) $article->setRelation('gallery', $gallery);
+				// $gallery = $article->gallery()->with('medias')->first();
+				// if($gallery) $article->setRelation('gallery', $gallery);
 			
 	 		});
 
@@ -67,7 +67,7 @@ class ArticleController extends BaseController
 		if($validator->passes())
 		{
 			$article = Article::create(array(
-				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
+				'app_id' => Appl::getAppIDByKey(Input::get('appkey'), 2),
 				'gallery_id' => Input::get('gallery_id', null),
 				'pre_title' => Input::get('pre_title'),
 				'title' => Input::get('title'),
