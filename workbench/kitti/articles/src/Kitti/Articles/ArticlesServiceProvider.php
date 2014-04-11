@@ -1,6 +1,8 @@
 <?php namespace Kitti\Articles;
 
 use Illuminate\Support\ServiceProvider;
+use Kitti\Articles\Article;
+use Kitti\Articles\Repositories\DBArticleRepository;
 
 class ArticlesServiceProvider extends ServiceProvider {
 
@@ -29,7 +31,9 @@ class ArticlesServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app->bind('Kitti\Articles\Repositories\ArticleRepositoryInterface', function($app){
+			return new DBArticleRepository(new Article, $app['Indianajone\Share\Repositories\DBShareRepository']);
+		});
 	}
 
 	/**

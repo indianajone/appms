@@ -128,7 +128,9 @@ class MissingchildController extends \BaseController
  		{
  			$app_id = Appl::getAppIDByKey(Input::get('appkey'));
 
- 			$child = Child::create(array(
+ 			$child = new Child;
+
+ 			$child->fill(array(
  				'app_id' => $app_id,
  				'description' => Input::get('description'),
  				'first_name' => Input::get('first_name'),
@@ -146,45 +148,44 @@ class MissingchildController extends \BaseController
  				'reported_place' => 'สถานีห้วยขวาง',
  				'reported_at' => Input::get('reported_at')
  			));
-
-			$child->attachRelations('categories',Input::get('category_id'));
-
-			$child->gallery()->create(
-                array(
-                    'app_id' => $app_id,
-                    'content_id' => $child->id,
-                    'name' => $child->first_name .'\'s gallery',             
-                    'published_at' => Input::get('published_at', Carbon::now()->timestamp),
-                )
-            );
-
-            if(Input::get('picture', null))
-            {
-            	$response = $child->createPicture($app_id);
-            	if(is_object($response)) return $response;             	
-             	unset($inputs['picture']);
-            }
-
-			$app_content = Article::create(array(
-				'app_id' => $app_id,
-				'title' => Input::get('title'),
-				'content' => $child->description,
-				'wrote_by' => Input::get('wrote_by', 'Admin'),
-				'published_at' => Input::get('published_at', Carbon::now()->timestamp),
-			));
-
-			$child->update(array(
-				'article_id' => $app_content->id
-			));
-
-			$app_content->gallery()->create(array(
-				'app_id' => $app_id,
-				'content_id' => $app_content->id,
-				'name' => $app_content->id,
-				'published_at' => Input::get('published_at', Carbon::now()->timestamp)
-			));
             
 			if($child->save())
+			{
+				$child->attachRelations('categories',Input::get('category_id'));
+				$child->gallery()->create(
+	                array(
+	                    'app_id' => $app_id,
+	                    'content_id' => $child->id,
+	                    'name' => $child->first_name .'\'s gallery',             
+	                    'published_at' => Input::get('published_at', Carbon::now()->timestamp),
+	                )
+	            );
+
+	            if(Input::get('picture', null))
+	            {
+	            	$response = $child->createPicture($app_id);
+	            	if(is_object($response)) return $response;             	
+	             	unset($inputs['picture']);
+	            }
+
+				$app_content = Article::create(array(
+					'app_id' => $app_id,
+					'title' => Input::get('title'),
+					'content' => $child->description,
+					'wrote_by' => Input::get('wrote_by', 'Admin'),
+					'published_at' => Input::get('published_at', Carbon::now()->timestamp),
+				));
+
+				$child->fill(array(
+					'article_id' => $app_content->id
+				));
+
+				$app_content->gallery()->create(array(
+					'app_id' => $app_id,
+					'content_id' => $app_content->id,
+					'name' => $app_content->id,
+					'published_at' => Input::get('published_at', Carbon::now()->timestamp)
+				));
 				return Response::result(
 					array(
 						'header'=> array(
@@ -199,6 +200,7 @@ class MissingchildController extends \BaseController
 						)
 					)
 				); 
+			}
 
  		}
 

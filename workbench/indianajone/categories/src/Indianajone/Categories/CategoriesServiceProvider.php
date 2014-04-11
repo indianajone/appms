@@ -30,6 +30,14 @@ class CategoriesServiceProvider extends \Baum\BaumServiceProvider {
 	public function register()
 	{
 		parent::register();
+
+		$this->app->bind('Indianajone\Categories\Repositories\CategoryRepositoryInterface', function($app){
+			return new Repositories\DBCategoryRepository( new Category );
+		});
+
+		$this->app->error(function(\Baum\MoveNotPossibleException $exception){
+			return \Response::message(400, $exception->getMessage());
+		});
 	}
 
 	/**

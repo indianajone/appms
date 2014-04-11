@@ -1,7 +1,6 @@
 <?php namespace Kitti\Galleries\Controllers;
 
 use \Appl;
-use \BaseController;
 use \Carbon\Carbon;
 use \Input;
 use \Response;
@@ -9,44 +8,33 @@ use \Validator;
 use \Image;
 use \Kitti\Galleries\Gallery;
 use \Kitti\Medias\Media;
+use Kitti\Galleries\GalleryRepositoryInterface;
 
-class GalleriesController extends BaseController 
+class ApiGalleriesController extends \BaseController 
 {
+    public function __construct(GalleryRepositoryInterface $galleries)
+    {
+        parent::__construct();
+        $this->galleries = $galleries;
+    }
+
     public function index()
     {      
-        $validator = Validator::make(Input::all(), Gallery::$rules['show']);
-
-        if($validator->passes())
+        if($this->galleries->validate('show'))
         {
-            $galleries = Gallery::app()->apiFilter()->with(array(
-                'medias' => function($query)
-                {
-                    $query->take(10)->select(array('gallery_id','id', 'name','link', 'picture', 'like'));
-                })
-            )->get();
-   
-            $galleries->each(function($gallery){
-                $gallery->fields();  
-
-                if($gallery->medias->count() == 0)
-                    $gallery->setRelation('medias', null);
-            });
-
-            return Response::result(
-                array(
-                    'header'=> array(
-                        'code'=> 200,
-                        'message'=> 'success'
-                    ),
-                    'offset' => (int) Input::get('offset', 0),
-                    'limit' => (int) Input::get('limit', 10),
-                    'total' => Gallery::app()->count(),
-                    'entries' => $galleries->toArray()
-                )
-            );
+            return Response::result(array(
+                'header' => array(
+                    'code' => 200,
+                    'message' => 'success'
+                ),
+                'offset' => Input::get('offset', 0),
+                'limit' => Input::get('limit', 10),
+                'total' => $this->galleries->count(),
+                'entries' => $this->galleries->all()
+            ));
         }
 
-        return Response::message(204, $validator->messages()->first());
+        return Response::message(400, $this->galleries->errors());
     }
 
     public function create()
@@ -56,31 +44,31 @@ class GalleriesController extends BaseController
 
     public function store()
     {
-        $validator = Validator::make(Input::all(), Gallery::$rules['create']);
-
-        if($validator->passes())
+        if($this->galleries->validate('create'))
         {
-            $gallery = Gallery::create(
-                array(
-                    'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
-                    'content_id' => Input::get('content_id'),
-                    'content_type' => Input::get('content_type'),
-                    'name' => Input::get('name'),
-                    'description' => Input::get('description'),
-                    'published_at' => Input::get('published_at', Carbon::now()->timestamp),
-                )
-            );
+            $owner = $this->galleries->owner(Input::get('content_type'));
+            $gallery = $this->galleries->create(array(
+                'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
+                'content_id' => Input::get('content_id'),
+                'content_type' => get_class($owner->getModel()),
+                'name' => Input::get('name'),
+                'description' => Input::get('description'),
+                'published_at' => Input::get('published_at', Carbon::now()->timestamp)
+            ));
+
+            if(is_null($gallery)) 
+                return Response::message(500, 'Something wrong when trying to create gallery.');
 
             $picture = Input::get('picture', null);
-            
-            if(Input::get('picture', null))
+
+            if($picture)
             {
-                $response = $gallery->createPicture($app_id);
-                if(is_object($response)) return $response;              
-                unset($inputs['picture']);
+                $response = Image::upload($picture);
+                if(is_object($response)) return $response;
+                $gallery->picture = $response;
             }
 
-            if($gallery)
+            if($gallery->save())
                 return Response::result(
                     array(
                         'header'=> array(
@@ -89,10 +77,12 @@ class GalleriesController extends BaseController
                         ),
                         'id'=> $gallery->id
                     )
-                ); 
+                );
+
+            return Response::message(500, 'Something wrong when trying to create gallery.');
         }
 
-        return Response::message(400,$validator->messages()->first());
+        return Response::message(400, $this->galleries->errors());
     }
 
     public function show($id)

@@ -1,18 +1,11 @@
 <?php namespace Kitti\Medias;
 
-class Media extends \BaseModel
+class Media extends \Eloquent
 {
     protected $table = 'medias';
     protected $guarded = array('id');
-    protected $hidden = array('app_id', 'gallery_id', 'status');
-
-    protected $map = array(
-        'order_by' => 'order_by',
-        'limit' => 'limit',
-        'offset' => 'offset',
-        'whereUpdated' => 'updated_at',
-        'whereCreated' => 'created_at'
-   );
+    protected $hidden = array('app_id', 'gallery_id', 'deleted_at');
+    protected $touches = array('gallery');
 
     public static $rules = array(
         'show' => array(
@@ -38,8 +31,15 @@ class Media extends \BaseModel
         )
     );
 
-    public function galleries()
+    use \BaseModel;
+
+    public function scopeSearch($query)
     {
-        return $this->belongsToMany('Kitti\\Galleries\\Gallery');
+        return $this->keywords(array('name'));
+    }
+
+    public function gallery()
+    {
+        return $this->belongsTo('Kitti\Galleries\Gallery');
     }
 }

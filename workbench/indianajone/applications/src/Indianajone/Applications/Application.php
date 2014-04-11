@@ -8,7 +8,7 @@ class Application extends \Eloquent
 	* @var string
 	**/
 	protected $table = 'applications';
-	protected $guarded = array('id');
+	protected $fillable = array('name', 'description', 'picture', 'user_id', 'appkey');
 	protected $perPage = 10;
 	/**
 	* The attributes excluded from the model's JSON form.
@@ -20,38 +20,48 @@ class Application extends \Eloquent
 	protected $rules = array(
 		'show' => array(
 			// 'appkey' => 'required',
-			'user_id' 	=> 'required|exists:users,id',
+			'id' 		=> 'exists:applications',
+			'user_id' 	=> 'required|exists:users,id'
 		),
 		'create' => array(
 			'user_id' 	=> 'required|exists:users,id',
 			'name'		=> 'required'
 		),
 		'update' => array(
-			'user_id' => 'required|exists:users,id'
+			'user_id' 	=> 'required|exists:users,id'
 		),
 		'delete' => array(
-			'id' => 'required|exists:applications'
+			'id' 		=> 'required|exists:applications'
 		)
 	);
 
 	use \BaseModel;
 
 	/**
-	*
 	* Application Owner
 	*
-	* @return User Model
+	* @return Max\User\Models\User
 	**/
 	public function owner()
 	{
 		return $this->belongsTo('Max\\User\\Models\\User', 'user_id');
 	}
 
+	/**
+	* Application Metadata
+	*
+	* @return Indianajone\Applications\ApplicationMeta
+	**/
 	public function meta()
 	{
 		return $this->hasMany('Indianajone\\Applications\\ApplicationMeta', 'app_id');
 	}
 
+	/**
+	* Get definded rules in Model.
+	*
+	* @return Array
+	**/
 	public function rules($action)
 	{
 		return $this->rules[$action];

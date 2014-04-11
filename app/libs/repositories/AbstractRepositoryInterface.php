@@ -8,6 +8,8 @@ Interface AbstractRepositoryInterface
 
 	public function find($id);
 
+	public function count();
+
 	public function create($input);
 
 	public function update($id, $input);

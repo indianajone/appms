@@ -2,12 +2,11 @@
 
 class BaseController extends Controller 
 {
-	function __construct()
+	public function __construct()
 	{
 		Validator::resolver(function($translator, $data, $rules, $messages)
 		{
 			return new \Indianajone\Validators\CustomValidator($translator, $data, $rules, $messages);
-
 		});
 	}
 	/**

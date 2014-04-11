@@ -15,6 +15,9 @@ class Image
 		$path = $cdn.$nas.$slug;
 		$format = Config::get('image.format');
 
+		// #FIXED iDevice base64 encode.
+		$picture = base64_decode(str_replace('%2B','+', $base64));
+
 		if($format == 'auto' || $format == '')
 		{
 			$f = finfo_open();

@@ -3,6 +3,7 @@ namespace Indianajone\Applications;
 
 use Illuminate\Support\ServiceProvider;
 use Indianajone\Applications\Application;
+use Indianajone\Applications\ApplicationMeta;
 use Max\User\Repository\DBUserRepository;
 
 class ApplicationsServiceProvider extends ServiceProvider {
@@ -41,6 +42,7 @@ class ApplicationsServiceProvider extends ServiceProvider {
         {
             return new DBAppRepository(
             	new Application, 
+            	new ApplicationMeta,
             	$this->app['Max\User\Repository\DBUserRepository']
             );
         });

@@ -1,7 +1,7 @@
 <?php namespace Indianajone\Applications;
 
-use DB, Cache, Carbon\Carbon;
-use Max\User\Models\User;
+use DB, Input;
+use Indianajone\Applications\ApplicationMeta as Meta;
 
 class Appl
 {
@@ -14,26 +14,34 @@ class Appl
 	{
 		if($key)
 		{
-			return DB::table('applications')->where('appkey', $key)->first()->id;
-			// $expiresAt = Carbon::now()->addMinutes(1);
-
-			// $app = Cache::remember('appkey', $expiresAt, function() use($key)
-			// {
-			//     return DB::table('applications')->where('appkey', $key)->first();
-			// });
-
-			// return $app->id;
+			/**  
+			  Need to implement better caching. 
+			 */
+			return DB::table('applications')->where('appkey', $key)->remember(1)->first()->id;
 		}		
 		
 		return null;
 	}
 
-	/*==========  Example on how to convent back to unixtime  ==========*/
-	
-	// public function getUnixtimeAttribute()
-	// {
-	// 	$format = \Input::get('date_format', null);
-	// 	$time = Carbon::createFromTimeStamp($this->attributes['created_at'])->format($format);
-	// 	return Carbon::createFromFormat($format, $time, \Config::get('app.timezone'))->timestamp;
-	// }
+	public function getMeta($key, $appkey=null)
+	{
+		if( is_null($appkey) ) $appkey = Input::get('appkey');
+
+		$app_id = $this->getAppIDByKey($appkey);
+		
+		return Meta::whereAppId($app_id)->whereMetaKey($key)->first()->meta_value; 
+	}
+
+	public function setMeta($key, $value, $appkey=null)
+	{
+		if( is_null($appkey) ) $appkey = Input::get('appkey');
+
+		$app_id = $this->getAppIDByKey($appkey);
+
+		$meta = Meta::whereAppId($app_id)->whereMetaKey($key)->first();
+
+		$meta->meta_value = $value;
+
+		$meta->save();
+	}
 }

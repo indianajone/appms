@@ -1,14 +1,12 @@
 <?php namespace Kitti\Articles;
 
-use Indianajone\Categories\Category;
-
-class Article extends \Eloquent
+class Article extends \Eloquent implements \ApiFilterableInteface
 {
     protected $table = 'articles';
     protected $guarded = array('id');
     protected $hidden = array('app_id', 'status', 'pivot', 'gallery_id', 'deleted_at');
 
-    public static $rules = array(
+    protected $rules = array(
     	'show' => array(
     		'appkey' => 'required|exists:applications,appkey'
     	),
@@ -38,24 +36,12 @@ class Article extends \Eloquent
 
     use \BaseModel;
 
-    function __construct()
-    {
+    public function __construct()
+    {      
         parent::__construct();
-        
-        $this->map = array(
-            'order_by' => 'order_by',
-            'limit' => 'limit',
-            'offset' => 'offset',
-            'search' => 'q',
-            'filterCats' => 'category_id',
-            'whereUpdated' => 'updated_at',
-            'whereCreated' => 'created_at'
-        );
-
-        $this->multiple = array(
-            'filterCats',
-            'order_by'
-        );
+        $this->setMultiple(array_add($this->getMultiple(), null, 'filterCats'));
+        $this->setMap(array_add($this->getMap(), 'filterCats', 'category_id'));
+        $this->setDefaults(array_add($this->getDefaults(), 'category_id', '*'));
     }
 
     public function categories()

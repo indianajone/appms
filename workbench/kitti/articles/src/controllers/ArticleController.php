@@ -1,42 +1,21 @@
 <?php namespace Kitti\Articles\Controllers;
 
-use App;
-use Appl;
-use BaseController;
+use Appl, Input, Response, Validator;
 use Carbon\Carbon;
-use Input;
-use Response;
-use Validator;
-use Kitti\Articles\Article;
-use Indianajone\Categories\Category;
-use Indianajone\Categories\Extensions\Eloquent\Collection;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Kitti\Articles\Repositories\ArticleRepositoryInterface;
 
-class ArticleController extends BaseController
+class ArticleController extends \BaseController
 {
+	public function __construct(ArticleRepositoryInterface $articles)
+	{
+		$this->articles = $articles;
+		parent::__construct();
+	}
+
 	public function index()
 	{
-		$validator = Validator::make(Input::all(), Article::$rules['show']);
-
-		if($validator->passes())
+		if($this->articles->validate('show'))
 		{
-			$articles = Article::apiFilter()->get();
-			
-			$articles->each(function($article) {
-				$article->fields();
-
-				$cats = $article->categories()->get(); 
-				foreach ($cats as $key => $cat) {
-					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
-				}
-
-				// $gallery = $article->gallery()->with('medias')->first();
-				// if($gallery) $article->setRelation('gallery', $gallery);
-			
-	 		});
-
-	 		// dd(\DB::getQueryLog());
-
 		 	return Response::result(
 				array(
 					'header'=> array(
@@ -45,13 +24,13 @@ class ArticleController extends BaseController
 		        	),
 					'offset' => (int) Input::get('offset', 0),
 					'limit' => (int) Input::get('limit', 10),
-					'total' => Article::count(),
-					'entries' => $articles->toArray()
+					'total' => $this->articles->count(),
+					'entries' => $this->articles->all()->toArray()
 				)
-			); 
+			);
 		}
 
-		return Response::message(400, $validator->messages()->first()); 
+		return Response::message(400, $this->articles->errors()); 
 	}
 
 	public function create()
@@ -61,13 +40,10 @@ class ArticleController extends BaseController
 
 	public function store()
 	{
-		$inputs = Input::all();
-		$validator = Validator::make($inputs, Article::$rules['create']);
-
-		if($validator->passes())
+		if($this->articles->validate('create'))
 		{
-			$article = Article::create(array(
-				'app_id' => Appl::getAppIDByKey(Input::get('appkey'), 2),
+			$article = $this->articles->create(array(
+				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
 				'gallery_id' => Input::get('gallery_id', null),
 				'pre_title' => Input::get('pre_title'),
 				'title' => Input::get('title'),
@@ -78,64 +54,53 @@ class ArticleController extends BaseController
 				'tags' => Input::get('tags')
 			));
 
-			if(array_key_exists('picture', $inputs))
-            {
-            	$response = $article->createPicture($article->app_id);
-            	if(is_object($response)) return $response;             	
-             	unset($inputs['picture']);
-            }
-
-			$category_id = Input::get('category_id', null);
-			if($category_id)
+			if( $article->save() )
 			{
-				$ids = explode(',', $category_id); 
-				$article->attachCategories($ids);
-			}
+				if(Input::get('picture', null))
+	            {
+	            	$response = $article->createPicture($article->app_id);
+	            	if(is_object($response)) return $response;             	
+	            }
 
-			if($article)
+				$category_id = Input::get('category_id', null);
+				if($category_id)
+				{
+					$ids = explode(',', $category_id); 
+					$article->attachCategories($ids);
+				}
+
 				return Response::result(array(
 					'header'=> array(
 		        		'code'=> 200,
 		        		'message'=> 'success'
 		        	), 'id'=> $article->id
 				));
+			}
+
+			return Response::message(500, 'Something wrong while creating an article.');
 		}
 
-		return Response::message(400, $validator->messages()->first()); 
+		return Response::message(400, $this->articles->errors());
 	}
 
 	public function show($id)
 	{
-		$inputs = array_add(Input::all(),'id',$id);
-		$validator = Validator::make($inputs, Article::$rules['show_with_id']);
+		$input = array_add(Input::all(), 'id', $id);
 
-		if($validator->passes())
+		if( $this->articles->validate('show_with_id', $input) )
 		{
-			$article = Article::whereId($id)->app()->ApiFilter()->first();
-			if($article)
-			{
-				$article->fields();
-				$cats = $article->categories()->get(); 
-				foreach ($cats as $key => $cat) {
-					$article->setRelation($cat->getRoot()->name, $cat->getAncestorsAndSelfWithoutRoot()->toHierarchy());
-				}
+			$article = $this->articles->find($id);
 
-				$gallery = $article->gallery()->with('medias')->first();
-				if($gallery) $article->setRelation('gallery', $gallery);
-
-				return Response::result(array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'success'
-	        		),
-	        		'entry' => $article->toArray()
-	        	));
-	        }
-
-	        return Response::message(204, 'Article id:'. $id . ' does not exists.');
+			return Response::result(array(
+        		'header' => array(
+        			'code' => 200,
+        			'message' => 'success'
+        		),
+        		'entry' => $article->toArray()
+        	));
 		}
 
-		return Response::message(400, $validator->messages()->first()); 
+		return Response::message(400, $this->articles->errors());
 	}
 
 	public function edit($id)
@@ -145,52 +110,29 @@ class ArticleController extends BaseController
 
 	public function update($id)
 	{
-		$inputs = array_merge(array('id'=>$id), Input::all());
-		$validator = Validator::make($inputs, Article::$rules['update']);	
+		$input = array_add(Input::all(), 'id', $id);
 
-		if($validator->passes())
+		if( $this->articles->validate('update', $input) )		
 		{
-			$article = Article::where('id','=',$id)->app()->first();
+			$article = $this->articles->update($id, $input);
+			
+			if( $article instanceof \Illuminate\Http\JsonResponse )
+				return $article;
 
-			$inputs = Input::all();
-			foreach ($inputs as $key => $val) {
-                if( $val == null || 
-                    $val == '' || 
-                    $val == $article[$key] ||
-                    $key == 'appkey' ||
-                    $key == 'id') 
-                {
-                    unset($inputs[$key]);
-                }
-            }
-
-            if(!count($inputs))
-                return Response::message(200, 'Nothing is update.');
-
-			 $category_id = Input::get('category_id', null);
+			$category_id = Input::get('category_id', null);
 			if($category_id)
 			{
 				$ids = explode(',', $category_id); 
 				$article->syncRelations('categories', $ids);
-				unset($inputs['category_id']);
 			}
 
-			if(array_key_exists('picture', $inputs))
-            {
-            	$response = $article->createPicture($article->app_id);
-            	if(is_object($response)) return $response;             	
-             	unset($inputs['picture']);
-            }
+			if($article->save())
+				return Response::message(200, 'Updated article_id: '.$id.' success!');
 
-			$article->update($inputs);
-
-            if($article->save())
-            	return Response::message(200, 'Updated article_id: '.$id.' success!');
-
-            return Response::message(500, 'Something wrong while trying to update.');
+			return Response::message(500, 'Something wrong while trying to update.');
 		}
 
-		return Response::message(400, $validator->messages()->first());
+		return Response::message(400, $this->articles->errors());
 	}
 
 	public function delete($id)

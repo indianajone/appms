@@ -9,7 +9,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
 {
     use \BaseModel;
 
-    public static $rules = array(
+    protected $rules = array(
         'chk_id' => array(
             'id' => 'required|exists:users'
         ),
@@ -158,8 +158,6 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
     {
         return $this->hasMany('Max\User\Models\User', 'parent_id');
     }
-
-
 
     /**
      * List all children ids.

@@ -4,9 +4,10 @@ class Gallery extends \Eloquent
 {
     protected $table = 'galleries';
   	protected $guarded = array('id');
+    protected $touches = array('owner', 'medias');
     protected $hidden = array('app_id', 'status', 'content_type', 'content_id');
 
-    public static $rules = array(
+    protected $rules = array(
     	'show' => array(
     		'appkey' => 'required|exists:applications,appkey',
     	),
@@ -45,7 +46,7 @@ class Gallery extends \Eloquent
 
     public function owner()
     {
-    	switch($this->attribute['content_type'])
+    	switch($this->getAttribute('content_type'))
     	{
             case 'article':
                 $model = 'Kitti\\Articles\\Article';
@@ -56,6 +57,11 @@ class Gallery extends \Eloquent
     	}
 
     	return $this->belongsTo($model, 'id');
+    }
+
+    public function article()
+    {
+        return $this->belongsTo('Kitti\\Articles\\Article', 'id');
     }
 
     public function medias()

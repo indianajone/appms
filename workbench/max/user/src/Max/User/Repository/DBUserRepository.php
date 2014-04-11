@@ -32,7 +32,7 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 	public function findWith($id, $relations)
 	{
-		$user = User::apiFilter()->whereId($id)->with('apps', 'roles')->first()->fields();
+		$user = User::apiFilter()->whereId($id)->with($relations)->firstOrFail()->fields();
 
 		$user->roles->each(function($role){
     		$role->setVisible(array('id','name'));

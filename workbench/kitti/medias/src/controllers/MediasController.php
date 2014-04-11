@@ -52,7 +52,8 @@ class MediasController extends BaseController
 
         if($validator->passes())
         {
-            $media = Media::create(array(
+            $media = new Media;
+            $media->fill(array(
                 'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
                 'gallery_id' => Input::get('gallery_id'),
                 'name' => Input::get('name', 'Image-'.Carbon::now()->toDateString()),
@@ -66,8 +67,12 @@ class MediasController extends BaseController
             if(Input::get('picture', null))
             {
                 $response = $media->createPicture($media->app_id);
+                // dd($response);
                 if(is_object($response)) return $response;              
-                unset($inputs['picture']);
+                // // unset($inputs['picture']);
+                $media->fill(array(
+                    'picture'=>$response
+                ));
             }
 
             if($media->save())
@@ -78,7 +83,7 @@ class MediasController extends BaseController
                             'message'=> 'success'
                         ),
                         'id'=> $media->id,
-                        'picture'=> $response ?: Input::get('picture')
+                        'picture'=> $response ? $media->getAttribute('picture') : Input::get('picture')
                     )
                 ); 
         }

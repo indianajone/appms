@@ -2,9 +2,9 @@
 namespace Max\Member\Models;
 
 use Illuminate\Auth\UserInterface;
-use \BaseModel;
 
-class Member extends BaseModel implements UserInterface{
+
+class Member extends \Eloquent implements UserInterface{
 	/**
      * The database table used by the model.
      *
@@ -53,6 +53,8 @@ class Member extends BaseModel implements UserInterface{
             'new_password' => 'required'
         ),
     );
+
+    use \BaseModel;
 
     /**
      * Get the unique identifier for the user.

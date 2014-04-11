@@ -81,7 +81,7 @@ class ApiUserController extends \BaseController
                 )
             );
 
-            if($user)
+            if($user->save())
                 return Response::result(array(
                     'header' => array(
                         'code'      => 200,

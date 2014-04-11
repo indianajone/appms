@@ -2,5 +2,5 @@
 
 interface AppRepositoryInterface extends \AbstractRepositoryInterface
 {
-	
+	public function findByKey($key);
 }

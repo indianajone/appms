@@ -5,48 +5,9 @@ use \Image, \Config;
 use Indianajone\Categories\Category;
 use Kitti\Medias\Media;
 
-Trait BaseModel
+Trait BaseModel 
 {
-	/*
-     * The following $map array maps the url query string to
-     * the corresponding model filter e.g.
-     *  ->order_by will handle Input::get('order_by')
-     */
-    protected $map = array(
-        'order_by' => 'order_by',
-        'limit' => 'limit',
-        'offset' => 'offset',
-        'search' => 'q',
-        'whereUpdated' => 'updated_at',
-        'whereCreated' => 'created_at'
-    );
-
-    /*
-     *  Default values for the url parameters
-     */
-    protected $defaults = array(
-        'order_by' => null,
-        'limit' => 10,
-        'offset' => 0,
-        // 'search' => null
-    );
-
-    /*
-     * The following filters are defined by
-     *  url parameters can have multiple
-     *  values separated by a delimiter
-     *  e.g. order_by, sort
-     */
-    protected  $multiple = array(
-        'order_by'
-    );
-
-    /*
-     * Delimiter that separates multiple url parameter values
-     *  e.g. ?category_id=1,2
-     */
-    protected  $delimiter = ',';
-
+    use ApiFilterable;
 	/** 
 	 * Override getDateFormat to unixtime stamp.
 	 * @return String
@@ -118,19 +79,19 @@ Trait BaseModel
 
 	public function scopeApiFilter($query)
     {
-        foreach ($this->map as $filter => $field) 
+        foreach ($this->getMap() as $filter => $field) 
         {
-            if (in_array($filter, $this->multiple)) 
+            if (in_array($filter, $this->getMultiple())) 
             {
                 $input = Input::get($field)
-                    ? explode($this->delimiter, Input::get($field))
-                    : array_get($this->defaults, $filter, null);
+                    ? explode($this->getDelimiter(), Input::get($field))
+                    : array_get($this->getDefaults(), $filter, null);
             } 
             else 
             {
                 $input = Input::get($field)
                     ? Input::get($field)
-                    : array_get($this->defaults, $filter, null);
+                    : array_get($this->getDefaults(), $filter, null);
             }
 
             if (!is_null($input)) 
@@ -138,7 +99,6 @@ Trait BaseModel
                 $query = $query->{$filter}($input);
             }
         }
-
         return $query;
     }
 
@@ -205,6 +165,11 @@ Trait BaseModel
         }
     }
 
+    public function rules($action)
+    {
+        return isset($this->rules) ? $this->rules[$action] : array();
+    }
+
     public function fields()
     {
         $field = Input::get('fields', null);
@@ -221,13 +186,22 @@ Trait BaseModel
 
     public function scopeFilterCats($query, $ids)
     {
+        if(is_null($this->categories)) return;
+
         if($ids != '*')
         {
             $categories = Category::findMany($ids);
             
             foreach($categories as $category)
             {
-                $cids = $category->getDescendantsAndSelf(['id'])->lists('id'); 
+                if($category->isRoot())
+                    $cids = $category->getDescendantsAndSelf(['id'])->lists('id'); 
+                else
+                {
+                    $root = $category->getRoot();
+                    $cids = $root->getDescendantsAndSelf(['id'])->lists('id');
+                }
+
                 $query = $query->whereIn('id', function($type) use($cids) {
 
                     $foreign_key = $this->getForeignKey();
@@ -286,7 +260,7 @@ Trait BaseModel
         return $this->time('updated_at', $time);
     }
 
-     public function scopeWhereCreated($query, $time)
+    public function scopeWhereCreated($query, $time)
     {
         return $this->time('created_at', $time);
     }
