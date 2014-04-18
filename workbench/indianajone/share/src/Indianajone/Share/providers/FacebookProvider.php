@@ -4,6 +4,11 @@ use App, Appl, Config;
 
 class FacebookProvider extends \Facebook implements ShareProviderInterface
 {
+	/**
+    * Laravel application
+    * 
+    * @var Illuminate\Foundation\Application
+    */
 	protected $app;
 
 	public function __construct($app)
@@ -42,13 +47,12 @@ class FacebookProvider extends \Facebook implements ShareProviderInterface
 		$type = array_get($input, 'content_type');
 		$id = array_get($input, 'content_id');
 
-		$cls = $this->getModel($type);
-		$model = $this->app[$cls];
+		$model = $this->app[$this->getModel($type)];
 
 		$content = $model->find($id);
 
 		$access_token = Appl::getMeta('fb_access_token');
-		// dd($access_token);
+		// dd($content->content);
 		// $this->setAccessToken($access_token);
 
 		// dd($this);
@@ -72,8 +76,8 @@ class FacebookProvider extends \Facebook implements ShareProviderInterface
   				// 'name' => 'Name: Hello',
   				// 'caption' => 'Caption: Yo!',
   				// 'no_story' => true,
-  				'message' => $content->content,
-  				'picture' => 'http://api-thaimissing.truelife.com/pictures/2014-03-27-8351395914480.png',
+  				'message' => 'test hello test', //$content->content,
+  				'picture' => 'http://api-thaimissing.truelife.com/pictures/2014-03-27-8351395914480.png/1200/650',
   			)
 		);
 
