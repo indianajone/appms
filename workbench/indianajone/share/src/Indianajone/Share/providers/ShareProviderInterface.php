@@ -4,5 +4,7 @@ interface ShareProviderInterface
 {
 	public function getAccessToken();
 
+	public function getModel($type);
+
 	public function share($input=null);
 }

@@ -1,31 +1,55 @@
 <?php namespace Indianajone\Share\Providers;
 
-use \Appl;
+use App, Appl, Config;
 
 class FacebookProvider extends \Facebook implements ShareProviderInterface
 {
-	public function __construct()
+	protected $app;
+
+	public function __construct($app)
 	{
 		$config = array(
 	        'appId' => \Config::get('share::facebook.appId'),
 	        'secret' => \Config::get('share::facebook.secret'),
 	        'allowSignedRequest' => true
-	    );
+	   );
+
+	   $this->app = $app;
 		
 		parent::__construct($config);
 
 		return $this;
 	}
 
+	public function getModel($type)
+	{
+		switch($type)
+		{
+			case 'article':
+				$model = Config::get('share::model.article');
+			break;
+
+			default:
+				$model = null;
+			break;
+		}
+
+		return $model;
+	}
+
 	public function share($input=null)
 	{
-		// dd($input);
 		$type = array_get($input, 'content_type');
 		$id = array_get($input, 'content_id');
 
+		$cls = $this->getModel($type);
+		$model = $this->app[$cls];
+
+		$content = $model->find($id);
+
 		$access_token = Appl::getMeta('fb_access_token');
-		dd($access_token);
-		$this->setAccessToken($access_token);
+		// dd($access_token);
+		// $this->setAccessToken($access_token);
 
 		// dd($this);
    		// $this->setExtendedAccessToken();
@@ -48,7 +72,7 @@ class FacebookProvider extends \Facebook implements ShareProviderInterface
   				// 'name' => 'Name: Hello',
   				// 'caption' => 'Caption: Yo!',
   				// 'no_story' => true,
-  				'message' => 'This is description hey yo',
+  				'message' => $content->content,
   				'picture' => 'http://api-thaimissing.truelife.com/pictures/2014-03-27-8351395914480.png',
   			)
 		);

@@ -1,7 +1,6 @@
 <?php namespace Indianajone\Share;
 
 use Illuminate\Support\ServiceProvider;
-use Indianajone\Share\Models\Share;
 use Indianajone\Share\Repositories\DBShareRepository;
 
 class ShareServiceProvider extends ServiceProvider {
@@ -33,7 +32,7 @@ class ShareServiceProvider extends ServiceProvider {
 	{
 		$this->app->bind('Indianajone\Share\Repositories\ShareRepositoryInterface', function($app)
         {
-            return new DBShareRepository(new Share, $app['Indianajone\Applications\DBAppRepository']);
+            return new DBShareRepository($app['Indianajone\Share\Models\Share'], $app);
         });
 	}
 

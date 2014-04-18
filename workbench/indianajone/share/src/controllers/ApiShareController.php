@@ -1,6 +1,6 @@
 <?php namespace Indianajone\Share\Controller;
 
-use Config, Response;
+use Config, Input, Response;
 use Indianajone\Share\Repositories\ShareRepositoryInterface;
 
 class ApiShareController extends \BaseController
@@ -18,8 +18,8 @@ class ApiShareController extends \BaseController
 		{
 			if($this->shares->validate('share'))
 			{
-				$this->provider = new $cls;
-				return $this->provider->share();
+				$this->provider = new $cls($this->shares->getApp());
+				return $this->provider->share(Input::all());
 			}
 
 			return Response::message(400, $this->shares->errors());
