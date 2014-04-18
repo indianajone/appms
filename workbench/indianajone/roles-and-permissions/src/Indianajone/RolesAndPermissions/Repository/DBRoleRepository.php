@@ -1,6 +1,4 @@
 <?php namespace Indianajone\RolesAndPermissions;
-
-use Input, Validator;
  
 class DBRoleRepository extends \AbstractRepository implements RoleRepositoryInterface
 {
@@ -11,14 +9,11 @@ class DBRoleRepository extends \AbstractRepository implements RoleRepositoryInte
 
 	public function all()
 	{
-		$roles = $this->model->apiFilter()->get();
+		$roles = $this->model->with('permits')->apiFilter()->get();
 
 		$roles->each(function($role){
 			$role->fields();
 		});
-
-		if($roles instanceof ArrayableInterface)
-        	return $roles->toArray();
 
 		return $roles;
 	}

@@ -56,14 +56,16 @@ class Image
 
 	public function delete($url)
 	{
-		$local_env = App::environment('local');
-		$cdn = $local_env ? Config::get('image.cdn') : '';
-		$nas = Config::get('image.nas');
+		// $local_env = App::environment('local');
+		// $cdn = $local_env ? Config::get('image.cdn') : '';
+		// $nas = $local_env ? Config::get('image.nas') : '';
 		$path = parse_url($url, PHP_URL_PATH);
 
-		if(File::exists($cdn.$nas.$path))
+		// if(File::exists($cdn.$nas.$path))
+		if(File::exists($path))
 		{
-			File::delete($cdn.$nas.$path);
+			File::delete($path);
+			// File::delete($cdn.$nas.$path);
 		}
 	}
 }

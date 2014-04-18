@@ -1,6 +1,7 @@
 <?php 
 
 use Illuminate\Support\MessageBag;
+use Illuminate\Support\Contracts\ArrayableInterface;
 
 abstract class AbstractRepository
 {
@@ -31,7 +32,6 @@ abstract class AbstractRepository
 	 */
 	public function validate($action, $input=null)
 	{
-		// dd($this->model->rules($action));
 		$validator = Validator::make($input ?: Input::all(), $this->model->rules($action));
 
 		if($validator->passes()) return true;
@@ -43,7 +43,7 @@ abstract class AbstractRepository
 
 	public function find($id)
 	{
-		return $this->model->apiFilter()->findOrFail($id)->fields();
+		return $this->model->findOrFail($id)->fields();
 	}
 
 	public function create($input)
@@ -67,13 +67,13 @@ abstract class AbstractRepository
 			if( array_key_exists($key, $input) && $value != $input[$key] )
 			{
 				if(array_key_exists('picture', $input))
-	            {
-	            	$response = $model->createPicture($model->app_id);
-	            	if(is_object($response)) return $response;             	
-	             	unset($input['picture']);
-	            }
-	            else
-	            {
+	         {
+	            $response = $model->createPicture($model->app_id);
+	            if(is_object($response)) return $response;             	
+	             unset($input['picture']);
+				}
+				else
+				{
 					$model->$key = $input[$key];
 				}
 			}

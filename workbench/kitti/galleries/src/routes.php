@@ -6,6 +6,5 @@
         });
         Route::get('galleries/{id}/medias', 'Kitti\\Galleries\\Controllers\\ApiGalleriesController@showMedias');
         Route::any('galleries/{id}/delete', 'Kitti\\Galleries\\Controllers\\ApiGalleriesController@delete');
-        Route::get('galleries/{type}/{id}', 'Kitti\\Galleries\\Controllers\\ApiGalleriesController@showByOwner');
         Route::resource('galleries', 'Kitti\\Galleries\\Controllers\\ApiGalleriesController');
     });

@@ -56,9 +56,6 @@ class ApiGalleriesController extends \BaseController
                 'published_at' => Input::get('published_at', Carbon::now()->timestamp)
             ));
 
-            if(is_null($gallery)) 
-                return Response::message(500, 'Something wrong when trying to create gallery.');
-
             $picture = Input::get('picture', null);
 
             if($picture)
@@ -87,96 +84,45 @@ class ApiGalleriesController extends \BaseController
 
     public function show($id)
     {
-        $inputs = array_merge(array('id'=>$id), Input::all());
-        $validator = Validator::make($inputs, Gallery::$rules['show_with_id']);
+        $input = array_add(Input::all(), 'id', $id);
 
-        if($validator->passes())
+        if($this->galleries->validate('show'))
         {
-            $gallery = Gallery::with(array(
-                'medias' => function($query)
-                {
-                    $query->take(10); //->select(array('gallery_id','id', 'name','link', 'picture', 'like'));
-                }))->apiFilter()->find($id);
+            return Response::result(array(
+                'header' => array(
+                    'code' => 200,
+                    'message' => 'success'
+                ),
+                'entry' => $this->galleries->find($id)
+                )
+            );
+        }
 
-            $gallery->fields();
+        return Response::message(400, $this->galleries->errors()); 
+    }
+
+    public function showMedias($id)
+    {
+        $input = array_add(Input::all(), 'id', $id);
+
+        if($this->galleries->validate('show_with_id', $input))
+        {
+            $gallery = $this->galleries->find($id);
+            $medias = $gallery->medias()->apiFilter()->get();
 
             return Response::result(array(
                 'header' => array(
                     'code' => 200,
                     'message' => 'success'
                 ),
-                'entry' => $gallery->toArray()
+                'offset' => (int) Input::get('offset', 0),
+                'limit' => (int) Input::get('limit', 10),
+                'total' => $gallery->medias->count(),
+                'entries' => $medias->toArray()
             ));
         }
 
-        return Response::message(400,$validator->messages()->first());
-    }
-
-    public function showByOwner($type, $id)
-    {
-        $validator = Validator::make(array('id'=>$id, 'type'=>$type, 'appkey' => Input::get('appkey')), Gallery::$rules['show_by_owner']);
-
-        if($validator->passes())
-        {
-
-            $galleries = Gallery::with(array(
-                'medias' => function($query)
-                {
-                    $query->take(10);
-                })
-            )->apiFilter()->owner($type, $id)->get();
-
-            $galleries->each(function($gallery) {
-                $gallery->fields();
-            });
-
-            return Response::listing(
-                array(
-                    'code'      => 200,
-                    'message'   => 'success'
-                ),
-                $galleries, $offset, $limit
-            );
-        }
-
-        return Response::message(400,$validator->messages()->first());
-    }
-
-    public function showMedias($id)
-    {
-        $gallery = Gallery::find($id);
-        $inputs = array_merge(array('id'=>$id), Input::all());
-        $validator = Validator::make($inputs, Gallery::$rules['show_with_id']);
-
-        if($validator->passes())
-        {
-            if($gallery)
-            {
-
-                $medias = $gallery->medias()->apiFilter()->get();
-
-                return Response::result(
-                    array(
-                        'header'=> array(
-                            'code'=> 200,
-                            'message'=> 'success'
-                        ),
-                        'offset' => (int) Input::get('offset', 0),
-                        'limit' => (int) Input::get('limit', 10),
-                        'total' => $gallery->medias->count(),
-                        'entries' => $medias->toArray()
-                    )
-                );
-            }
-
-            else 
-            {
-                return Response::message(204, 'Can not find any medias in this gallery');
-            }
-        }
-
-        return Response::message(400,$validator->messages()->first());
-
+        return Response::message(400, $this->galleries->errors());
     }
 
     public function edit($id)
@@ -186,44 +132,22 @@ class ApiGalleriesController extends \BaseController
 
     public function update($id)
     {
-        $inputs = array_add(Input::all(),
-            'id', $id
-        );
+        $inputs = array_add(Input::all(), 'id', $id);
 
-        $validator = Validator::make($inputs, Gallery::$rules['update']);
-
-        if($validator->passes())
+        if($this->galleries->validate('update'))
         {
-            $gallery = Gallery::find($id);
-
-            foreach ($inputs as $key => $val) {
-                if( $val == null || 
-                    $val == '' || 
-                    $val == $gallery[$key] ||
-                    $key == 'appkey' ||
-                    $key == 'id') 
-                {
-                    unset($inputs[$key]);
-                }
+            $gallery = $this->galleries->update($id, Input::all());
+            
+            if(!is_null($gallery))
+            {   
+                if($gallery->save())
+                    return Response::message(200, 'Updated gallery id: '.$id.' success!');
             }
 
-            if(!count($inputs))
-                return Response::message(200, 'Nothing is update.');
-
-            if(Input::get('picture', null))
-            {
-                $response = $gallery->createPicture($gallery->app_id);
-                if(is_object($response)) return $response;              
-                unset($inputs['picture']);
-            }
-
-            if($gallery->update($inputs))
-                 return Response::message(200, 'Updated gallery id: '.$id.' success!');
-
-            return Response::message(500, 'Something wrong when trying to update gallery.');
+            return Response::message(404, 'Selected application does not exists.');
         }
 
-        return Response::message(400,$validator->messages()->first());
+        return Response::message(400, $this->galleries->errors); 
     }
 
     public function delete($id)
@@ -233,20 +157,17 @@ class ApiGalleriesController extends \BaseController
 
     public function destroy($id)
     {
-        $inputs = array_add(Input::all(), 'id', $id);
-        $validator = Validator::make($inputs, Gallery::$rules['delete']);
+        $input = array_add(Input::all(), 'id', $id);
 
-        if($validator->passes())
+        if($this->galleries->validate('delete', $input))
         {
-            
-            $gallery = Gallery::find($id);
-            $gallery->medias()->delete();
-            $gallery->delete();
-
-            return Response::message(200, 'Deleted Gallery: '.$id.' success!');
+            if($this->galleries->delete($id))
+            {
+                 return Response::message(200, 'Deleted gallery_id: '.$id.' success!'); 
+            }
         }
 
-        return Response::message(400, $validator->messages()->first()); 
+        return Response::message(400, $this->galleries->errors());
     }
 
 }

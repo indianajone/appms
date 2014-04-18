@@ -5,6 +5,6 @@
             return Response::fields('medias');
         });
 
-        Route::post('delete', 'Kitti\\Medias\\Controllers\MediasController@delete');
-        Route::resource('medias', 'Kitti\\Medias\\Controllers\MediasController');
+        Route::any('medias/{id}/delete', 'Kitti\\Medias\\Controllers\ApiMediasController@delete');
+        Route::resource('medias', 'Kitti\\Medias\\Controllers\ApiMediasController');
     });

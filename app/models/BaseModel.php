@@ -145,7 +145,7 @@ Trait BaseModel
 
                 if(is_object($response)) return $response;
 
-                if($this->gallery)
+                if('Kitti\Medias\Media' != get_called_class() && $this->gallery)
                 {
                     $this->gallery->medias()->create(array(
                          'app_id' => $app_id,
@@ -154,11 +154,11 @@ Trait BaseModel
                          'picture' => $response,
                          'type' => 'image'
                     ));
+                    
+                    $this->update(array(
+                        'picture' => $response
+                    ));
                 }
-
-                $this->update(array(
-                    'picture' => $response
-                ));
 
                 return $response;
             }

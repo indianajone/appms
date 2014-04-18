@@ -18,6 +18,11 @@ class Role extends \Zizaco\Entrust\EntrustRole
         )
     );
 
+    public function rules($action)
+    {
+        return static::$rules[$action];
+    }
+
     /**
      * Override Many-to-Many relations with Permission
      * named perms as permissions is already taken.

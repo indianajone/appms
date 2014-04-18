@@ -44,6 +44,15 @@ class Gallery extends \Eloquent
 
     use \BaseModel;
 
+    public static function boot()
+    {
+        static::deleting(function($gallery){
+            $gallery->medias()->delete();
+        });
+        
+        parent::boot();
+    }
+
     public function owner()
     {
     	switch($this->getAttribute('content_type'))
@@ -72,6 +81,11 @@ class Gallery extends \Eloquent
     public function scopeOwner($query, $type, $id)
     {
     	return $query->whereContentType($type)->whereContentId($id);
+    }
+
+    public function scopeSearch($query)
+    {
+        return $this->keywords(array('name'));
     }
 
     public function galleryable()

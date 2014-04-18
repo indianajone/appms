@@ -1,16 +1,14 @@
 <?php namespace Indianajone\RolesAndsPermissions\Controllers;
 
-use \BaseController;
-use \Input;
-use \Response;
-use \Validator;
-use \Indianajone\RolesAndPermissions\Role;
-use \Indianajone\RolesAndPermissions\RoleRepositoryInterface;
+use BaseController, Input, Response, Validator;
+use Indianajone\RolesAndPermissions\Role;
+use Indianajone\RolesAndPermissions\RoleRepositoryInterface;
 
 class RoleController extends BaseController {
 
 	public function __construct(RoleRepositoryInterface $roles)
 	{
+		parent::__construct();
 		$this->roles = $roles;
 	}
 
@@ -23,7 +21,7 @@ class RoleController extends BaseController {
 	{
 		$roles = $this->roles->all();
         
-        return Response::result(
+      return Response::result(
         	array(
         		'header' => array(
         			'code' => 200,
@@ -34,7 +32,7 @@ class RoleController extends BaseController {
         		'total' => $roles->count(),
         		'entries' => $roles->toArray()
         	)
-        );
+      );
 	}
 
 	/**
@@ -54,14 +52,12 @@ class RoleController extends BaseController {
 	 */
 	public function store()
 	{
-		$validator = $this->roles->validate('create');
-
-		if ($validator) {
+		if ($this->roles->validate('create')) {
 			$role = $this->roles->create(array(
 				'name' => Input::get('name')
 			));
 
-			if($role)
+			if($role->save())
 				return Response::result(array(
 	                    'header' => array(
 	                        'code'      => 200,
@@ -73,7 +69,7 @@ class RoleController extends BaseController {
 			return Response::message(500, 'Something wrong when trying to create role.');
 		} 
 
-		return Response::message(400, $this->roles->errors);
+		return Response::message(400, $this->roles->errors());
 	}
 
 	/**

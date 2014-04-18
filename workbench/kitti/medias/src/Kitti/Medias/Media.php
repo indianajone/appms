@@ -1,5 +1,7 @@
 <?php namespace Kitti\Medias;
 
+use Image;
+
 class Media extends \Eloquent
 {
     protected $table = 'medias';
@@ -7,7 +9,7 @@ class Media extends \Eloquent
     protected $hidden = array('app_id', 'gallery_id', 'deleted_at');
     protected $touches = array('gallery');
 
-    public static $rules = array(
+    protected $rules = array(
         'show' => array(
             'appkey' => 'required|exists:applications'
         ),
@@ -32,6 +34,15 @@ class Media extends \Eloquent
     );
 
     use \BaseModel;
+
+    public static function boot()
+    {
+        static::deleting(function($media){
+            Image::delete($media->getOriginal('picture'));
+        });
+
+        parent::boot();
+    }
 
     public function scopeSearch($query)
     {

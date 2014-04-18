@@ -5,30 +5,16 @@ use Carbon\Carbon;
 
 class Permission extends EntrustPermission {
 
-    protected $guarded = array('id');
+   protected $guarded = array('id');
 	protected $hidden = array('pivot');
-    public static $rules = array();
+   public static $rules = array();
 
-	/** 
-	 * Override getDateFormat to unixtime stamp.
-	 * @return String
-	 */
-	protected function getDateFormat()
-    {
-        return 'U';
-    }
+	use \BaseModel;
 
-    public function getCreatedAtAttribute($value)
-    {
-        $format = \Input::get('date_format', null);
-        return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
-    }
-
-    public function getUpdatedAtAttribute($value)
-    {
-        $format = \Input::get('date_format', null);
-        return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;     
-    }
+	public function rules($action)
+	{
+	   return static::$rules[$action];
+	}
 
     public function roles()
     {
