@@ -2,12 +2,16 @@
 
 class BaseController extends Controller 
 {
+	protected $current_user;
+
 	public function __construct()
 	{
 		Validator::resolver(function($translator, $data, $rules, $messages)
 		{
 			return new \Indianajone\Validators\CustomValidator($translator, $data, $rules, $messages);
 		});
+
+		 $this->current_user = Auth::user();
 	}
 	/**
 	 * Setup the layout used by the controller.

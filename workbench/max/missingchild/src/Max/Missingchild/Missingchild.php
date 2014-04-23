@@ -8,10 +8,10 @@ class Missingchild extends \Eloquent
 {
 	protected $table = 'missingchilds';
     protected $softDelete = true;
-    protected $guarded = array('id');
+    protected $fillable = array('app_id', 'description', 'first_name', 'last_name', 'nickname', 'gender', 'lost_age', 'age', 'place_of_missing', 'latitude', 'longitude', 'note', 'order', 'missing_at', 'reported_place', 'reported_at');
     protected $hidden = array('status', 'app_id', 'gallery_id', 'article_id', 'user_id', 'title', 'categories', 'deleted_at');
 
-    public static $rules = array(
+    protected $rules = array(
         'show' => array(
             'appkey'    => 'required|exists:applications,appkey'
         ),
@@ -48,25 +48,15 @@ class Missingchild extends \Eloquent
         )
     );
 
-    use \BaseModel;
-
-    function __construct()
-    {
-        $this->map = array(
-            'order_by' => 'order_by',
-            'limit' => 'limit',
-            'offset' => 'offset',
-            'search' => 'q',
-            'filterCats' => 'category_id',
-            'whereUpdated' => 'updated_at',
-            'whereCreated' => 'created_at'
-        );
-
-        $this->multiple = array(
-            'filterCats',
-            'order_by'
-        );
+    public function __construct($attributes=array())
+    {      
+        parent::__construct($attributes);
+        $this->setMultiple(array_add($this->getMultiple(), null, 'filterCats'));
+        $this->setMap(array_add($this->getMap(), 'filterCats', 'category_id'));
+        $this->setDefaults(array_add($this->getDefaults(), 'category_id', '*'));
     }
+
+    use \BaseModel;
 
     public function articles()
     {
@@ -109,7 +99,6 @@ class Missingchild extends \Eloquent
         if (is_string($categories))
             $categories = explode(',', $categories);
 
-        // $categories = Category::findMany($categories);
         foreach ($categories as $category) {
             $this->attachRelation($related, $category);
         }
@@ -163,9 +152,4 @@ class Missingchild extends \Eloquent
         $cat = $this->types()->whereCategoryId($id)->first();
         return $cat ? true : false;
     }
-
-    // public function newCollection(array $models = array())
-    // {
-    //     return new Collection($models);
-    // }
 }

@@ -32,7 +32,7 @@ class ArticlesServiceProvider extends ServiceProvider {
 	public function register()
 	{
 		$this->app->bind('Kitti\Articles\Repositories\ArticleRepositoryInterface', function($app){
-			return new DBArticleRepository(new Article, $app['Indianajone\Share\Repositories\DBShareRepository']);
+			return new DBArticleRepository($app['Kitti\\Articles\\Article']);
 		});
 	}
 

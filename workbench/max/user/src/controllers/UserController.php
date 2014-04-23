@@ -58,17 +58,17 @@ class UserController extends \BaseController
 	 */
 	public function edit($id)
 	{
-        $user = $this->users->find($id);
+        $user = Auth::user();
         if($user)
         {
-            if(Auth::user()->can('edit_user'))
+            if($user->can('edit_user') || $user->getKey() == $id)
             {
                 $root = $this->users->find($user->getRootId());
                 $parent = $this->users->findMany($root->getChildrenId(), array('id', 'username'));
                 $roles = $this->roles->all();
 
                 return View::make('users.edit')->with(array(
-                    'user'=> $user, 
+                    'user'=> $this->users->find($id), 
                     'parents'=> $parent,
                     'roles' => $roles
                 ));

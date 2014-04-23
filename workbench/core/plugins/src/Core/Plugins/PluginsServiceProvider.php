@@ -1,9 +1,8 @@
-<?php namespace Max\Missingchild;
+<?php namespace Core\Plugins;
 
 use Illuminate\Support\ServiceProvider;
-use Max\Missingchild\Repositories\DBMissingchildRepository;
 
-class MissingchildServiceProvider extends ServiceProvider {
+class PluginsServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -19,8 +18,7 @@ class MissingchildServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-
-		$this->package('max/missingchild');
+		$this->package('core/plugins');
 		include __DIR__.'/../../routes.php';
 	}
 
@@ -31,10 +29,15 @@ class MissingchildServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->bind('Max\Missingchild\Repositories\MissingchildRepositoryInterface', function($app){
-			return new DBMissingchildRepository(
-				$app['Max\\Missingchild\\Models\\Missingchild'],
-				$app['Kitti\\Articles\\Repositories\\DBArticleRepository']);
+		$this->app->bind('plugin', function($app)
+		{
+			return new Plugin;
+		}, true);
+
+		$this->app->booting(function()
+		{
+			$loader = \Illuminate\Foundation\AliasLoader::getInstance();
+			$loader->alias('Plugin', 'Core\Plugins\Facades\Plugin');
 		});
 	}
 
@@ -45,7 +48,7 @@ class MissingchildServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('missingchild');
+		return array('plugin');
 	}
 
 }

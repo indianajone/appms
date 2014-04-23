@@ -12,18 +12,19 @@
 */
 
 // Display all SQL executed in Eloquent
-// Event::listen('illuminate.query', function($sql, $bindings)
-// {
-//     foreach ($bindings as $i => $val) {
-//         $bindings[$i] = "'$val'";
-//     }
+Event::listen('illuminate.query', function($sql, $bindings)
+{
+    foreach ($bindings as $i => $val) {
+        $bindings[$i] = "'$val'";
+    }
     
-//     $sql_with_bindings = array_reduce($bindings, function ($result, $item) {
-//         return substr_replace($result, $item, strpos($result, '?'), 1);
-//     }, $sql);
+    $sql_with_bindings = array_reduce($bindings, function ($result, $item) {
+        return substr_replace($result, $item, strpos($result, '?'), 1);
+    }, $sql);
 
-//     var_dump($sql_with_bindings);
-// });
+    // var_dump($sql_with_bindings);
+    // Log::write('info', $sql_with_bindings);
+});
 
 Route::get('/', function()
 {
@@ -63,7 +64,7 @@ Route::get('migrate/{bench?}', function($bench=null){
 
 Route::get('test', function(){
 
-	return action('Max\User\Controllers\ApiUserController@index');
+	return App::getBindings();
 });
 
 Route::get('image', function(){

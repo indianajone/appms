@@ -15,6 +15,9 @@ class Role extends \Zizaco\Entrust\EntrustRole
         ),
         'create'    => array(
             'name'  => 'required|unique:roles' 
+        ),
+        'attach'    => array(
+            'permission_id' => 'required|existsloop:permissions,id'
         )
     );
 

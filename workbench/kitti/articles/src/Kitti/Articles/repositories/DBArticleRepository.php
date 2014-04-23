@@ -21,7 +21,7 @@ class DBArticleRepository extends \AbstractRepository implements ArticleReposito
 	{
 		$app_id = Appl::getAppIDByKey(Input::get('appkey'));
 
-		$articles = $this->model->whereAppId($app_id)->apiFilter()->get();
+		$articles = $this->model->whereAppId($app_id)->apiFilter()->with('gallery')->get();
 
 		$articles->each(function($article) {
 			$article->fields();
@@ -40,8 +40,8 @@ class DBArticleRepository extends \AbstractRepository implements ArticleReposito
 				}
 			};
 
-			$gallery = $article->gallery()->first();
-			if($gallery) $article->setRelation('gallery', $gallery);
+			// $gallery = $article->gallery()->with('medias')->first();
+			// if($gallery) $article->setRelation('gallery', $gallery);
 		
  		});
 
@@ -74,9 +74,25 @@ class DBArticleRepository extends \AbstractRepository implements ArticleReposito
 			// $query->select(array('id', 'picture', 'gallery_id'));
 			$query->offset(0)->limit(5)->orderBy('id', 'desc');
 		}))->first(); //array('id', 'name', 'picture'));
+		
 		if($gallery) $article->setRelation('gallery', $gallery);
 
 		return $article;
+	}
+
+	public function create($input)
+	{
+		$model = $this->model->newInstance($input);
+		$model->save();
+
+		$category_id = array_get($input, 'category_id');
+		if($category_id)
+		{
+			$ids = explode(',', $category_id); 
+			$model->attachCategories($ids);
+		}
+
+		return $model->getKey();
 	}
 
 }

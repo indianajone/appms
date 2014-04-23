@@ -7,7 +7,7 @@ use \Validator;
 use \Indianajone\RolesAndPermissions\Permission;
 use \Max\User\Models\User;
 
-class PermissionController extends BaseController {
+class ApiPermissionController extends BaseController {
 
 	/**
 	 * Display a listing of the resource.

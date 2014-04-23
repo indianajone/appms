@@ -1,6 +1,8 @@
 <?php namespace Indianajone\Applications;
 
 use DB, Input;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Indianajone\Applications\Application as App;
 use Indianajone\Applications\ApplicationMeta as Meta;
 
 class Appl
@@ -10,14 +12,24 @@ class Appl
 		return str_random(32);
 	}
 
-	public function getAppIDByKey($key)
+	public function getAppByKey($key)
 	{
 		if($key)
 		{
 			/**  
 			  Need to implement better caching. 
 			 */
-			return DB::table('applications')->where('appkey', $key)->remember(1)->first()->id;
+			return !is_null($model = App::where('appkey', $key)->remember(1)->first()) ? $model : null;
+		}		
+		
+		return null;
+	}
+
+	public function getAppIDByKey($key)
+	{
+		if($key)
+		{
+			return !is_null($model = $this->getAppByKey($key)) ? $model->getKey() : null;
 		}		
 		
 		return null;

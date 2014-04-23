@@ -1,7 +1,7 @@
 <?php
 namespace Max\User\Controllers;
 
-use Validator, Input, Response, Hash, View, Request, Auth;
+use Appl, Auth, Hash, Input, Response;
 use Carbon\Carbon;
 use Max\User\Repository\UserRepositoryInterface;
 use Indianajone\RolesAndPermissions\RoleRepositoryInterface;
@@ -12,6 +12,7 @@ class ApiUserController extends \BaseController
         UserRepositoryInterface $users,
         RoleRepositoryInterface $roles)
     {
+        parent::__construct();
         $this->users = $users;
         $this->roles = $roles;
     }
@@ -25,27 +26,32 @@ class ApiUserController extends \BaseController
 	{
         $id = Input::get('user_id');
 
-        $users = !is_null($id) ? 
-                    $this->users->findUserAndChildren($id) :
-                    $this->users->all();
-
-        if($users)
+        if($this->current_user || $this->users->validate('index'))
         {
-            return Response::result(
-                array(
-                    'header'=> array(
-                        'code'=> 200,
-                        'message'=> 'success'
-                    ),
-                    'offset' => (int) Input::get('offset', 0),
-                    'limit' => (int) Input::get('limit', 10),
-                    'total' => (int) $this->users->countChildren($id) ?: count($users),
-                    'entries' => $users
-                )
-            ); 
+            $users = !is_null($id) ? 
+                        $this->users->findUserAndChildren($id) :
+                        $this->users->all();
+
+            if($users)
+            {
+                return Response::result(
+                    array(
+                        'header'=> array(
+                            'code'=> 200,
+                            'message'=> 'success'
+                        ),
+                        'offset' => (int) Input::get('offset', 0),
+                        'limit' => (int) Input::get('limit', 10),
+                        'total' => (int) is_null($id) ? count($this->users->count()) : $this->users->countChildren($id),
+                        'entries' => $users
+                    )
+                ); 
+            }
+
+            return Response::message(204, 'Can not find any users');   
         }
 
-        return Response::message(204, 'Can not find any users');   
+        return Response::message(400, $this->users->errors());
 	}
 
     /**
@@ -65,9 +71,9 @@ class ApiUserController extends \BaseController
 	 */
 	public function store()
 	{
-        if ($this->users->validate('create'))
+        if ($this->current_user || $this->users->validate('create'))
         {
-            $user = $this->users->create(
+            $id = $this->users->create(
                 array(
                     'parent_id'     => Input::get('parent_id'),
                     'username'      => Input::get('username'),
@@ -81,19 +87,19 @@ class ApiUserController extends \BaseController
                 )
             );
 
-            if($user->save())
+            if($id)
                 return Response::result(array(
                     'header' => array(
                         'code'      => 200,
                         'message'   => 'success'
                     ),
-                    'id' => $user->id
+                    'id' => $id
                 ));
 
             return Response::message(500, 'Something wrong when trying to save user.');
         }
         
-        return Response::message(204, $this->users->errors);
+        return Response::message(204, $this->users->errors());
 	}
 
 	/**
@@ -104,17 +110,21 @@ class ApiUserController extends \BaseController
 	 */
 	public function show($id)
 	{
-        $user = $this->users->findWith($id, array('apps', 'roles'));
+        $input = array_add(Input::all(), 'id', $id);
+        if($this->current_user || $this->users->validate('show', $input))
+        {
+            return Response::result(
+                array(
+                    'header' => array(
+                        'code' => 200,
+                        'message' => 'success'
+                    ),
+                    'entry' => $this->users->findWith($id, array('apps', 'roles'))
+                )
+            );
+        }
 
-        return Response::result(
-            array(
-                'header' => array(
-                    'code' => 200,
-                    'message' => 'success'
-                ),
-                'entry' => $user
-            )
-        );
+        return Response::message(ภจจ, $this->users->errors());  
 	}
 
 	/**
@@ -138,31 +148,19 @@ class ApiUserController extends \BaseController
 	{
 		$validator = $this->users->validate('update', array('id'=>$id));
 
-        if($validator)
+        if($this->current_user || $validator)
         {
-            $user = $this->users->find($id);
-            $inputs = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
+            $input = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
+            $user = $this->users->update($id, $input);
 
-            foreach ($inputs as $key => $val) {
-                if( $val == null || 
-                    $val == '' || 
-                    $val == $user[$key]) 
-                {
-                    unset($inputs[$key]);
-                }
-            }
-
-            if(!count($inputs))
-                return Response::message(204, 'Nothing is update.');
-
-            if($user->update($inputs))
+            if($user)
                 return Response::message(200, 'Updated user id: '.$id.' success!'); 
 
             return Response::message(500, 'Something wrong when trying to update user.');
            
         }
 
-        return Response::message(400, $this->users->errors); 
+        return Response::message(400, $this->users->errors()); 
 	}
 
     public function delete($id)
@@ -181,13 +179,13 @@ class ApiUserController extends \BaseController
 
         $validator = $validator = $this->users->validate('delete');
 
-        if($validator)
+        if($this->current_user || $validator)
         {
             $user = $this->users->delete($id);
             return Response::message(200, 'Deleted User: '.$id.' success!');
         }
 
-        return Response::message(400, $this->users->errors); 
+        return Response::message(400, $this->users->errors()); 
 	}
 
     /**
@@ -216,7 +214,7 @@ class ApiUserController extends \BaseController
             return Response::message(204, 'Username or Password is incorrect');
         }
 
-        return Response::message(400, $this->users->errors); 
+        return Response::message(400, $this->users->errors()); 
     }
     
     /**
@@ -255,7 +253,7 @@ class ApiUserController extends \BaseController
             return Response::message(204, 'Username or Password is incorrect');
         }
 
-        return Response::message(400, $this->users->errors); 
+        return Response::message(400, $this->users->errors()); 
     }
 
     /**
@@ -270,7 +268,7 @@ class ApiUserController extends \BaseController
         $inputs = array_merge(array('id'=> $id, 'action' => $action), Input::only('role_id'));
         $validator = $this->users->validate('manage_role', $inputs);
 
-        if($validator)
+        if($this->current_user || $validator)
         {
             $role = Input::get('role_id');
             $ids = array_flatten(explode(',', $role));
@@ -304,6 +302,6 @@ class ApiUserController extends \BaseController
             return Response::message(200, $user->username.' is now has roles '. implode(', ', $names).' '.$action. 'ed.');
         }
 
-        return Response::message(400, $this->users->errors); 
+        return Response::message(400, $this->users->errors()); 
     }
 }

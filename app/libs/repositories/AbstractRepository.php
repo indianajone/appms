@@ -48,14 +48,20 @@ abstract class AbstractRepository
 
 	public function create($input)
 	{
-		return $this->model->fill($input);
+		$model = $this->model->newInstance($input);
+		$model->save();
+
+		return $model->getKey();
 	}
 
 	public function count()
 	{
 		$app_id = Appl::getAppIDByKey(Input::get('appkey', null));
 
-		return $this->model->whereAppId($app_id)->count();
+		if($this->model->getAttribute('app_id'))
+			return $this->model->whereAppId($app_id)->count();
+
+		return $this->model->count();
 	}
 
 	public function update($id, $input)
@@ -64,7 +70,7 @@ abstract class AbstractRepository
 		
 		foreach( $model->getAttributes() as $key => $value )
 		{
-			if( array_key_exists($key, $input) && $value != $input[$key] )
+			if( array_key_exists($key, $input) && $value != $input[$key] && !is_null($input[$key]))
 			{
 				if(array_key_exists('picture', $input))
 	         {
@@ -79,7 +85,7 @@ abstract class AbstractRepository
 			}
 		}
 
-		return $model;
+		return $model->save();
 	}
 
 	public function delete($id)

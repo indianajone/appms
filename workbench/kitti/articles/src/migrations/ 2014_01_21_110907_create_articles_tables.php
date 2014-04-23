@@ -22,9 +22,6 @@ class CreateArticlesTables extends Migration {
             $table->integer('gallery_id', false)->unsigned()->nullable();
             $table->foreign('gallery_id')->references('id')->on('galleries');
 
-            // index
-            // $table->string('categories_id', 100);
-
             // others
             $table->string('pre_title',255)->nullable();
             $table->string('title',255);

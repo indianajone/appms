@@ -1,6 +1,6 @@
 <?php namespace Max\User\Repository;
 
-use Input, Validator;
+use Appl, Input, Validator;
 use Max\User\Models\User;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
@@ -8,31 +8,31 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 {
 	public function __construct(User $user)
 	{
-		$this->model = $user;
+		parent::__construct($user);
 	}
 
 	public function all()
 	{
-        $users = User::apiFilter()->get();
+		$users =$this->model->apiFilter()->get();
 
-        $users->each(function($user){
-        	$user->fields();
-        });
+		$users->each(function($user){
+			$user->fields();
+		});
 
-        if($users instanceof ArrayableInterface)
-        	return $users->toArray();
+		if($users instanceof ArrayableInterface)
+			return $users->toArray();
 
-        return $users;
+       return $users;
 	}
 
 	public function findMany($ids, $columns=array('*'))
 	{
-		return User::findMany($ids, $columns);
+		return $this->model->findMany($ids, $columns);
 	}
 
 	public function findWith($id, $relations)
 	{
-		$user = User::apiFilter()->whereId($id)->with($relations)->firstOrFail()->fields();
+		$user = $this->model->apiFilter()->whereId($id)->with($relations)->firstOrFail()->fields();
 
 		$user->roles->each(function($role){
     		$role->setVisible(array('id','name'));
@@ -50,6 +50,17 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 	public function findUserAndChildren($id)
 	{
+		$app = Appl::getAppByKey(Input::get('appkey'));
+		
+		if($app)
+		{
+			$user = $this->model->findOrFail($id);
+			$owner = $app->user_id;
+			if(!in_array($owner, $user->getChildrenId()))
+			return false;
+		}
+		
+
 		$user = $this->children($id);
 
 		if($user)
@@ -79,11 +90,11 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 	public function children($id)
 	{
-		$user = User::findOrFail($id);
+		$user = $this->model->findOrFail($id);
 
 		if($user)
 		{
-			return User::whereIn('id', $user->getChildrenId());
+			return $this->model->whereIn('id', $user->getChildrenId());
 		}
 
 		return null;

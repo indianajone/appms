@@ -8,8 +8,11 @@ use Zizaco\Entrust\HasRole;
 class User extends \Eloquent implements UserInterface, RemindableInterface 
 {
     use \BaseModel;
-
+    
     protected $rules = array(
+        'index' => array(
+            // 'appkey' => 'required|exists:applications'
+        ),
         'chk_id' => array(
             'id' => 'required|exists:users'
         ),
@@ -42,7 +45,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
         'manage_role' => array(
             'id' => 'required|exists:users',
             'action' => 'required',
-            'role_id' => 'required|existloop:roles,id'
+            'role_id' => 'required|existsloop:roles,id'
         )
     );
 
@@ -98,7 +101,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
      */
     public function getRememberToken()
     {
-        return $this->attributes['remember_token'];
+        return $this->remember_token;
     }
 
     /**
@@ -109,7 +112,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
      */
     public function setRememberToken($value)
     {
-        $this->attributes['remember_token'] = $value;
+        $this->remember_token = $value;
     }
 
     /**

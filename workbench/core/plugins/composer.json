@@ -1,10 +1,10 @@
 {
-    "name": "max/user",
+    "name": "core/plugins",
     "description": "",
     "authors": [
         {
-            "name": "Phasupong Yingampol",
-            "email": "phasupong@gmail.com"
+            "name": "Ravi Vaisayawan",
+            "email": "mmer555@hotmail.com"
         }
     ],
     "require": {
@@ -13,12 +13,11 @@
     },
     "autoload": {
         "classmap": [
-            "src/migrations",
-            "src/controllers"
+            "src/migrations"
         ],
         "psr-0": {
-            "Max\\User\\": "src/"
+            "Core\\Plugins\\": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }

@@ -8,8 +8,8 @@ class ArticleController extends \BaseController
 {
 	public function __construct(ArticleRepositoryInterface $articles)
 	{
-		$this->articles = $articles;
 		parent::__construct();
+		$this->articles = $articles;
 	}
 
 	public function index()
@@ -42,8 +42,9 @@ class ArticleController extends \BaseController
 	{
 		if($this->articles->validate('create'))
 		{
-			$article = $this->articles->create(array(
-				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
+			$app_id = Appl::getAppIDByKey(Input::get('appkey'));
+			$id = $this->articles->create(array(
+				'app_id' => $app_id,
 				'gallery_id' => Input::get('gallery_id', null),
 				'pre_title' => Input::get('pre_title'),
 				'title' => Input::get('title'),
@@ -51,29 +52,23 @@ class ArticleController extends \BaseController
 				'content' => Input::get('content'),
 				'wrote_by' => Input::get('wrote_by'),
 				'published_at' => Input::get('published_at', Carbon::now()->timestamp),
-				'tags' => Input::get('tags')
+				'tags' => Input::get('tags'),
+				'category_id' => Input::get('category_id', null)
 			));
 
-			if( $article->save() )
+			if(Input::get('picture', null))
+	      {
+	         $response = $this->articles->createPicture($app_id);
+	         if(is_object($response)) return $response;             	
+	      }
+
+			if($id)
 			{
-				if(Input::get('picture', null))
-	            {
-	            	$response = $article->createPicture($article->app_id);
-	            	if(is_object($response)) return $response;             	
-	            }
-
-				$category_id = Input::get('category_id', null);
-				if($category_id)
-				{
-					$ids = explode(',', $category_id); 
-					$article->attachCategories($ids);
-				}
-
 				return Response::result(array(
 					'header'=> array(
 		        		'code'=> 200,
 		        		'message'=> 'success'
-		        	), 'id'=> $article->id
+		        	), 'id'=> $id
 				));
 			}
 

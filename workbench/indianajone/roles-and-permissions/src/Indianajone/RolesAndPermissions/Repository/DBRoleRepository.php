@@ -22,4 +22,12 @@ class DBRoleRepository extends \AbstractRepository implements RoleRepositoryInte
 	{
 		return $this->model->apiFilter()->with('permits')->findOrFail($id)->fields();
 	}
+
+	public function syncPermissions($id, $ids=array())
+	{
+		$role = $this->model->findOrFail($id);
+		$role->permits()->sync($ids);
+
+		return $role;
+	}
 }

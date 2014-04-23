@@ -101,17 +101,17 @@
             		"orderable": false,
             		"render": function(data){
             			return 	'<a href="{{ URL::to('v1/users/') }}/' + data + '/edit' + '" data-toggle="tooltip" data-placement="top" title="Edit">' +
-									'<span class="fa-stack">' +
-										'<i class="fa fa-circle fa-stack-2x text-warning"></i>' +
-										'<i class="fa fa-edit fa-stack-1x fa-inverse"></i>' +
-									'</span>' +
-								'</a>' +
-								'<a href="#" data-toggle="tooltip" data-placement="top" title="Delete">' +
-									'<span class="fa-stack">' +
-										'<i class="fa fa-circle fa-stack-2x text-danger"></i>' +
-										'<i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>' +
-									'</span>' +
-								'</a>';
+											'<span class="fa-stack">' +
+												'<i class="fa fa-circle fa-stack-2x text-warning"></i>' +
+												'<i class="fa fa-edit fa-stack-1x fa-inverse"></i>' +
+											'</span>' +
+										'</a>' +
+										'<a href="#" data-toggle="tooltip" data-placement="top" title="Delete">' +
+											'<span class="fa-stack">' +
+												'<i class="fa fa-circle fa-stack-2x text-danger"></i>' +
+												'<i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>' +
+											'</span>' +
+										'</a>';
             		}
             	}
             ]

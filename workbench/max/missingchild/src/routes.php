@@ -6,5 +6,5 @@
 			return Response::fields('missingchilds');
 		});
 
-		Route::resource('missingchilds', 'Max\\Missingchild\\Controllers\\MissingchildController');
+		Route::resource('missingchilds', 'Max\\Missingchild\\Controllers\\ApiMissingchildController');
 	});

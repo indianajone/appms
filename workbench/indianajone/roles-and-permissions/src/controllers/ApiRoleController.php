@@ -1,10 +1,10 @@
 <?php namespace Indianajone\RolesAndsPermissions\Controllers;
 
-use BaseController, Input, Response, Validator;
+use Appl, BaseController, Input, Response, Validator;
 use Indianajone\RolesAndPermissions\Role;
 use Indianajone\RolesAndPermissions\RoleRepositoryInterface;
 
-class RoleController extends BaseController {
+class ApiRoleController extends BaseController {
 
 	public function __construct(RoleRepositoryInterface $roles)
 	{
@@ -54,6 +54,7 @@ class RoleController extends BaseController {
 	{
 		if ($this->roles->validate('create')) {
 			$role = $this->roles->create(array(
+				'app_id' => Appl::getAppIDByKey(Input::get('appkey')),
 				'name' => Input::get('name')
 			));
 
@@ -91,11 +92,11 @@ class RoleController extends BaseController {
         			'code' => 200,
         			'message' => 'success'
         		),
-        		'entry' => $role->toArray()
+        		'entry' => compact('role')
 			));
 		}
 
-		return Response::message(400, $this->roles->errors);
+		return Response::message(400, $this->roles->errors());
 	}
 
 	/**
@@ -117,32 +118,19 @@ class RoleController extends BaseController {
 	 */
 	public function update($id)
 	{
-		// $validator = $this->roles->validate('show', array('id'=>$id));
+		$input = array_add(Input::all(), 'id', $id);
+		if($this->roles->validate('show', $input))
+		{
+			$input = Input::only('name');
+			$role = $this->roles->update($id, $input);
 
-		// if($validator)
-		// {
-			$inputs = Input::only('name');
-			$role = $this->roles->find($id);
+         if($role)
+				return Response::message(200, 'Updated role id: '.$id.' success!'); 
 
-            foreach ($inputs as $key => $val) {
-                if( $val == null || 
-                    $val == '' || 
-                    $val == $role[$key]) 
-                {
-                    unset($inputs[$key]);
-                }
-            }
+			return Response::message(500, 'Something wrong when trying to update role.');
+		}
 
-            if(!count($inputs))
-                return Response::message(204, 'Nothing is update.');
-
-            if($role->update($inputs))
-                return Response::message(200, 'Updated role id: '.$id.' success!'); 
-
-            return Response::message(500, 'Something wrong when trying to update role.');
-		// }
-
-		// return Response::message(400, $this->roles->errors);
+		return Response::message(400, $this->roles->errors());
 	}
 
 	/**
@@ -164,30 +152,16 @@ class RoleController extends BaseController {
 	 */
 	public function destroy($id)
 	{
-		$role = Role::find($id);
-		if($role) 
-		{
-			$role->delete();
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 200,
-	        			'message' => 'Deleted role_id: '.$id.' success!'
-	        		)
-	        	), 200
-	        );
-		}
-		else
-		{
-			return Response::json(
-	        	array(
-	        		'header' => array(
-	        			'code' => 204,
-	        			'message' => 'No user were found.'
-	        		)
-	        	), 200
-	        );
-		}
+		$role = $this->roles->find($id)->delete();
+	
+		return Response::json(
+        	array(
+        		'header' => array(
+        			'code' => 200,
+        			'message' => 'Deleted role_id: '.$id.' success!'
+        		)
+        	), 200
+        );
 	}
 
 	/**
@@ -198,51 +172,13 @@ class RoleController extends BaseController {
 	 */
 	public function attachPermissions($id)
 	{
-		/**
-			#TODO: Move Validation to service and Rules to Model.
-		**/
-		$rules = array(
-			'permission_id' => 'required|existloop:permissions,id'
-		);
-
-		/**
-			#TODO: Find a better place for resolver.
-		**/
-		Validator::resolver(function($translator, $data, $rules, $messages)
+		if($this->roles->validate('attach'))
 		{
-		    return new \Indianajone\Validators\Rules\ExistLoop($translator, $data, $rules, $messages);
-		});
-
-		$validator = Validator::make(Input::all(), $rules);
-
-		if($validator->passes())
-		{
-			$role = Role::find($id);
-			if(!$role) 
-				return Response::json(array(
-					'header'=> [
-		        		'code'=> 400,
-		        		'message'=> 'Role id: '. $id .' can not be found'
-		        	]
-				), 200);
-			else 
-			{
-				$ids = Input::get('permission_id');
-				$role->permits()->sync(array_map('intval', explode(',', $ids)));
-				return Response::json(array(
-					'header'=> [
-		        		'code'=> 200,
-		        		'message'=> 'permission_id: '. $ids .' is attached to ' . $role->name
-		        	]
-				), 200);
-			}
+			$ids = Input::get('permission_id');
+			$role = $this->roles->syncPermissions($id, array_map('intval', explode(',', $ids)));
+			return Response::message(200, 'permission_id: '. $ids .' is attached to ' . $role->name);
 		}
 
-		return Response::json(array(
-			'header'=> [
-        		'code'=> 204,
-        		'message'=> $validator->messages()->first()
-        	]
-		), 200); 
+		return Response::message(400, $this->roles->errors());
 	}
 }
