@@ -1,8 +1,10 @@
 <?php namespace Max\User;
 
+use PluginableInterface as Pluginable;
 use Illuminate\Support\ServiceProvider;
+use Max\User\Repository\DBUserRepository;
 
-class UserServiceProvider extends ServiceProvider {
+class UserServiceProvider extends ServiceProvider implements Pluginable {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -19,6 +21,7 @@ class UserServiceProvider extends ServiceProvider {
 	public function boot()
 	{
         $this->package('max/user');
+
         include __DIR__.'/../../routes.php';
 	}
 
@@ -29,9 +32,7 @@ class UserServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->bind('Max\\User\\Repository\\UserRepositoryInterface', function($app){
-			return new  \Max\User\Repository\DBUserRepository($app['Max\\User\\Models\\User']);
-		});
+		$this->app->bind('Max\\User\\Repository\\UserRepositoryInterface', 'Max\User\Repository\DBUserRepository');
 
 		$this->registerPlugin();
 	}

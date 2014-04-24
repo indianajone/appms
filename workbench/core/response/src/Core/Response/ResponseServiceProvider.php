@@ -1,7 +1,7 @@
 <?php namespace Core\Response;
 
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
-use App;
 
 class ResponseServiceProvider extends ServiceProvider {
 
@@ -29,14 +29,17 @@ class ResponseServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		App::bind('response', function($app)
+		$this->app->bind('response', function($app)
 		{	
 			return new Response($app['config']);
 		});
-            // $this->app['response'] = $this->app->share(function($app)
-            // {
-                // return new Response($app['config']);
-            // });
+            
+      $this->app->booting(function()
+		{
+			$loader = AliasLoader::getInstance();
+
+			$loader->alias('Response', 'Core\Response\Facades\Response');
+		});
 	}
 
 	/**

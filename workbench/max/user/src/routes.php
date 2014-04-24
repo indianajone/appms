@@ -31,7 +31,7 @@ Route::group(array('prefix' => 'api/v1'), function()
     Route::get('users/fields', function(){
         return Response::fields('users');
     });
-    Route::post('users/{id}/delete', 'Max\\User\\Controllers\\ApiUserController@delete');
+    Route::any('users/{id}/delete', 'Max\\User\\Controllers\\ApiUserController@delete');
     Route::get('users/{id}/resetPassword', 'Max\\User\\Controllers\\ApiUserController@resetPassword'); 
     Route::any('users/{id}/roles/{action}', 'Max\\User\\Controllers\\ApiUserController@manageRole'); 
     Route::resource('users', 'Max\\User\\Controllers\\ApiUserController');

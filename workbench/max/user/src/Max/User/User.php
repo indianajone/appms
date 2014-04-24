@@ -6,17 +6,17 @@ use Zizaco\Entrust\HasRole;
 
 
 class User extends \Eloquent implements UserInterface, RemindableInterface 
-{
-    use \BaseModel;
-    
+{   
     protected $rules = array(
         'index' => array(
-            // 'appkey' => 'required|exists:applications'
+            'token' => 'required|exists:users,remember_token'
         ),
-        'chk_id' => array(
+        'show' => array(
+            'token' => 'required|exists:users,remember_token',
             'id' => 'required|exists:users'
         ),
         'create' => array(
+            'token' => 'required|exists:users,remember_token',
             'username'  => 'required|unique:users,username',
             'password'  => 'required',
             'first_name' => 'required',
@@ -24,10 +24,12 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
             'email' => 'required|email|unique:users,email',
         ),
         'update' => array(
-            // 'email' => 'required|email|unique:users'
+            'token' => 'required|exists:users,remember_token',
+            'email' => 'email|unique:users',
             'id' => 'required|exists:users'
         ),
         'delete' => array(
+            'token' => 'required|exists:users,remember_token',
             'id' => 'required|exists:users'
         ),
         'fields' => array(
@@ -38,11 +40,13 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
             'password'  => 'required'
         ),
         'resetPwd' => array(
+            'token' => 'required|exists:users,remember_token',
             'username'    => 'required|exists:users,username',
             'password' => 'required',
             'new_password' => 'required'
         ),
         'manage_role' => array(
+            'token' => 'required|exists:users,remember_token',
             'id' => 'required|exists:users',
             'action' => 'required',
             'role_id' => 'required|existsloop:roles,id'
@@ -61,7 +65,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
      *
      * @var array
      */
-    protected $hidden = array('password', 'parent_id');
+    protected $hidden = array('password', 'parent_id', 'meta', 'remember_token', 'deleted_at');
 
     /**
      * The attributes that aren't mass assignable.
@@ -70,6 +74,14 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
      */
     protected $guarded = array('id');
 
+    /**
+     * Indicates if the model should soft delete.
+     *
+     * @var bool
+     */
+    // protected $softDelete = true;
+
+    use \BaseModel;
     
     // Roles and Permissions Helper.
     use HasRole; 
@@ -154,6 +166,15 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
         return $this->hasMany('Indianajone\\Applications\\Application', 'user_id');
     }
 
+     /**
+     * Define a one-to-many with Application.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function meta(){
+        return $this->hasMany('Max\\User\\Models\\Usermeta', 'user_id');
+    }
+
     /**
      * Define a many-to-many Role.
      *
@@ -216,6 +237,15 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
         }
 
         return array_unique($ids);
+    }
+
+    public function getMeta()
+    {
+        $this->meta->each(function($meta) {
+            $this[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
+        });
+
+        return $this;
     }
 
      /**

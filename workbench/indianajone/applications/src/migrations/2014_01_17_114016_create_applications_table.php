@@ -22,6 +22,14 @@ class CreateApplicationsTable extends Migration {
 			$table->integer('created_at');
 			$table->integer('updated_at');
 		});
+
+		Schema::create('application_meta', function($table){
+			$table->increments('id');
+			$table->integer('app_id', false, true)->default(0);
+			$table->foreign('app_id')->references('id')->on('applications');
+			$table->string('meta_key')->nullable()->index();
+			$table->text('meta_value')->nullable();
+		});
 	}
 
 	/**
@@ -31,6 +39,7 @@ class CreateApplicationsTable extends Migration {
 	 */
 	public function down()
 	{
+		Schema::drop('application_meta');
 		Schema::drop('applications');
 	}
 

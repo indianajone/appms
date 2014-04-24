@@ -32,7 +32,9 @@ abstract class AbstractRepository
 	 */
 	public function validate($action, $input=null)
 	{
-		$validator = Validator::make($input ?: Input::all(), $this->model->rules($action));
+		// dd(Auth::user());
+		$fields = array_add($input ?: Input::all(), 'token', Auth::user() ? Auth::user()->remember_token : null);
+		$validator = Validator::make($fields, $this->model->rules($action));
 
 		if($validator->passes()) return true;
 

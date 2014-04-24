@@ -24,9 +24,9 @@ class ApiUserController extends \BaseController
 	 */
 	public function index()
 	{
-        $id = Input::get('user_id');
+        $id = $this->users->getIDByToken(Auth::user() ? Auth::user()->getRememberToken() : Input::get('token'));
 
-        if($this->current_user || $this->users->validate('index'))
+        if($this->users->validate('index'))
         {
             $users = !is_null($id) ? 
                         $this->users->findUserAndChildren($id) :
@@ -71,19 +71,17 @@ class ApiUserController extends \BaseController
 	 */
 	public function store()
 	{
-        if ($this->current_user || $this->users->validate('create'))
+        if ($this->users->validate('create'))
         {
             $id = $this->users->create(
                 array(
                     'parent_id'     => Input::get('parent_id'),
                     'username'      => Input::get('username'),
                     'password'      => Hash::make(Input::get('password')),
+                    'display_name'  => Input::get('display_name', Input::get('username')),
                     'first_name'    => Input::get('first_name'),
                     'last_name'     => Input::get('last_name'),
-                    'email'         => Input::get('email'),
-                    'gender'        => Input::get('gender'),
-                    'birthday'      => Input::get('birthday'),
-                    'last_seen'     => Carbon::now()->timestamp
+                    'email'         => Input::get('email')
                 )
             );
 
@@ -111,7 +109,7 @@ class ApiUserController extends \BaseController
 	public function show($id)
 	{
         $input = array_add(Input::all(), 'id', $id);
-        if($this->current_user || $this->users->validate('show', $input))
+        if($this->users->validate('show', $input))
         {
             return Response::result(
                 array(
@@ -119,12 +117,12 @@ class ApiUserController extends \BaseController
                         'code' => 200,
                         'message' => 'success'
                     ),
-                    'entry' => $this->users->findWith($id, array('apps', 'roles'))
+                    'entry' => $this->users->findWith($id)
                 )
             );
         }
 
-        return Response::message(ภจจ, $this->users->errors());  
+        return Response::message(400, $this->users->errors());  
 	}
 
 	/**
@@ -146,11 +144,11 @@ class ApiUserController extends \BaseController
 	 */
 	public function update($id)
 	{
-		$validator = $this->users->validate('update', array('id'=>$id));
+		$input = array_add(Input::all(), 'id', $id);
 
-        if($this->current_user || $validator)
+        if($this->users->validate('update', $input))
         {
-            $input = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email', 'gender', 'birthday');
+            $input = Input::only('parent_id', 'username', 'first_name', 'last_name', 'email');
             $user = $this->users->update($id, $input);
 
             if($user)
@@ -176,10 +174,8 @@ class ApiUserController extends \BaseController
 	 */
 	public function destroy($id)
 	{
-
-        $validator = $validator = $this->users->validate('delete');
-
-        if($this->current_user || $validator)
+        $input = array_add(Input::all(), 'id', $id);
+        if( $this->users->validate('delete', $input))
         {
             $user = $this->users->delete($id);
             return Response::message(200, 'Deleted User: '.$id.' success!');
@@ -199,13 +195,11 @@ class ApiUserController extends \BaseController
 
         if($validator)
         {
-            $userdata = Input::only('username', 'password');
+            $credential = Input::only('username', 'password');
 
-            if(Auth::attempt($userdata))
+            if(Auth::attempt($credential))
             {
-                $user = Auth::user();
-                $user->timestamps = false;
-                $user->update(array(
+                $this->users->updateMeta(Auth::user()->id, array(
                     'last_seen' => Carbon::now()->timestamp
                 ));
                 
@@ -268,7 +262,7 @@ class ApiUserController extends \BaseController
         $inputs = array_merge(array('id'=> $id, 'action' => $action), Input::only('role_id'));
         $validator = $this->users->validate('manage_role', $inputs);
 
-        if($this->current_user || $validator)
+        if($validator)
         {
             $role = Input::get('role_id');
             $ids = array_flatten(explode(',', $role));

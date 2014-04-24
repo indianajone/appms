@@ -2,21 +2,23 @@
 
 use Appl, Input, Validator;
 use Max\User\Models\User;
+use Max\User\Models\Usermeta;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
 class DBUserRepository extends \AbstractRepository implements UserRepositoryInterface
 {
-	public function __construct(User $user)
+	public function __construct(User $user, Usermeta $meta)
 	{
 		parent::__construct($user);
+		$this->meta = $meta;
 	}
 
 	public function all()
 	{
-		$users =$this->model->apiFilter()->get();
+		$users =$this->model->apiFilter()->with('meta')->get();
 
 		$users->each(function($user){
-			$user->fields();
+			$user->getMeta()->fields();
 		});
 
 		if($users instanceof ArrayableInterface)
@@ -25,52 +27,71 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
        return $users;
 	}
 
+	public function create($input)
+	{
+		$id = parent::create($input);
+
+		if($id)
+		{
+			$this->meta->create(array(
+				'user_id' => (int) $id,
+				'meta_key' => 'last_seen'
+			));
+		}
+
+		return $id;
+	}
+
+	public function updateMeta($id, $attributes=array())
+	{
+		$user = $this->model->with('meta')->find($id);
+		$meta = $user->meta()->first();
+
+		foreach($attributes as $key => $value)
+		{
+			$meta->fill(array(
+				'meta_key' => $key,
+				'meta_value' => $value
+			));
+		}
+
+		return $meta->save();
+	}
+
 	public function findMany($ids, $columns=array('*'))
 	{
 		return $this->model->findMany($ids, $columns);
 	}
 
-	public function findWith($id, $relations)
+	public function findWith($id, $relations=array())
 	{
-		$user = $this->model->apiFilter()->whereId($id)->with($relations)->firstOrFail()->fields();
+		$user = $this->model->apiFilter()->whereId($id)->with($relations)->firstOrFail()->getMeta()->fields();
 
-		$user->roles->each(function($role){
-    		$role->setVisible(array('id','name'));
-    	});
-
-    	$user->apps->each(function($app){
-    		$app->setVisible(array('id','name'));
-    	});
+    	foreach($relations as $relation)
+    	{
+    		$user->{$relation}->each(function($model)
+    		{
+    			$model->setVisible(array(
+    				'id', 'name'
+    			));
+    		});
+    	}
 
 		if($user instanceof ArrayableInterface)
         	return $user->toArray();
 
-        return $user;
+      return $user;
 	}
 
 	public function findUserAndChildren($id)
 	{
-		$app = Appl::getAppByKey(Input::get('appkey'));
-		
-		if($app)
-		{
-			$user = $this->model->findOrFail($id);
-			$owner = $app->user_id;
-			if(!in_array($owner, $user->getChildrenId()))
-			return false;
-		}
-		
-
 		$user = $this->children($id);
 
 		if($user)
 		{
-			$users = $user->with('roles')->apiFilter()->get();
+			$users = $user->apiFilter()->get();
 			$users->each(function($user){
-            	$user->fields();
-            	$user->roles->each(function($role){
-            		$role->setVisible(array('id','name'));
-            	});
+            	$user->getMeta()->fields();
         	});
 
         	if($users instanceof ArrayableInterface)
@@ -110,5 +131,19 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 		}
 
 		return 0;
+	}
+
+	public function delete($id)
+	{
+		$user = $this->model->find($id);
+		
+		$user->meta()->delete();
+
+		return $user->delete();
+	}
+
+	public function getIDByToken($token)
+	{
+		return !is_null($token) ? $this->model->where($this->model->getRememberTokenName(), '=', $token)->first()->getAuthIdentifier() : null;
 	}
 }

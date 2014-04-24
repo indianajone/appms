@@ -11,4 +11,8 @@ interface UserRepositoryInterface extends \AbstractRepositoryInterface
 	public function children($id);
 
 	public function countChildren($id);
+
+	public function updateMeta($id, $attributes=array());
+
+	public function getIDByToken($token);
 }

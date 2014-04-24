@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 
 class CreateUserTable extends Migration {
 
@@ -12,20 +11,27 @@ class CreateUserTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('users', function(Blueprint $table) {
+		Schema::create('users', function($table) {
 			$table->increments('id');
 			$table->integer('parent_id')->unsigned()->nullable();
 			$table->foreign('parent_id')->references('id')->on('users');
+			$table->string('display_name', 50)->nullable();
 			$table->string('first_name', 100);
 			$table->string('last_name', 100);
-			$table->string('gender', 10)->nullable();
 			$table->string('email', 100)->unique();
-			$table->string('username', 40)->unique();
-			$table->string('password', 100);
-			$table->integer('birthday')->nullable();
-			$table->integer('last_seen');
+			$table->string('username', 60)->unique();
+			$table->string('password', 64);
 			$table->integer('created_at');
 			$table->integer('updated_at');
+			$table->integer('deleted_at')->nullable();
+		});
+
+		Schema::create('user_meta', function($table){
+			$table->increments('id');
+			$table->integer('user_id', false, true)->default(0);
+			$table->foreign('user_id')->references('id')->on('users');
+			$table->string('meta_key')->nullable()->index();
+			$table->text('meta_value')->nullable();
 		});
 	}
 
@@ -36,7 +42,8 @@ class CreateUserTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('user');
+		Schema::drop('user_meta');
+		Schema::drop('users');
 	}
 
 }

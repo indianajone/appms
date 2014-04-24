@@ -10,8 +10,6 @@ class BaseController extends Controller
 		{
 			return new \Indianajone\Validators\CustomValidator($translator, $data, $rules, $messages);
 		});
-
-		 $this->current_user = Auth::user();
 	}
 	/**
 	 * Setup the layout used by the controller.

@@ -232,7 +232,7 @@ Trait BaseModel
 
     public function scopeSearch($query)
     {
-        return $this->keywords(array('first_name', 'last_name'));
+        return $this->keywords(array('first_name', 'username'));
     }
 
     public function scopeTime($query, $field, $value)

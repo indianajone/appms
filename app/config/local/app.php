@@ -107,23 +107,25 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
-		'Core\Plugins\PluginsServiceProvider',
-		'Core\Response\ResponseServiceProvider',
+		'Core\Settings\SettingsServiceProvider',
 
-		'Indianajone\Applications\ApplicationsServiceProvider',
-		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
-		'Indianajone\Categories\CategoriesServiceProvider',
-		'Indianajone\Share\ShareServiceProvider',
+		// 'Core\Plugins\PluginsServiceProvider',
+		// 'Core\Response\ResponseServiceProvider',
 
-		'Max\User\UserServiceProvider',
-		'Max\Member\MemberServiceProvider',
-		'Max\Missingchild\MissingchildServiceProvider',
+		// 'Indianajone\Applications\ApplicationsServiceProvider',
+		// 'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
+		// 'Indianajone\Categories\CategoriesServiceProvider',
+		// 'Indianajone\Share\ShareServiceProvider',
 
-		'Kitti\Galleries\GalleriesServiceProvider',
-		'Kitti\Medias\MediasServiceProvider',
-		'Kitti\Articles\ArticlesServiceProvider',
+		// 'Max\User\UserServiceProvider',
+		// 'Max\Member\MemberServiceProvider',
+		// 'Max\Missingchild\MissingchildServiceProvider',
 
-		'Spescina\Timthumb\TimthumbServiceProvider'
+		// 'Kitti\Galleries\GalleriesServiceProvider',
+		// 'Kitti\Medias\MediasServiceProvider',
+		// 'Kitti\Articles\ArticlesServiceProvider',
+
+		// 'Spescina\Timthumb\TimthumbServiceProvider'
 	),
 
 	/*
@@ -179,8 +181,8 @@ return array(
 		'Redirect'        => 'Illuminate\Support\Facades\Redirect',
 		'Redis'           => 'Illuminate\Support\Facades\Redis',
 		'Request'         => 'Illuminate\Support\Facades\Request',
-		// 'Response'        => 'Illuminate\Support\Facades\Response',
-		'Response'		  => 'Core\Response\Facades\Response',
+		'Response'        => 'Illuminate\Support\Facades\Response',
+		// 'Response'		  => 'Core\Response\Facades\Response',
 		'Route'           => 'Illuminate\Support\Facades\Route',
 		'Schema'          => 'Illuminate\Support\Facades\Schema',
 		'Seeder'          => 'Illuminate\Database\Seeder',
@@ -191,10 +193,10 @@ return array(
 		'Validator'       => 'Illuminate\Support\Facades\Validator',
 		'View'            => 'Illuminate\Support\Facades\View',
 
-		'Appl'			  => 'Indianajone\Applications\Facades\Application',
-		'Image'			  => 'Libs\Helpers\Facades\Image',
-		'Entrust' 		  => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions',
-		'Timthumb'        => 'Spescina\Timthumb\Facades\Timthumb'
+		// 'Appl'			  => 'Indianajone\Applications\Facades\Application',
+		// 'Image'			  => 'Libs\Helpers\Facades\Image',
+		// 'Entrust' 		  => 'Indianajone\RolesAndPermissions\Facade\RolesAndPermissions',
+		// 'Timthumb'        => 'Spescina\Timthumb\Facades\Timthumb'
 	),
 
 );

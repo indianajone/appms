@@ -45,7 +45,7 @@
 			// processing: true,
 			serverSide: true,
 			ajax: $.fn.dataTable.pipeline( {
-	            url: '<?php echo URL::to("api/v1/users?user_id=").Auth::user()->id; ?>',
+	            url: '<?php echo URL::to("api/v1/users?user_id="); ?><?php echo Auth::user()->id; ?>',
 	            pages: 1, // number of pages to cache
 	            data: function ( d ) {
 	                d.fields = "id,username,email,last_seen";

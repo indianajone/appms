@@ -17,7 +17,6 @@ $.extend( true, $.fn.dataTable.defaults, {
     bAutoWidth:false,
     "order": [ 1, 'asc' ],
     drawCallback: function( settings ) {
-        console.log($('a[data-toggle=tooltip]'));
         $('a[data-toggle=tooltip]').tooltip();
     }
 
@@ -343,19 +342,28 @@ $.fn.dataTable.pipeline = function ( opts ) {
                 "dataType": "json",
                 "cache":    false,
                 "success":  function ( json ) {
-                    json.data = json.entries;
-                    json.draw = request.draw;
-                    json.recordsTotal = json.total;
-                    json.recordsFiltered = json.total + request.start;
+                    if(json.header.code == 200)
+                    {
+                        json.data = json.entries;
+                        json.draw = request.draw;
+                        json.recordsTotal = json.total;
+                        json.recordsFiltered = json.total + request.start;
 
-                    cacheLastJson = $.extend(true, {}, json);
- 
-                    if ( cacheLower != requestStart ) {
-                        json.data.splice( 0, requestStart-cacheLower );
+                        cacheLastJson = $.extend(true, {}, json);
+     
+                        if ( cacheLower != requestStart ) {
+                            json.data.splice( 0, requestStart-cacheLower );
+                        }
+                        json.data.splice( requestLength, json.data.length );
+                         
+                        drawCallback( json );
                     }
-                    json.data.splice( requestLength, json.data.length );
-                     
-                    drawCallback( json );
+                    else drawCallback({
+                        data: [],
+                        draw : request.draw,
+                        recordsTotal: 0,
+                        recordsFiltered: 0
+                    });
                 }
             } );
         }

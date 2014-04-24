@@ -1,9 +1,9 @@
-<?php namespace Core\Plugins;
+<?php namespace Core\Settings;
 
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
-class PluginsServiceProvider extends ServiceProvider {
+class SettingsServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -19,7 +19,8 @@ class PluginsServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('core/plugins');
+		$this->package('core/settings');
+
 		include __DIR__.'/../../routes.php';
 	}
 
@@ -30,16 +31,19 @@ class PluginsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->bind('plugin', function($app)
-		{
-			return new Plugin;
-		}, true);
+		$this->app->bind('Core\Settings\Repositories\SettingRepositoryInterface', 'Core\Settings\Repositories\DBSettingRepository', true);
 
 		$this->app->booting(function()
 		{
 			$loader = AliasLoader::getInstance();
-			$loader->alias('Plugin', 'Core\Plugins\Facades\Plugin');
+
+			$loader->alias('Settings', 'Core\Settings\Facades\Setting');
 		});
+
+		$this->app->register('Core\Plugins\PluginsServiceProvider');
+
+		$this->app->register('Core\Response\ResponseServiceProvider');
+
 	}
 
 	/**
@@ -49,7 +53,7 @@ class PluginsServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('plugin');
+		return array('settings');
 	}
 
 }
