@@ -59,12 +59,13 @@ abstract class AbstractRepository
 			{
 				$this->errors = $response->getData()->header->message;
 				return false;
-			}
-
+			} 
+			
 			$input['picture'] = $response;
 		}
-
+		
 		$model = $this->model->newInstance($input);
+
 		$model->save();
 
 		return $model->getKey();

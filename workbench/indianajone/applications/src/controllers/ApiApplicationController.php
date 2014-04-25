@@ -21,6 +21,7 @@ class ApiApplicationController extends \BaseController
 		if($this->apps->validate('show'))
 		{
 			$apps = $this->apps->all();
+
 			return Response::result(
                 array(
                     'header'=> array(

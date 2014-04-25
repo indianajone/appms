@@ -1,6 +1,6 @@
 <?php namespace Indianajone\Applications;
 
-use Auth, Input;
+use Auth, Config, Input;
 use Indianajone\Applications\Application;
 use Indianajone\Applications\ApplicationMeta;
 use Illuminate\Support\Contracts\ArrayableInterface;
@@ -67,17 +67,19 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 		$uid = $this->users->getIDByToken(Input::get('token'));
 		$input = array_add($input, 'user_id', $uid);
 		$id = parent::create($input);
+		$default = Config::get('applications::meta');
 
-		/* 
-			 Uncomment if needed to define default meta 
-		if($id)
+		if($id && $default)
 		{
-			$this->meta->create(array(
-				'user_id' => (int) $id,
-				'meta_key' => 'fb_token'
-			));
+			foreach($default as $key => $value )
+			{
+				$this->meta->create(array(
+					'user_id' => (int) $id,
+					'meta_key' => $key,
+					'meta_value' => $value
+				));
+			}
 		}
-		*/
 
 		return $id;
 	}
