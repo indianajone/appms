@@ -239,15 +239,6 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
         return array_unique($ids);
     }
 
-    public function getMeta()
-    {
-        $this->meta->each(function($meta) {
-            $this[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
-        });
-
-        return $this;
-    }
-
      /**
      * Check if current user is in top level.
      *

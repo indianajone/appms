@@ -65,6 +65,15 @@ Trait BaseModel
         return $value;
     }
 
+    public function getMeta()
+    {
+        $this->meta->each(function($meta) {
+            $this[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
+        });
+
+        return $this;
+    }
+
 	public function scopeKeywords($query, $fields)
 	{
 		$keyword = Input::get('q', '');
@@ -165,9 +174,14 @@ Trait BaseModel
         }
     }
 
+    /**
+    * Get definded rules in Model.
+    *
+    * @return Array
+    **/
     public function rules($action)
     {
-        return isset($this->rules) ? $this->rules[$action] : array();
+         return isset($this->rules) ? $this->rules[$action] : array();
     }
 
     public function fields()

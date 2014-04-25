@@ -5,10 +5,14 @@ use Kitti\Medias\Media;
 
 class Image 
 {
+	/**
+	 * Upload an Image
+	 *
+	 * @param $base64 
+	 * @return $mix String | Illuminate\Support\Facades\Response
+	 */
 	public function upload($base64)
 	{
-		$local_env = App::environment('local');
-
 		$cdn = Config::get('image.cdn');
 		$nas = Config::get('image.nas');
 		$slug = Config::get('image.slug').'/'.date('Y/m/d').'/';

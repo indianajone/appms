@@ -21,7 +21,6 @@ class ApiApplicationController extends \BaseController
 		if($this->apps->validate('show'))
 		{
 			$apps = $this->apps->all();
-
 			return Response::result(
                 array(
                     'header'=> array(
@@ -31,7 +30,7 @@ class ApiApplicationController extends \BaseController
                     'offset' => (int) Input::get('offset', 0),
                     'limit' => (int) Input::get('limit', 10), 
                     'total' => (int) $this->apps->countWithChildren(),
-                    'entries' => $apps->toArray()
+                    'entries' => $apps
                 )
             ); 
 		}
@@ -58,37 +57,28 @@ class ApiApplicationController extends \BaseController
 	{
 		if($this->apps->validate('create'))
 		{
-			$app = $this->apps->create(array(
+			$id = $this->apps->create(array(
 				'name' => Input::get('name'),
 				'user_id' => Input::get('user_id'),
 				'description' => Input::get('description', ''),
-				'appkey' => Appl::genKey()
+				'appkey' => Appl::genKey(),
+				'picture' => Input::get('picture')
 			));
 
-			if(is_null($app)) 
-				return Response::message(500, 'Something wrong when trying to create app.');
-
-			$picture = Input::get('picture', null);
-
-			if($picture)
+			if($id) 
 			{
-				$response = Image::upload($picture);
-				if(is_object($response)) return $response;
-				$app->picture = $response;
-			}
-
-			if($app->save())
 				return Response::result(
 					array(
 						'header'=> array(
 			        		'code'=> 200,
 			        		'message'=> 'success'
 			        	),
-						'id'=> $app->id
+						'id'=> $id
 					)
 				);
+			}
 
-			return Response::message(500, 'Something wrong when trying to create app.');
+			return Response::message(500, $this->apps->errors());
 		}
 
 		return Response::message(400, $this->apps->errors());		
@@ -102,20 +92,19 @@ class ApiApplicationController extends \BaseController
 	 */
 	public function show($id)
 	{
-		if($this->apps->validate('show', array_add(Input::all(), 'id',$id)))
-		{
-			$app = $this->apps->find($id);
+		$input = array_add(Input::all(), 'id',$id);
 
-			if($app)
-				return Response::result(
-					array(
-	                    'header'=> array(
-	                        'code'=> 200,
-	                        'message'=> 'success'
-	                    ),
-	                    'entry' => $app->toArray()
-	                )
-				);
+		if($this->apps->validate('show', $input))
+		{	
+			return Response::result(
+				array(
+                    'header'=> array(
+                        'code'=> 200,
+                        'message'=> 'success'
+                    ),
+                    'entry' => $this->apps->find($id)
+                )
+			);
 
 			return Response::message(403, 'Unauthorize user');
 		}
@@ -142,17 +131,15 @@ class ApiApplicationController extends \BaseController
 	 */
 	public function update($id)
 	{
-		if($this->apps->validate('update'))
+		$input = array_add(Input::all(), 'id', $id);
+		if($this->apps->validate('update', $input))
 		{
 			$app = $this->apps->update($id, Input::all());
 			
-			if(!is_null($app))
-			{	
-				if($app->save())
-					return Response::message(200, 'Updated app id: '.$id.' success!');
-			}
+			if($app)
+				return Response::message(200, 'Updated app id: '.$id.' success!');
 
-            return Response::message(404, 'Selected application does not exists.');
+			return Response::message(404, 'Selected application does not exists.');
 		}
 
 		return Response::message(400, $this->apps->errors());
@@ -177,12 +164,15 @@ class ApiApplicationController extends \BaseController
 	 */
 	public function destroy($id)
 	{
-		if ($this->apps->validate('delete')) {
+		$input = array_add(Input::all(), 'id', $id);
+
+		if ($this->apps->validate('delete', $input)) 
+		{
 			$app = $this->apps->delete($id);
 			return Response::message(200, 'Deleted Application: '.$id.' success!');
 		}
 
-		return Response::message(400, $validator->messages()->first()); 
+		return Response::message(400, $this->apps->errors()); 
 	}
 
 }

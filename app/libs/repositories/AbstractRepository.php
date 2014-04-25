@@ -50,6 +50,20 @@ abstract class AbstractRepository
 
 	public function create($input)
 	{
+		$picture = array_get($input, 'picture', null);
+
+		if($picture)
+		{
+			$response = Image::upload($picture);
+			if(is_object($response)) 
+			{
+				$this->errors = $response->getData()->header->message;
+				return false;
+			}
+
+			$input['picture'] = $response;
+		}
+
 		$model = $this->model->newInstance($input);
 		$model->save();
 
@@ -85,6 +99,18 @@ abstract class AbstractRepository
 					$model->$key = $input[$key];
 				}
 			}
+		}
+
+		if($model->meta)
+		{
+			$model->meta->each(function($meta) use ($input) {
+				if(array_key_exists($meta->getAttribute('meta_key'), $input))
+				{
+					$meta->update(array(
+						'meta_value' => $input[$meta->getAttribute('meta_key')]
+					));
+				}
+			});
 		}
 
 		return $model->save();

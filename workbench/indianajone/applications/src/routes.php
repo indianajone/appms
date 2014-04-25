@@ -12,7 +12,7 @@
 		Route::get('apps/fields', function(){
 			return Response::fields('applications');
 		});
-		Route::post('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApiApplicationController@delete');
+		Route::any('apps/{id}/delete', 'Indianajone\\Applications\\Controllers\\ApiApplicationController@delete');
 		Route::resource('apps', 'Indianajone\\Applications\Controllers\\ApiApplicationController');
 	});
 

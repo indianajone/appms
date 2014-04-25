@@ -2,7 +2,6 @@
 
 use PluginableInterface as Pluginable;
 use Illuminate\Support\ServiceProvider;
-use Max\User\Repository\DBUserRepository;
 
 class UserServiceProvider extends ServiceProvider implements Pluginable {
 

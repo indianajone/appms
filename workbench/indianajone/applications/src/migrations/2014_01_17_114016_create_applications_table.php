@@ -13,7 +13,7 @@ class CreateApplicationsTable extends Migration {
 	{
 		Schema::create('applications', function($table){
 			$table->increments('id');
-			$table->integer('user_id', false)->unsigned();
+			$table->integer('user_id', false, true);
 			$table->foreign('user_id')->references('id')->on('users');
 			$table->string('name', 100);
 			$table->string('description', 255)->nullable();

@@ -1,6 +1,6 @@
 <?php namespace Indianajone\Applications;
 
-use Input;
+use Auth, Input;
 use Indianajone\Applications\Application;
 use Indianajone\Applications\ApplicationMeta;
 use Illuminate\Support\Contracts\ArrayableInterface;
@@ -28,35 +28,30 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 
 	public function all()
 	{
-		$users = $this->users->children(Input::get('user_id'));
+		$id = $this->users->getIDByToken(Auth::user() ? Auth::user()->getRememberToken() : Input::get('token'));
+		$users = $this->users->children($id);
 		$query = $this->model->whereIn('user_id', $users->lists('id'));
 		$this->countWithChildren = $query->count();
 		$apps = $query->apiFilter()->with('meta')->get();
 
 		$apps->each(function($app)
 		{
-			$app->fields();
-			$app->meta->each(function($meta) use($app){
-				$app[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
-			});
+			$app->getMeta()->fields();
 		});
 
-		return $apps;
+		return $apps->toArray();
 	}
 
 	public function find($id)
 	{
-		$user_id = Input::get('user_id');
+		$user_id = $this->users->getIDByToken(Input::get('token'));
 		$users = $this->users->children($user_id);
 
 		$app = $this->model->apiFilter()->with('meta')->findOrFail($id);
-		$app->meta->each(function($meta) use($app){
-			$app[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
-		});
-		$app->fields();
+		$app->getMeta()->fields();
 
 		if(in_array($app->user_id, $users->lists('id')))
-			return $app;
+			return $app->toArray();
 		else 
 			return null;
 	}
@@ -66,55 +61,63 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 		return $this->model->whereAppkey($key)->first();
 	}
 
+	
 	public function create($input)
 	{
-		foreach( $this->model->getFillable() as $key )
+		$uid = $this->users->getIDByToken(Input::get('token'));
+		$input = array_add($input, 'user_id', $uid);
+		$id = parent::create($input);
+
+		/* 
+			 Uncomment if needed to define default meta 
+		if($id)
 		{
-			if(array_key_exists($key, $input))
-			{
-				$this->model->fill(array(
-					$key => $input[$key]
-				));
-			}
+			$this->meta->create(array(
+				'user_id' => (int) $id,
+				'meta_key' => 'fb_token'
+			));
 		}
+		*/
 
-		$this->model->fill(array(
-			'appkey' => $this->model->genKey()
-		));
-
-		return $this->model;
+		return $id;
 	}
 
 	public function update($id, $input)
 	{
-		$model = $this->model->findOrFail($id);
+		$user_id = $this->users->getIDByToken(Input::get('token'));
+		$users = $this->users->children($user_id);
+		$app = $this->model->find($id);
 
-		$model->meta->each(function($meta) use ($input) {
-			if(array_key_exists($meta->getAttribute('meta_key'), $input))
-			{
-				$meta->update(array(
-					'meta_value' => $input[$meta->getAttribute('meta_key')]
-				));
-			}
-		});
-
-		foreach( $model->getAttributes() as $key => $value )
+		if(!in_array($app->user_id, $users->lists('id')))
 		{
-			if( array_key_exists($key, $input) && $value != $input[$key] )
-			{
-				if(array_key_exists('picture', $input))
-	            {
-	            	$response = $model->createPicture($model->app_id);
-	            	if(is_object($response)) return $response;             	
-	             	unset($input['picture']);
-	            }
-	            else
-	            {
-					$model->$key = $input[$key];
-				}
-			}
+			return false;
 		}
 
-		return $model;
+		return parent::update($id, $input);
+	}
+
+	public function updateMeta($id, $attributes=array())
+	{
+		$user = $this->model->with('meta')->find($id);
+		$meta = $user->meta()->first();
+
+		foreach($attributes as $key => $value)
+		{
+			$meta->fill(array(
+				'meta_key' => $key,
+				'meta_value' => $value
+			));
+		}
+
+		return $meta->save();
+	}
+
+	public function delete($id)
+	{
+		$user = $this->model->find($id);
+		
+		$user->meta()->delete();
+
+		return $user->delete();
 	}
 }

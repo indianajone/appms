@@ -9,7 +9,6 @@ class Application extends \Eloquent
 	**/
 	protected $table = 'applications';
 	protected $fillable = array('name', 'description', 'picture', 'user_id', 'appkey');
-	protected $perPage = 10;
 	/**
 	* The attributes excluded from the model's JSON form.
 	*
@@ -19,18 +18,20 @@ class Application extends \Eloquent
 
 	protected $rules = array(
 		'show' => array(
-			// 'appkey' => 'required',
+			'token' => 'required|exists:users,remember_token',
 			'id' 		=> 'exists:applications',
-			'user_id' 	=> 'required|exists:users,id'
 		),
 		'create' => array(
-			'user_id' 	=> 'required|exists:users,id',
+			'token' => 'required|exists:users,remember_token',
 			'name'		=> 'required'
 		),
 		'update' => array(
-			'user_id' 	=> 'required|exists:users,id'
+			'token' => 'required|exists:users,remember_token',
+			'id' 		=> 'required|exists:applications',
+			'user_id' 		=> 'exists:users,id'
 		),
 		'delete' => array(
+			'token' => 'required|exists:users,remember_token',
 			'id' 		=> 'required|exists:applications'
 		)
 	);
@@ -57,16 +58,6 @@ class Application extends \Eloquent
 		return $this->hasMany('Indianajone\\Applications\\ApplicationMeta', 'app_id');
 	}
 
-	/**
-	* Get definded rules in Model.
-	*
-	* @return Array
-	**/
-	public function rules($action)
-	{
-		return $this->rules[$action];
-	}
-
 	public function genKey()
 	{
 		return str_random(32);
@@ -76,4 +67,9 @@ class Application extends \Eloquent
 	{
 		return $this->whereAppkey($key)->first();
 	}
+
+	public function scopeSearch($query)
+    {
+        return $this->keywords(array('name'));
+    }
 }

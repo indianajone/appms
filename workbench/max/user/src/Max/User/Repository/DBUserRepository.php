@@ -144,6 +144,6 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 	public function getIDByToken($token)
 	{
-		return !is_null($token) ? $this->model->where($this->model->getRememberTokenName(), '=', $token)->first()->getAuthIdentifier() : null;
+		return !is_null($token) ? $this->model->where($this->model->getRememberTokenName(), '=', $token)->firstOrFail()->getAuthIdentifier() : null;
 	}
 }

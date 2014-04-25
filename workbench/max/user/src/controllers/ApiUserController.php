@@ -203,7 +203,15 @@ class ApiUserController extends \BaseController
                     'last_seen' => Carbon::now()->timestamp
                 ));
                 
-                return Response::message(200, 'success');
+                return Response::result(
+                    array(
+                        'header' => array(
+                            'code' => 200,
+                            'message' => 'success'
+                        ),
+                        'token' => Auth::user()->getRememberToken()
+                    )
+                );
             }   
             return Response::message(204, 'Username or Password is incorrect');
         }
