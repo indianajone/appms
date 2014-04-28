@@ -67,14 +67,36 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 		$uid = $this->users->getIDByToken(Input::get('token'));
 		$input = array_add($input, 'user_id', $uid);
 		$id = parent::create($input);
+
+		/**
+		  #TODO: Move to Meta Object later on.
+		 */
+
 		$default = Config::get('applications::meta');
+		$json = Input::get('meta');
+
+		if($json)
+		{
+			$meta = json_decode($json, true);
+
+			if( !is_null($meta) )
+			{
+				foreach( $meta as $key => $value )
+				{
+					if( !$this->meta->is_protected($key) )
+						$default = array_key_exists($key, $default) ? 
+							array_set($default, $key, $value) : 
+							array_add($default, $key, $value);
+				}
+			}
+		}
 
 		if($id && $default)
 		{
 			foreach($default as $key => $value )
 			{
 				$this->meta->create(array(
-					'user_id' => (int) $id,
+					'app_id' => (int) $id,
 					'meta_key' => $key,
 					'meta_value' => $value
 				));
@@ -100,8 +122,8 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 
 	public function updateMeta($id, $attributes=array())
 	{
-		$user = $this->model->with('meta')->find($id);
-		$meta = $user->meta()->first();
+		$app = $this->model->with('meta')->find($id);
+		$meta = $app->meta()->first();
 
 		foreach($attributes as $key => $value)
 		{
@@ -116,10 +138,10 @@ class DBAppRepository extends \AbstractRepository Implements AppRepositoryInterf
 
 	public function delete($id)
 	{
-		$user = $this->model->find($id);
+		$app = $this->model->find($id);
 		
-		$user->meta()->delete();
+		$app->meta()->delete();
 
-		return $user->delete();
+		return $app->delete();
 	}
 }

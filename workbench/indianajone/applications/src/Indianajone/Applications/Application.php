@@ -8,7 +8,7 @@ class Application extends \Eloquent
 	* @var string
 	**/
 	protected $table = 'applications';
-	protected $fillable = array('name', 'description', 'picture', 'user_id', 'appkey');
+	protected $fillable = array('name', 'description', 'user_id', 'appkey');
 	/**
 	* The attributes excluded from the model's JSON form.
 	*

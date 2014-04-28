@@ -17,7 +17,6 @@ class CreateApplicationsTable extends Migration {
 			$table->foreign('user_id')->references('id')->on('users');
 			$table->string('name', 100);
 			$table->string('description', 255)->nullable();
-			$table->string('picture')->nullable();
 			$table->string('appkey', 32)->unique();
 			$table->integer('created_at');
 			$table->integer('updated_at');

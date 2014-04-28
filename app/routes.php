@@ -62,10 +62,10 @@ Route::get('/', function()
 // 	}
 // });
 
-// Route::get('test', function(){
+Route::get('test', function(){
 
-// 	return App::getBindings();
-// });
+	return App::getBindings();
+});
 
 // Route::get('image', function(){
 // 	$picture = Input::get('picture', null);

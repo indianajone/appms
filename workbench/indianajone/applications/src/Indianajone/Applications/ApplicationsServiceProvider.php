@@ -2,10 +2,6 @@
 namespace Indianajone\Applications;
 
 use Illuminate\Support\ServiceProvider;
-// use Indianajone\Applications\Application;
-// use Indianajone\Applications\ApplicationMeta;
-// use Max\User\Repository\DBUserRepository;
-
 use PluginableInterface as Pluginable;
 
 class ApplicationsServiceProvider extends ServiceProvider implements Pluginable {
@@ -39,15 +35,6 @@ class ApplicationsServiceProvider extends ServiceProvider implements Pluginable 
      	{     
      		return new Appl();
      	});
-
-     // $this->app->bind('Indianajone\Applications\AppRepositoryInterface', function()
-     // {
-     //     return new DBAppRepository(
-     //     	new Application, 
-     //     	new ApplicationMeta,
-     //     	$this->app['Max\User\Repository\DBUserRepository']
-     //     );
-     // });
 
 		$this->app->bind('Indianajone\Applications\AppRepositoryInterface', 'Indianajone\Applications\DBAppRepository');
 

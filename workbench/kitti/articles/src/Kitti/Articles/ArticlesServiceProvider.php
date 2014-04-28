@@ -1,10 +1,10 @@
 <?php namespace Kitti\Articles;
 
 use Illuminate\Support\ServiceProvider;
-use Kitti\Articles\Article;
 use Kitti\Articles\Repositories\DBArticleRepository;
+use PluginableInterface as Pluginable;
 
-class ArticlesServiceProvider extends ServiceProvider {
+class ArticlesServiceProvider extends ServiceProvider implements Pluginable {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -19,10 +19,10 @@ class ArticlesServiceProvider extends ServiceProvider {
      * @return void
      */
 	public function boot()
-    {
-        $this->package('kitti/articles');
-        include __DIR__.'/../../routes.php';
-    }
+	{
+	  $this->package('kitti/articles');
+	  include __DIR__.'/../../routes.php';
+	}
 
 	/**
 	 * Register the service provider.
@@ -34,6 +34,11 @@ class ArticlesServiceProvider extends ServiceProvider {
 		$this->app->bind('Kitti\Articles\Repositories\ArticleRepositoryInterface', function($app){
 			return new DBArticleRepository($app['Kitti\\Articles\\Article']);
 		});
+	}
+
+	public function registerPlugin()
+	{
+		$this->app->plugin->register('articles', 'Kitti\\Articles\\Article');
 	}
 
 	/**

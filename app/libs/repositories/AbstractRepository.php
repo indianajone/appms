@@ -50,6 +50,8 @@ abstract class AbstractRepository
 
 	public function create($input)
 	{
+		$model = $this->model->newInstance($input);
+
 		$picture = array_get($input, 'picture', null);
 
 		if($picture)
@@ -60,13 +62,21 @@ abstract class AbstractRepository
 				$this->errors = $response->getData()->header->message;
 				return false;
 			} 
-			
-			$input['picture'] = $response;
+
 		}
-		
-		$model = $this->model->newInstance($input);
 
 		$model->save();
+
+		if($picture)
+		{
+			if($model->meta)
+			{
+				$model->meta()->create(array(
+					'meta_key' => 'picture',
+					'meta_value' => $response
+				));
+			}
+		}
 
 		return $model->getKey();
 	}
