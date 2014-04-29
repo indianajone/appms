@@ -20,33 +20,23 @@ Trait BaseModel
     public function formatTime($value)
     {
     	$format = Input::get('date_format', null);
-		return $format ? Carbon::createFromTimeStamp($value, \Config::get('app.timezone'))->format($format) : $value;    
+		return $format ? Carbon::createFromTimeStamp($value, Config::get('app.timezone'))->format($format) : $value;    
     }
 
-    public function getBirthdayAttribute($value)
+    public function toArray()
     {
-        return $this->formatTime($value);
+        $attributes = $this->attributesToArray();
+
+        foreach ($attributes as $key => $value) 
+        {
+            if(in_array($key, $this->getDates()))
+            {
+                $attributes[$key] = $this->formatTime($value);
+            }
+        }
+
+        return array_merge($attributes, $this->relationsToArray());
     }
-
-    public function getCreatedAtAttribute($value)
-	{
-		return $this->formatTime($value);
-	}
-
-	public function getUpdatedAtAttribute($value)
-	{
-		return $this->formatTime($value);    
-	}
-
-    public function getLastSeenAttribute($value)
-    {
-        return $this->formatTime($value); 
-    }
-
-	public function getPublishedAtAttribute($value)
-	{
-		return $this->formatTime($value); 
-	}
 
     public function getPictureAttribute($value)
     {
@@ -68,7 +58,7 @@ Trait BaseModel
     public function getMeta()
     {
         $this->meta->each(function($meta) {
-            $this[$meta->getAttribute('meta_key')] = $meta->getAttribute('meta_value');
+            $this->setAttribute($meta->getAttribute('meta_key'), $meta->getAttribute('meta_value'));
         });
 
         return $this;

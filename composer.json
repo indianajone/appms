@@ -6,14 +6,11 @@
 	"require": {
 		"laravel/framework": "4.1.*",
 		"way/generators": "dev-master",
-		"indianajone/share": "dev-master"
+		"league/fractal": "0.7.*"
 	},
-	"repositories": [
-		{
-		"type": "vcs",
-		"url": "https://github.com/indianajone/share.git"
-		}
-	],
+	"require-dev": {
+		"fzaninotto/faker": "1.4.*@dev"
+	},
 	"autoload": {
 		"classmap": [
 			"app/commands",

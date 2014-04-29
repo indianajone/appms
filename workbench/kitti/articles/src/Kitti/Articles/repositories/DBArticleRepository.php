@@ -19,26 +19,24 @@ class DBArticleRepository extends \AbstractRepository implements ArticleReposito
 
 	public function all()
 	{
-		$app_id = Appl::getAppIDByKey(Input::get('appkey'));
-
-		$articles = $this->model->whereAppId($app_id)->apiFilter()->with('gallery')->get();
+		$articles = $this->model->app()->apiFilter()->get(); // ->with('gallery')
 
 		$articles->each(function($article) {
 			$article->fields();
 			
-			foreach ($article->categories()->get() as $cat)
-			{
-				if($cat->isRoot())
-				{
-					$article->setRelation($cat->getRoot()->name, $cat->getDescendants($this->columns)->toHierarchy());
-				}
-				else
-				{
-					$root = $cat->getRoot();
-					if(!is_null($root))
-						$article->setRelation($root->name, $cat->getDescendantsAndSelf($this->columns)->toHierarchy());
-				}
-			};
+			// foreach ($article->categories()->get() as $cat)
+			// {
+			// 	if($cat->isRoot())
+			// 	{
+			// 		$article->setRelation($cat->getRoot()->name, $cat->getDescendants($this->columns)->toHierarchy());
+			// 	}
+			// 	else
+			// 	{
+			// 		$root = $cat->getRoot();
+			// 		if(!is_null($root))
+			// 			$article->setRelation($root->name, $cat->getDescendantsAndSelf($this->columns)->toHierarchy());
+			// 	}
+			// };
 
 			// $gallery = $article->gallery()->with('medias')->first();
 			// if($gallery) $article->setRelation('gallery', $gallery);

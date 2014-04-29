@@ -75,6 +75,13 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
     protected $guarded = array('id');
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = array('last_seen');
+
+    /**
      * Indicates if the model should soft delete.
      *
      * @var bool

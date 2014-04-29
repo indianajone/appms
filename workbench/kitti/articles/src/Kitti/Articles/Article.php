@@ -54,6 +54,11 @@ class Article extends \Eloquent implements \ApiFilterableInteface
         return $this->morphOne('Kitti\\Galleries\\Gallery', 'galleryable', 'content_type', 'content_id');
     }
 
+    public function scopeSearch($query)
+    {
+        return $this->keywords(array('title'));
+    }
+
     public function attachCategory($category)
     {
     	if(is_object($category))
