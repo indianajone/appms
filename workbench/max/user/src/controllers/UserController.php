@@ -1,5 +1,4 @@
-<?php
-namespace Max\User\Controllers;
+<?php namespace Max\User\Controllers;
 
 use Validator, Input, Response, Hash, View, Redirect, Auth, App;
 use Carbon\Carbon;
@@ -10,11 +9,11 @@ class UserController extends \BaseController
 {
 
     public function __construct(
-        UserRepositoryInterface $users, 
-        RoleRepositoryInterface $roles)
+        UserRepositoryInterface $users)//, 
+        //RoleRepositoryInterface $roles)
     {
         $this->users = $users;
-        $this->roles = $roles;
+        // $this->roles = $roles;
     }
 
 	/**

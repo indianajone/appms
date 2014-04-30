@@ -5,16 +5,23 @@ use Appl, Auth, Hash, Input, Response;
 use Carbon\Carbon;
 use Max\User\Repository\UserRepositoryInterface;
 use Indianajone\RolesAndPermissions\RoleRepositoryInterface;
+use League\Fractal\Resource\Item;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use Max\User\Transformers\UserTransformer;
 
 class ApiUserController extends \BaseController 
 {
+    // public function __construct(
+    //     UserRepositoryInterface $users,
+    //     RoleRepositoryInterface $roles)
+
     public function __construct(
-        UserRepositoryInterface $users,
-        RoleRepositoryInterface $roles)
+        UserRepositoryInterface $users)
     {
         parent::__construct();
         $this->users = $users;
-        $this->roles = $roles;
+        // $this->roles = $roles;
     }
 
 	/**
@@ -28,12 +35,19 @@ class ApiUserController extends \BaseController
 
         if($this->users->validate('index'))
         {
-            $users = !is_null($id) ? 
+            $paginator = !is_null($id) ? 
                         $this->users->findUserAndChildren($id) :
                         $this->users->all();
 
+            $users = $paginator->getCollection();
+
             if($users)
             {
+                $resource = new Collection($users, new UserTransformer);
+                $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
+
+                $data = $this->transformer->createData($resource)->toArray();
+              
                 return Response::result(
                     array(
                         'header'=> array(
@@ -42,8 +56,8 @@ class ApiUserController extends \BaseController
                         ),
                         'offset' => (int) Input::get('offset', 0),
                         'limit' => (int) Input::get('limit', 10),
-                        'total' => (int) is_null($id) ? count($this->users->count()) : $this->users->countChildren($id),
-                        'entries' => $users
+                        'total' =>  $data['pagination']['total'], //(int) is_null($id) ? count($this->users->count()) : $this->users->countChildren($id),
+                        'entries'  => $data['data']
                     )
                 ); 
             }
@@ -109,15 +123,22 @@ class ApiUserController extends \BaseController
 	public function show($id)
 	{
         $input = array_add(Input::all(), 'id', $id);
+
         if($this->users->validate('show', $input))
         {
+            $user = $this->users->findWith($id);
+
+            $resource = new Item($user, new UserTransformer);
+            
+            $data = $this->transformer->createData($resource);
+            
             return Response::result(
                 array(
                     'header' => array(
                         'code' => 200,
                         'message' => 'success'
                     ),
-                    'entry' => $this->users->findWith($id)
+                    'entry' => $data->toArray()['data']
                 )
             );
         }

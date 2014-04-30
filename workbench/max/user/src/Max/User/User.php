@@ -2,7 +2,7 @@
 
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
-use Zizaco\Entrust\HasRole;
+// use Zizaco\Entrust\HasRole;
 
 
 class User extends \Eloquent implements UserInterface, RemindableInterface 
@@ -81,6 +81,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
      */
     protected $dates = array('last_seen');
 
+
     /**
      * Indicates if the model should soft delete.
      *
@@ -91,7 +92,7 @@ class User extends \Eloquent implements UserInterface, RemindableInterface
     use \BaseModel;
     
     // Roles and Permissions Helper.
-    use HasRole; 
+    // use HasRole; 
 
     /**
      * Get the unique identifier for the user.

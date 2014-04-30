@@ -1,11 +1,19 @@
 <?php
 
+use  League\Fractal\Manager;
+
 class BaseController extends Controller 
 {
 	protected $current_user;
 
+	protected $transformer;
+
 	public function __construct()
 	{
+		$this->transformer = new Manager;
+
+		$this->transformer->setRequestedScopes(explode(',', Input::get('with')));
+
 		Validator::resolver(function($translator, $data, $rules, $messages)
 		{
 			return new \Indianajone\Validators\CustomValidator($translator, $data, $rules, $messages);

@@ -17,26 +17,26 @@ Trait BaseModel
         return 'U';
     }
 
-    public function formatTime($value)
-    {
-    	$format = Input::get('date_format', null);
-		return $format ? Carbon::createFromTimeStamp($value, Config::get('app.timezone'))->format($format) : $value;    
-    }
+  //   public function formatTime($value)
+  //   {
+  //   	$format = Input::get('date_format', null);
+		// return $format ? Carbon::createFromTimeStamp($value, Config::get('app.timezone'))->format($format) : $value;    
+  //   }
 
-    public function toArray()
-    {
-        $attributes = $this->attributesToArray();
+    // public function toArray()
+    // {
+    //     $attributes = $this->attributesToArray();
 
-        foreach ($attributes as $key => $value) 
-        {
-            if(in_array($key, $this->getDates()))
-            {
-                $attributes[$key] = $this->formatTime($value);
-            }
-        }
+    //     foreach ($attributes as $key => $value) 
+    //     {
+    //         if(in_array($key, $this->getDates()))
+    //         {
+    //             $attributes[$key] = $this->formatTime($value);
+    //         }
+    //     }
 
-        return array_merge($attributes, $this->relationsToArray());
-    }
+    //     return array_merge($attributes, $this->relationsToArray());
+    // }
 
     public function getPictureAttribute($value)
     {

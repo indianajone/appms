@@ -28,7 +28,7 @@ return array(
 	|
 	*/
 
-	'model' => '\Max\User\Models\User',
+	'model' => 'Max\\User\\Models\\User',
 
 	/*
 	|--------------------------------------------------------------------------

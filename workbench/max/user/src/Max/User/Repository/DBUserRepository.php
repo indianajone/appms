@@ -1,6 +1,6 @@
 <?php namespace Max\User\Repository;
 
-use Appl, Input, Validator;
+use Appl, Config, Input;
 use Max\User\Models\User;
 use Max\User\Models\Usermeta;
 use Illuminate\Support\Contracts\ArrayableInterface;
@@ -15,14 +15,14 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 	public function all()
 	{
-		$users =$this->model->apiFilter()->with('meta')->get();
+		$users =$this->model->apiFilter()->paginate(Input::get('limit', Config::get('user:perPage')));
 
 		$users->each(function($user){
 			$user->getMeta()->fields();
 		});
 
-		if($users instanceof ArrayableInterface)
-			return $users->toArray();
+		// if($users instanceof ArrayableInterface)
+			// return $users->toArray();
 
        return $users;
 	}
@@ -77,8 +77,8 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
     		});
     	}
 
-		if($user instanceof ArrayableInterface)
-        	return $user->toArray();
+		// if($user instanceof ArrayableInterface)
+  //       	return $user->toArray();
 
       return $user;
 	}
@@ -89,13 +89,10 @@ class DBUserRepository extends \AbstractRepository implements UserRepositoryInte
 
 		if($user)
 		{
-			$users = $user->apiFilter()->get();
+			$users = $user->apiFilter()->paginate(Input::get('limit', Config::get('user:perPage')));
 			$users->each(function($user){
             	$user->getMeta()->fields();
         	});
-
-        	if($users instanceof ArrayableInterface)
-        		return $users->toArray();
 
         	return $users;
 		}

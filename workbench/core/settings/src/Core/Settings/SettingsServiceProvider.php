@@ -44,6 +44,8 @@ class SettingsServiceProvider extends ServiceProvider {
 
 		$this->app->register('Core\Response\ResponseServiceProvider');
 
+		$this->app->register('Max\User\UserServiceProvider');
+
 	}
 
 	/**

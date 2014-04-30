@@ -37,7 +37,7 @@ class UserServiceProvider extends ServiceProvider implements Pluginable {
 	}
 
 	public function registerPlugin()
-	{
+	{	
 		$this->app->plugin->register('user', 'Max\\User\\Models\\User');
 	}
 

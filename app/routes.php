@@ -23,7 +23,7 @@ Event::listen('illuminate.query', function($sql, $bindings)
     }, $sql);
 
     // var_dump($sql_with_bindings);
-    // Log::write('info', $sql_with_bindings);
+ // Log::write('info', $sql_with_bindings);
 });
 
 Route::get('/', function()

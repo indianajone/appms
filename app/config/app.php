@@ -107,22 +107,22 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
-		'Core\Response\ResponseServiceProvider',
+		// 'Core\Response\ResponseServiceProvider',
 
-		'Indianajone\Applications\ApplicationsServiceProvider',
-		'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
-		'Indianajone\Categories\CategoriesServiceProvider',
-		'Indianajone\Share\ShareServiceProvider',
+		// 'Indianajone\Applications\ApplicationsServiceProvider',
+		// 'Indianajone\RolesAndPermissions\RolesAndPermissionsServiceProvider',
+		// 'Indianajone\Categories\CategoriesServiceProvider',
+		// 'Indianajone\Share\ShareServiceProvider',
 
-		'Max\User\UserServiceProvider',
-		'Max\Member\MemberServiceProvider',
-		'Max\Missingchild\MissingchildServiceProvider',
+		// 'Max\User\UserServiceProvider',
+		// 'Max\Member\MemberServiceProvider',
+		// 'Max\Missingchild\MissingchildServiceProvider',
 
-		'Kitti\Galleries\GalleriesServiceProvider',
-		'Kitti\Medias\MediasServiceProvider',
-		'Kitti\Articles\ArticlesServiceProvider',
+		// 'Kitti\Galleries\GalleriesServiceProvider',
+		// 'Kitti\Medias\MediasServiceProvider',
+		// 'Kitti\Articles\ArticlesServiceProvider',
 
-		'Spescina\Timthumb\TimthumbServiceProvider',
+		// 'Spescina\Timthumb\TimthumbServiceProvider',
 
 	),
 
